@@ -184,6 +184,47 @@
       th:nth-child(3),td:nth-child(3){display:none}
       .search-in{width:140px}
     }
+  
+    /* ── TABS ── */
+    .tab-bar{display:flex;gap:4px;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;width:fit-content;box-shadow:var(--shadow-sm)}
+    .tab-btn{padding:9px 22px;border-radius:var(--r);font-size:13.5px;font-weight:600;color:var(--text-2);background:transparent;border:none;cursor:pointer;transition:all .18s}
+    .tab-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(0,102,204,0.22)}
+    .tab-pane{display:none}
+    .tab-pane.active{display:block}
+
+    /* ── SETTINGS ── */
+    .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .settings-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;box-shadow:var(--shadow-sm)}
+    .settings-card.full{grid-column:1/-1}
+    .settings-card-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:800;margin-bottom:4px}
+    .settings-card-sub{font-size:12.5px;color:var(--text-3);margin-bottom:18px}
+    .s-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+    .s-lbl{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-2)}
+    .s-in{background:#F8FAFC;border:1.5px solid var(--border);border-radius:var(--r);padding:10px 13px;font-size:13.5px;color:var(--text);outline:none;width:100%;font-family:'DM Sans',sans-serif;transition:all .2s var(--ease)}
+    .s-in:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(0,102,204,0.1)}
+    textarea.s-in{resize:vertical;min-height:80px}
+    .btn-save-section{padding:10px 24px;border-radius:var(--r-full);background:var(--blue);color:#fff;font-size:13.5px;font-weight:600;border:none;cursor:pointer;transition:all .2s;box-shadow:0 3px 10px rgba(0,102,204,0.2)}
+    .btn-save-section:hover{background:var(--blue-dark);transform:translateY(-1px)}
+    .btn-save-section:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .save-status{font-size:12.5px;color:#059669;margin-left:10px;opacity:0;transition:opacity .3s}
+    .save-status.show{opacity:1}
+
+    /* doctor list in settings */
+    .doc-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+    .doc-row{display:grid;grid-template-columns:36px 1fr 1fr auto;gap:10px;align-items:start;background:#F8FAFC;border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+    .doc-av-sm{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+    .doc-row-inputs{display:flex;flex-direction:column;gap:6px}
+    .s-in-sm{background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;font-size:13px;color:var(--text);outline:none;width:100%;font-family:'DM Sans',sans-serif;transition:border-color .18s}
+    .s-in-sm:focus{border-color:var(--blue)}
+    textarea.s-in-sm{resize:vertical;min-height:60px}
+    .btn-doc-del{padding:5px 10px;border-radius:8px;background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap}
+    .btn-doc-del:hover{background:#DC2626;color:#fff}
+    .btn-add-doc{display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--r);border:1.5px dashed var(--border-blue);background:#EFF6FF;color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;width:100%;justify-content:center}
+    .btn-add-doc:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+    @media(max-width:900px){.settings-grid{grid-template-columns:1fr}.settings-card.full{grid-column:1}}
+    @media(max-width:600px){.doc-row{grid-template-columns:36px 1fr auto}}
+
   </style>
 </head>
 <body>
@@ -221,6 +262,13 @@
   </nav>
 
   <main class="admin-main">
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="appointments">Appointments</button>
+      <button class="tab-btn" data-tab="settings">Clinic Settings</button>
+    </div>
+
+    <div class="tab-pane active" id="tab-appointments">
     <div class="stats-strip">
       <div class="stat-chip"><div class="stat-chip-num" id="statTotal"   style="color:var(--text)">—</div><div class="stat-chip-lbl">Total</div></div>
       <div class="stat-chip"><div class="stat-chip-num" id="statPending" style="color:#D97706">—</div><div class="stat-chip-lbl">Pending</div></div>
@@ -279,6 +327,13 @@
     </div>
   </main>
 </div>
+
+    </div><!-- /tab-appointments -->
+
+    <!-- SETTINGS TAB -->
+    <div class="tab-pane" id="tab-settings">
+      <!-- settings injected by JS -->
+    </div>
 
 <!-- EDIT MODAL -->
 <div class="modal-backdrop" id="editModal">
@@ -388,7 +443,8 @@
 <script type="module">
   import {
     adminLogin, adminLogout, onAuthChange,
-    getAppointments, updateAppointmentStatus, updateAppointment
+    getAppointments, updateAppointmentStatus, updateAppointment,
+    getClinicSettings, saveClinicSettings, getDoctorsList, saveDoctorsList
   } from './firebase-config.js';
 
   // ── State ────────────────────────────────────────────────────
@@ -711,6 +767,215 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
   }
+
+  // ── TABS ─────────────────────────────────────────────────────
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'settings') initSettings();
+    });
+  });
+
+  // ── SETTINGS ─────────────────────────────────────────────────
+  let settingsLoaded = false;
+  let currentSettings = {};
+  let currentDoctors  = [];
+
+  async function initSettings() {
+    if (settingsLoaded) return;
+    settingsLoaded = true;
+    const pane = document.getElementById('tab-settings');
+    pane.innerHTML = '<p style="padding:32px;color:var(--text-3)">Loading settings...</p>';
+
+    const [s, doctors] = await Promise.all([getClinicSettings(), getDoctorsList()]);
+    currentSettings = s;
+    currentDoctors  = doctors;
+    renderSettings(s, doctors);
+  }
+
+  function renderSettings(s, doctors) {
+    const pane = document.getElementById('tab-settings');
+    pane.innerHTML = `
+      <div class="settings-grid">
+
+        <!-- Clinic Info -->
+        <div class="settings-card">
+          <div class="settings-card-title">Contact Info</div>
+          <div class="settings-card-sub">Phone, WhatsApp, and email shown across all pages.</div>
+          <div class="s-group"><label class="s-lbl">Phone Number (10 digits)</label><input class="s-in" id="sPhone" value="${esc(s.phone)}" maxlength="15" placeholder="9876543210"></div>
+          <div class="s-group"><label class="s-lbl">WhatsApp Number (with country code)</label><input class="s-in" id="sWhatsapp" value="${esc(s.whatsapp)}" maxlength="15" placeholder="919876543210"></div>
+          <div class="s-group"><label class="s-lbl">Email Address</label><input class="s-in" id="sEmail" type="email" value="${esc(s.email)}" placeholder="care@auraclinic.in"></div>
+          <div style="display:flex;align-items:center">
+            <button class="btn-save-section" onclick="saveContactInfo()">Save Contact Info</button>
+            <span class="save-status" id="statusContact">Saved</span>
+          </div>
+        </div>
+
+        <!-- Address -->
+        <div class="settings-card">
+          <div class="settings-card-title">Address</div>
+          <div class="settings-card-sub">Shown in footer, contact page, and booking page.</div>
+          <div class="s-group"><label class="s-lbl">Address Line 1</label><input class="s-in" id="sAddrL1" value="${esc(s.addressLine1)}" placeholder="Street, Area"></div>
+          <div class="s-group"><label class="s-lbl">Address Line 2</label><input class="s-in" id="sAddrL2" value="${esc(s.addressLine2)}" placeholder="City, PIN, State"></div>
+          <div class="s-group"><label class="s-lbl">Full Address (for footer, single line)</label><input class="s-in" id="sAddrFull" value="${esc(s.addressFull)}" placeholder="Full address on one line"></div>
+          <div class="s-group"><label class="s-lbl">Landmark Note</label><input class="s-in" id="sAddrNote" value="${esc(s.addressNote)}" placeholder="Near metro, bus stop, etc."></div>
+          <div class="s-group"><label class="s-lbl">Google Maps Embed URL</label><textarea class="s-in" id="sMapEmbed" rows="3" placeholder="Paste the src URL from the Google Maps embed code">${esc(s.mapEmbed)}</textarea></div>
+          <div style="display:flex;align-items:center">
+            <button class="btn-save-section" onclick="saveAddress()">Save Address</button>
+            <span class="save-status" id="statusAddress">Saved</span>
+          </div>
+        </div>
+
+        <!-- Hours -->
+        <div class="settings-card full">
+          <div class="settings-card-title">Business Hours</div>
+          <div class="settings-card-sub">Shown on contact page, footer, and booking page.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px">
+            <div class="s-group"><label class="s-lbl">Weekdays</label><input class="s-in" id="sHrsWd" value="${esc(s.hoursWeekday)}" placeholder="Mon-Fri: 8AM-8PM"></div>
+            <div class="s-group"><label class="s-lbl">Saturday</label><input class="s-in" id="sHrsSat" value="${esc(s.hoursSat)}" placeholder="Sat: 8AM-6PM"></div>
+            <div class="s-group"><label class="s-lbl">Sunday</label><input class="s-in" id="sHrsSun" value="${esc(s.hoursSun)}" placeholder="Sun: 9AM-2PM"></div>
+            <div class="s-group"><label class="s-lbl">Short (for footer)</label><input class="s-in" id="sHrsFooter" value="${esc(s.hoursFooter)}" placeholder="Mon-Sat: 8AM-8PM, Sun: 9AM-2PM"></div>
+          </div>
+          <div class="s-group"><label class="s-lbl">Call Card Hours ("Mon-Sat, 8AM-8PM")</label><input class="s-in" id="sHrsCall" value="${esc(s.hoursCall)}" placeholder="Mon-Sat, 8AM-8PM"></div>
+          <div style="display:flex;align-items:center">
+            <button class="btn-save-section" onclick="saveHours()">Save Hours</button>
+            <span class="save-status" id="statusHours">Saved</span>
+          </div>
+        </div>
+
+        <!-- Doctors -->
+        <div class="settings-card full">
+          <div class="settings-card-title">Doctor Profiles</div>
+          <div class="settings-card-sub">Name, specialty, qualifications, bio, and avatar colour shown on the doctors page.</div>
+          <div class="doc-list" id="doctorList"></div>
+          <button class="btn-add-doc" onclick="addDoctor()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Doctor
+          </button>
+          <div style="display:flex;align-items:center;margin-top:16px">
+            <button class="btn-save-section" onclick="saveDoctors()">Save All Doctors</button>
+            <span class="save-status" id="statusDoctors">Saved</span>
+          </div>
+        </div>
+
+      </div>
+    `;
+    renderDoctorList(doctors);
+  }
+
+  function renderDoctorList(doctors) {
+    const list = document.getElementById('doctorList');
+    if (!list) return;
+    list.innerHTML = doctors.map((d, i) => `
+      <div class="doc-row" data-idx="${i}">
+        <div class="doc-av-sm" style="background:linear-gradient(135deg,${esc(d.color)})">${esc(d.initials)}</div>
+        <div class="doc-row-inputs">
+          <input class="s-in-sm" placeholder="Full name" value="${esc(d.name)}" data-field="name">
+          <input class="s-in-sm" placeholder="Specialty" value="${esc(d.specialty)}" data-field="specialty">
+          <input class="s-in-sm" placeholder="Qualifications" value="${esc(d.quals)}" data-field="quals">
+          <input class="s-in-sm" placeholder="Initials (2 letters)" value="${esc(d.initials)}" maxlength="3" data-field="initials" style="width:80px">
+          <input class="s-in-sm" placeholder="Avatar colours e.g. #0066CC,#0052A3" value="${esc(d.color)}" data-field="color">
+        </div>
+        <div class="doc-row-inputs">
+          <textarea class="s-in-sm" placeholder="Bio" rows="4" data-field="bio">${esc(d.bio)}</textarea>
+          <input class="s-in-sm" placeholder="Years of experience" type="number" value="${d.years}" data-field="years">
+          <input class="s-in-sm" placeholder="Tags (comma separated)" value="${esc(d.tags)}" data-field="tags">
+        </div>
+        <button class="btn-doc-del" onclick="deleteDoctor(${i})">Remove</button>
+      </div>
+    `).join('');
+  }
+
+  window.addDoctor = function() {
+    const newDoc = { id: Date.now(), initials:'DR', color:'#0066CC,#0052A3', name:'', specialty:'', quals:'', bio:'', years:0, tags:'', active:true };
+    currentDoctors.push(newDoc);
+    renderDoctorList(currentDoctors);
+    document.getElementById('doctorList').lastElementChild?.scrollIntoView({ behavior:'smooth' });
+  };
+
+  window.deleteDoctor = function(i) {
+    if (!confirm('Remove this doctor?')) return;
+    currentDoctors.splice(i, 1);
+    renderDoctorList(currentDoctors);
+  };
+
+  function collectDoctorsFromDOM() {
+    const rows = document.querySelectorAll('.doc-row');
+    return Array.from(rows).map((row, i) => {
+      const get = f => row.querySelector(`[data-field="${f}"]`)?.value?.trim() ?? '';
+      return {
+        ...currentDoctors[i],
+        name:      get('name'),
+        specialty: get('specialty'),
+        quals:     get('quals'),
+        initials:  get('initials'),
+        color:     get('color'),
+        bio:       get('bio'),
+        years:     parseInt(get('years'), 10) || 0,
+        tags:      get('tags'),
+      };
+    });
+  }
+
+  // ── Settings save helpers ────────────────────────────────────
+
+  function flashSaved(statusId, btn) {
+    const el = document.getElementById(statusId);
+    if (el) { el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2500); }
+    if (btn) { btn.disabled = false; btn.textContent = btn.dataset.label || btn.textContent.replace('Saving...','Save'); }
+  }
+
+  window.saveContactInfo = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const phone = document.getElementById('sPhone').value.trim().replace(/\D/g,'');
+    if (phone.length !== 10 && !(phone.length === 12 && phone.startsWith('91'))) {
+      showToast('Phone must be 10 digits'); btn.disabled=false; btn.textContent=btn.dataset.label; return;
+    }
+    const data = {
+      phone,
+      whatsapp: document.getElementById('sWhatsapp').value.trim().replace(/\D/g,''),
+      email:    document.getElementById('sEmail').value.trim(),
+    };
+    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusContact', btn); showToast('Contact info saved'); }
+    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  window.saveAddress = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const data = {
+      addressLine1: document.getElementById('sAddrL1').value.trim(),
+      addressLine2: document.getElementById('sAddrL2').value.trim(),
+      addressFull:  document.getElementById('sAddrFull').value.trim(),
+      addressNote:  document.getElementById('sAddrNote').value.trim(),
+      mapEmbed:     document.getElementById('sMapEmbed').value.trim(),
+    };
+    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusAddress', btn); showToast('Address saved'); }
+    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  window.saveHours = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const data = {
+      hoursWeekday: document.getElementById('sHrsWd').value.trim(),
+      hoursSat:     document.getElementById('sHrsSat').value.trim(),
+      hoursSun:     document.getElementById('sHrsSun').value.trim(),
+      hoursFooter:  document.getElementById('sHrsFooter').value.trim(),
+      hoursCall:    document.getElementById('sHrsCall').value.trim(),
+    };
+    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusHours', btn); showToast('Hours saved'); }
+    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  window.saveDoctors = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const updated = collectDoctorsFromDOM();
+    try { await saveDoctorsList(updated); currentDoctors=updated; flashSaved('statusDoctors', btn); showToast('Doctors saved'); }
+    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
 </script>
 </body>
 </html>
