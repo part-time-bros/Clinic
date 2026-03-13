@@ -1,18 +1,12 @@
-// ─────────────────────────────────────────────────────────────
 // AuraClinic — Firebase Config
-//
-// Steps to activate:
-//  1. Go to https://console.firebase.google.com
-//  2. Create a project → Add a web app → copy the config below
-//  3. In Firestore Database → Create database (start in production mode)
-//  4. Set the security rules shown at the bottom of this file
-// ─────────────────────────────────────────────────────────────
 
-import { initializeApp }              from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
-import { getFirestore, collection,
-         addDoc, serverTimestamp }    from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
+import { initializeApp }                           from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
+import { getFirestore, collection, addDoc,
+         getDocs, doc, updateDoc,
+         query, orderBy, serverTimestamp }         from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword,
+         signOut, onAuthStateChanged }             from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js';
 
-// ── PASTE YOUR FIREBASE CONFIG HERE ──────────────────────────
 const firebaseConfig = {
   apiKey:            'AIzaSyBCi8ytQagIVZFya7Ipy_YKNm0Cfo6acDY',
   authDomain:        'auraclinic-42da8.firebaseapp.com',
@@ -21,16 +15,13 @@ const firebaseConfig = {
   messagingSenderId: '1006372372941',
   appId:             '1:1006372372941:web:cfd0d571337e301d5d8484',
 };
-// ─────────────────────────────────────────────────────────────
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const db   = getFirestore(app);
+const auth = getAuth(app);
 
-/**
- * Saves an appointment to Firestore.
- * @param {Object} data — appointment fields collected from the form
- * @returns {Promise<string>} — the generated document ID
- */
+// ── PUBLIC: called by booking forms ──────────────────────────
+
 export async function saveAppointment(data) {
   const docRef = await addDoc(collection(db, 'appointments'), {
     ...data,
@@ -40,18 +31,40 @@ export async function saveAppointment(data) {
   return docRef.id;
 }
 
+// ── ADMIN: called only from admin.html ───────────────────────
+
+export async function adminLogin(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function adminLogout() {
+  return signOut(auth);
+}
+
+export function onAuthChange(callback) {
+  return onAuthStateChanged(auth, callback);
+}
+
+export async function getAppointments() {
+  const q      = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'));
+  const snap   = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+export async function updateAppointmentStatus(id, status) {
+  await updateDoc(doc(db, 'appointments', id), { status });
+}
+
 // ─────────────────────────────────────────────────────────────
-// Firestore Security Rules (paste into Firebase console)
+// Updated Firestore Security Rules — paste into Firebase console
 // ─────────────────────────────────────────────────────────────
 //
 // rules_version = '2';
 // service cloud.firestore {
 //   match /databases/{database}/documents {
-//
-//     // Anyone can create an appointment (website form submission)
-//     // No one can read, update, or delete from the client side.
-//     // Admin reads happen via the Admin SDK (server-side, Phase 3).
 //     match /appointments/{id} {
+//
+//       // Anyone can submit a booking form
 //       allow create: if
 //         request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
 //         && request.resource.data.name is string
@@ -60,7 +73,11 @@ export async function saveAppointment(data) {
 //         && request.resource.data.phone is string
 //         && request.resource.data.status == 'pending';
 //
-//       allow read, update, delete: if false;
+//       // Only logged-in admins can read or update
+//       allow read, update: if request.auth != null;
+//
+//       // Nobody can delete from the client
+//       allow delete: if false;
 //     }
 //   }
 // }
