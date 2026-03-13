@@ -189,32 +189,122 @@
   const errorEl   = document.getElementById('bkError');
   const HP_KEY    = 'ac_bk_submissions';
   const LIMIT     = 2;
-  const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+  const WINDOW_MS = 24 * 60 * 60 * 1000;
 
+  // ── Rate limit helpers ───────────────────────────────────────
   function getRateData() {
     try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
     catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
   }
-
   function isRateLimited() {
-    const data = getRateData();
-    if (Date.now() > data.resetAt) {
-      // Window expired — reset
-      localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS }));
-      return false;
-    }
-    return data.count >= LIMIT;
+    const d = getRateData();
+    if (Date.now() > d.resetAt) { localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS })); return false; }
+    return d.count >= LIMIT;
   }
-
   function incrementRate() {
-    const data = getRateData();
-    data.count += 1;
-    localStorage.setItem(HP_KEY, JSON.stringify(data));
+    const d = getRateData(); d.count++;
+    localStorage.setItem(HP_KEY, JSON.stringify(d));
   }
 
-  submitBtn.addEventListener('click', async () => {
-    const getValue = sel => form.querySelector(sel)?.value?.trim() ?? '';
+  // ── Field-level error helpers ────────────────────────────────
+  function fieldError(input, msg) {
+    input.style.borderColor = '#DC2626';
+    input.style.boxShadow   = '0 0 0 3px rgba(220,38,38,0.1)';
+    let tip = input.parentElement.querySelector('.field-tip');
+    if (!tip) { tip = document.createElement('div'); tip.className = 'field-tip'; tip.style.cssText = 'font-size:12px;color:#DC2626;margin-top:4px;'; input.parentElement.appendChild(tip); }
+    tip.textContent = msg;
+  }
+  function fieldOk(input) {
+    input.style.borderColor = '#059669';
+    input.style.boxShadow   = '0 0 0 3px rgba(5,150,105,0.08)';
+    const tip = input.parentElement.querySelector('.field-tip');
+    if (tip) tip.remove();
+  }
+  function fieldReset(input) {
+    input.style.borderColor = '';
+    input.style.boxShadow   = '';
+    const tip = input.parentElement.querySelector('.field-tip');
+    if (tip) tip.remove();
+  }
 
+  // ── Validators ───────────────────────────────────────────────
+  const RULES = {
+    name(v) {
+      if (!v)                         return 'Full name is required.';
+      if (v.length < 3)               return 'Name must be at least 3 characters.';
+      if (v.length > 80)              return 'Name is too long.';
+      if (/[0-9]/.test(v))            return 'Name cannot contain numbers.';
+      if (/[^a-zA-Z\s\.\-']/.test(v)) return 'Name contains invalid characters.';
+      return null;
+    },
+    phone(v) {
+      const digits = v.replace(/[\s\-\+]/g, '');
+      if (!digits)                    return 'Phone number is required.';
+      if (!/^\d+$/.test(digits))      return 'Phone number must contain digits only.';
+      // Accept 10 digits or 91+10 digits
+      if (digits.length === 12 && digits.startsWith('91')) return null;
+      if (digits.length !== 10)       return 'Enter a valid 10-digit Indian mobile number.';
+      if (!/^[6-9]/.test(digits))     return 'Mobile number must start with 6, 7, 8, or 9.';
+      return null;
+    },
+    email(v) {
+      if (!v) return null; // optional field
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Enter a valid email address.';
+      if (v.length > 120) return 'Email address is too long.';
+      return null;
+    },
+    specialty(v) {
+      if (!v) return 'Please select a specialty.';
+      return null;
+    },
+    date(v) {
+      if (!v) return 'Please select a preferred date.';
+      const chosen  = new Date(v);
+      const today   = new Date(); today.setHours(0,0,0,0);
+      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
+      if (chosen < today)    return 'Please select a future date.';
+      if (chosen > maxDate)  return 'Appointments can only be booked up to 3 months ahead.';
+      // No Sundays (clinic open Sun 9AM-2PM but keep it simple — remove this if needed)
+      return null;
+    },
+  };
+
+  // ── Live validation on blur ──────────────────────────────────
+  const nameIn  = form.querySelector('input[placeholder="Your full name"]');
+  const phoneIn = form.querySelector('input[type="tel"]');
+  const emailIn = form.querySelector('input[type="email"]');
+  const specIn  = form.querySelector('select');
+  const dateIn  = form.querySelector('input[type="date"]');
+
+  function attachBlur(input, rule) {
+    input.addEventListener('blur', () => {
+      const err = RULES[rule](input.value.trim());
+      if (input.value.trim()) err ? fieldError(input, err) : fieldOk(input);
+    });
+    input.addEventListener('input', () => {
+      if (input.style.borderColor) {
+        const err = RULES[rule](input.value.trim());
+        err ? fieldError(input, err) : fieldOk(input);
+      }
+    });
+  }
+  attachBlur(nameIn,  'name');
+  attachBlur(phoneIn, 'phone');
+  attachBlur(emailIn, 'email');
+  attachBlur(dateIn,  'date');
+  specIn.addEventListener('change', () => {
+    const err = RULES.specialty(specIn.value);
+    err ? fieldError(specIn, err) : fieldOk(specIn);
+  });
+
+  // ── Submit ───────────────────────────────────────────────────
+  submitBtn.addEventListener('click', async () => {
+    // Honeypot
+    if (document.getElementById('hpField')?.value) {
+      form.style.display = 'none'; successEl.style.display = 'flex'; return;
+    }
+
+    const getValue = sel => form.querySelector(sel)?.value?.trim() ?? '';
     const name      = getValue('input[placeholder="Your full name"]');
     const phone     = getValue('input[type="tel"]');
     const email     = getValue('input[type="email"]');
@@ -225,33 +315,44 @@
     const visitType = getValue('select:nth-of-type(4)');
     const notes     = getValue('textarea');
 
-    // Honeypot check — if filled, silently fake success without writing to Firestore
-    if (document.getElementById('hpField')?.value) {
-      form.style.display  = 'none';
-      successEl.style.display = 'flex';
+    // Run all validators and mark fields
+    const errors = [
+      [nameIn,  RULES.name(name)],
+      [phoneIn, RULES.phone(phone)],
+      [emailIn, RULES.email(email)],
+      [specIn,  RULES.specialty(specialty)],
+      [dateIn,  RULES.date(date)],
+    ];
+    let hasError = false;
+    errors.forEach(([input, err]) => {
+      if (err) { fieldError(input, err); hasError = true; }
+      else if (input.value.trim()) fieldOk(input);
+    });
+
+    if (hasError) {
+      errorEl.textContent   = 'Please fix the errors above before submitting.';
+      errorEl.style.display = 'block';
+      // Scroll to first error
+      form.querySelector('input[style*="DC2626"], select[style*="DC2626"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
-    // Rate limit check
+    // Rate limit
     if (isRateLimited()) {
-      errorEl.textContent  = 'You have already submitted 2 appointment requests today. Please call us directly at +91 98765 43210.';
+      errorEl.textContent   = 'You have already submitted 2 appointment requests today. Please call us directly at +91 98765 43210.';
       errorEl.style.display = 'block';
       return;
     }
 
-    // Validation
-    if (!name || !phone || !specialty || !date) {
-      errorEl.textContent  = 'Please fill in all required fields.';
-      errorEl.style.display = 'block';
-      return;
-    }
     errorEl.style.display = 'none';
-
     submitBtn.disabled    = true;
     submitBtn.textContent = 'Submitting...';
 
+    // Normalise phone — strip country code, store clean 10 digits
+    const cleanPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+
     try {
-      await saveAppointment({ name, phone, email, specialty, doctor, date, time, visitType, notes, source: 'booking-page' });
+      await saveAppointment({ name, phone: cleanPhone, email, specialty, doctor, date, time, visitType, notes, source: 'booking-page' });
       incrementRate();
       form.style.display      = 'none';
       successEl.style.display = 'flex';
@@ -265,4 +366,4 @@
   });
 </script>
 </body>
-  </html>
+          </html>
