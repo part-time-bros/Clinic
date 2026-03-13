@@ -21,9 +21,6 @@ const app  = initializeApp(firebaseConfig);
 const db   = getFirestore(app);
 const auth = getAuth(app);
 
-// Session ends when browser tab is closed
-setPersistence(auth, browserSessionPersistence).catch(console.error);
-
 // ── PUBLIC ────────────────────────────────────────────────────
 
 export async function saveAppointment(data) {
@@ -41,6 +38,8 @@ const SESSION_KEY = 'ac_login_at';
 const MAX_SESSION = 24 * 60 * 60 * 1000;
 
 export async function adminLogin(email, password) {
+  // Set session persistence first so it's guaranteed before sign-in
+  await setPersistence(auth, browserSessionPersistence);
   const cred = await signInWithEmailAndPassword(auth, email, password);
   sessionStorage.setItem(SESSION_KEY, Date.now().toString());
   return cred;
@@ -55,9 +54,16 @@ export function onAuthChange(callback) {
   return onAuthStateChanged(auth, async user => {
     if (user) {
       const loginAt = parseInt(sessionStorage.getItem(SESSION_KEY) || '0', 10);
-      if (!loginAt || Date.now() - loginAt > MAX_SESSION) {
+      // No session stamp means tab was closed and Firebase restored from cache — force re-login
+      if (!loginAt) {
         await signOut(auth);
+        callback(null);
+        return;
+      }
+      // Session older than 24 hours — force re-login
+      if (Date.now() - loginAt > MAX_SESSION) {
         sessionStorage.removeItem(SESSION_KEY);
+        await signOut(auth);
         callback(null);
         return;
       }
