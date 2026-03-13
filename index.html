@@ -413,53 +413,125 @@
     try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
     catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
   }
-
   function isRateLimited() {
-    const data = getRateData();
-    if (Date.now() > data.resetAt) {
-      localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS }));
-      return false;
-    }
-    return data.count >= LIMIT;
+    const d = getRateData();
+    if (Date.now() > d.resetAt) { localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS })); return false; }
+    return d.count >= LIMIT;
+  }
+  function incrementRate() {
+    const d = getRateData(); d.count++;
+    localStorage.setItem(HP_KEY, JSON.stringify(d));
   }
 
-  function incrementRate() {
-    const data = getRateData();
-    data.count += 1;
-    localStorage.setItem(HP_KEY, JSON.stringify(data));
+  function fieldError(input, msg) {
+    input.style.borderColor = '#DC2626';
+    input.style.boxShadow   = '0 0 0 3px rgba(220,38,38,0.1)';
+    let tip = input.parentElement.querySelector('.field-tip');
+    if (!tip) { tip = document.createElement('div'); tip.className = 'field-tip'; tip.style.cssText = 'font-size:12px;color:#DC2626;margin-top:4px;'; input.parentElement.appendChild(tip); }
+    tip.textContent = msg;
   }
+  function fieldOk(input) {
+    input.style.borderColor = '#059669';
+    input.style.boxShadow   = '0 0 0 3px rgba(5,150,105,0.08)';
+    const tip = input.parentElement.querySelector('.field-tip');
+    if (tip) tip.remove();
+  }
+
+  const RULES = {
+    name(v) {
+      if (!v)                return 'Full name is required.';
+      if (v.length < 3)      return 'Name must be at least 3 characters.';
+      if (/[0-9]/.test(v))   return 'Name cannot contain numbers.';
+      return null;
+    },
+    phone(v) {
+      const digits = v.replace(/[\s\-\+]/g, '');
+      if (!digits)           return 'Phone number is required.';
+      if (!/^\d+$/.test(digits)) return 'Digits only — no letters or symbols.';
+      if (digits.length === 12 && digits.startsWith('91')) return null;
+      if (digits.length !== 10) return 'Enter a valid 10-digit Indian mobile number.';
+      if (!/^[6-9]/.test(digits)) return 'Number must start with 6, 7, 8, or 9.';
+      return null;
+    },
+    specialty(v) { return v ? null : 'Please select a specialty.'; },
+    date(v) {
+      if (!v) return 'Please select a preferred date.';
+      const chosen = new Date(v);
+      const today  = new Date(); today.setHours(0,0,0,0);
+      const max    = new Date(); max.setMonth(max.getMonth() + 3);
+      if (chosen < today) return 'Please select a future date.';
+      if (chosen > max)   return 'Appointments can only be booked up to 3 months ahead.';
+      return null;
+    },
+  };
+
+  const nameIn  = form.querySelector('input[type="text"]');
+  const phoneIn = form.querySelector('input[type="tel"]');
+  const specIn  = form.querySelector('select');
+  const dateIn  = form.querySelector('input[type="date"]');
+
+  function attachBlur(input, rule) {
+    input.addEventListener('blur', () => {
+      const err = RULES[rule](input.value.trim());
+      if (input.value.trim()) err ? fieldError(input, err) : fieldOk(input);
+    });
+    input.addEventListener('input', () => {
+      if (input.style.borderColor) {
+        const err = RULES[rule](input.value.trim());
+        err ? fieldError(input, err) : fieldOk(input);
+      }
+    });
+  }
+  attachBlur(nameIn,  'name');
+  attachBlur(phoneIn, 'phone');
+  attachBlur(dateIn,  'date');
+  specIn.addEventListener('change', () => {
+    const err = RULES.specialty(specIn.value);
+    err ? fieldError(specIn, err) : fieldOk(specIn);
+  });
 
   submitBtn.addEventListener('click', async () => {
-    const name      = form.querySelector('input[type="text"]')?.value?.trim() ?? '';
-    const phone     = form.querySelector('input[type="tel"]')?.value?.trim() ?? '';
-    const specialty = form.querySelector('select')?.value ?? '';
-    const date      = form.querySelector('input[type="date"]')?.value ?? '';
-
-    // Honeypot check
     if (document.getElementById('hpFieldHome')?.value) {
-      form.style.display      = 'none';
-      successEl.style.display = 'flex';
+      form.style.display = 'none'; successEl.style.display = 'flex'; return;
+    }
+
+    const name      = nameIn.value.trim();
+    const phone     = phoneIn.value.trim();
+    const specialty = specIn.value;
+    const date      = dateIn.value;
+
+    const errors = [
+      [nameIn,  RULES.name(name)],
+      [phoneIn, RULES.phone(phone)],
+      [specIn,  RULES.specialty(specialty)],
+      [dateIn,  RULES.date(date)],
+    ];
+    let hasError = false;
+    errors.forEach(([input, err]) => {
+      if (err) { fieldError(input, err); hasError = true; }
+      else if (input.value.trim()) fieldOk(input);
+    });
+
+    if (hasError) {
+      errorEl.textContent   = 'Please fix the errors above.';
+      errorEl.style.display = 'block';
       return;
     }
 
-    // Rate limit
     if (isRateLimited()) {
       errorEl.textContent   = 'You have already submitted 2 requests today. Please call us at +91 98765 43210.';
       errorEl.style.display = 'block';
       return;
     }
 
-    if (!name || !phone || !specialty || !date) {
-      errorEl.textContent   = 'Please fill in all required fields.';
-      errorEl.style.display = 'block';
-      return;
-    }
     errorEl.style.display = 'none';
     submitBtn.disabled    = true;
     submitBtn.textContent = 'Submitting...';
 
+    const cleanPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+
     try {
-      await saveAppointment({ name, phone, specialty, date, source: 'homepage' });
+      await saveAppointment({ name, phone: cleanPhone, specialty, date, source: 'homepage' });
       incrementRate();
       form.style.display      = 'none';
       successEl.style.display = 'flex';
@@ -473,4 +545,4 @@
   });
 </script>
 </body>
-    </html>
+      </html>
