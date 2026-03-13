@@ -255,6 +255,10 @@
         <div class="form-title">Book an Appointment</div>
         <div class="form-sub">Fill in your details and we will confirm shortly.</div>
         <div id="bookingForm">
+          <!-- Honeypot -->
+          <div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+            <input type="text" name="clinic_ref" id="hpFieldHome" tabindex="-1" autocomplete="off">
+          </div>
           <div class="form-row">
             <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" placeholder="Your full name"></div>
             <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" placeholder="+91 98765 43210"></div>
@@ -401,6 +405,29 @@
   const form      = document.getElementById('bookingForm');
   const successEl = document.getElementById('bookingSuccess');
   const errorEl   = document.getElementById('homeError');
+  const HP_KEY    = 'ac_bk_submissions';
+  const LIMIT     = 2;
+  const WINDOW_MS = 24 * 60 * 60 * 1000;
+
+  function getRateData() {
+    try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
+    catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
+  }
+
+  function isRateLimited() {
+    const data = getRateData();
+    if (Date.now() > data.resetAt) {
+      localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS }));
+      return false;
+    }
+    return data.count >= LIMIT;
+  }
+
+  function incrementRate() {
+    const data = getRateData();
+    data.count += 1;
+    localStorage.setItem(HP_KEY, JSON.stringify(data));
+  }
 
   submitBtn.addEventListener('click', async () => {
     const name      = form.querySelector('input[type="text"]')?.value?.trim() ?? '';
@@ -408,27 +435,42 @@
     const specialty = form.querySelector('select')?.value ?? '';
     const date      = form.querySelector('input[type="date"]')?.value ?? '';
 
+    // Honeypot check
+    if (document.getElementById('hpFieldHome')?.value) {
+      form.style.display      = 'none';
+      successEl.style.display = 'flex';
+      return;
+    }
+
+    // Rate limit
+    if (isRateLimited()) {
+      errorEl.textContent   = 'You have already submitted 2 requests today. Please call us at +91 98765 43210.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
     if (!name || !phone || !specialty || !date) {
-      errorEl.textContent = 'Please fill in all required fields.';
+      errorEl.textContent   = 'Please fill in all required fields.';
       errorEl.style.display = 'block';
       return;
     }
     errorEl.style.display = 'none';
-    submitBtn.disabled = true;
+    submitBtn.disabled    = true;
     submitBtn.textContent = 'Submitting...';
 
     try {
       await saveAppointment({ name, phone, specialty, date, source: 'homepage' });
-      form.style.display = 'none';
+      incrementRate();
+      form.style.display      = 'none';
       successEl.style.display = 'flex';
     } catch (err) {
       console.error('Firestore write failed:', err);
-      errorEl.textContent = 'Something went wrong. Please call us directly.';
+      errorEl.textContent   = 'Something went wrong. Please call us directly.';
       errorEl.style.display = 'block';
-      submitBtn.disabled = false;
+      submitBtn.disabled    = false;
       submitBtn.textContent = 'Confirm Appointment';
     }
   });
 </script>
 </body>
-  </html>
+    </html>
