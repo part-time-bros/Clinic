@@ -186,8 +186,8 @@
     }
   
     /* ── TABS ── */
-    .tab-bar{display:flex;gap:4px;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;width:fit-content;box-shadow:var(--shadow-sm)}
-    .tab-btn{padding:9px 22px;border-radius:var(--r);font-size:13.5px;font-weight:600;color:var(--text-2);background:transparent;border:none;cursor:pointer;transition:all .18s}
+    .tab-bar{display:flex;gap:4px;margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:4px;width:100%;max-width:360px;box-shadow:var(--shadow-sm)}
+    .tab-btn{flex:1;padding:10px 16px;border-radius:var(--r);font-size:13.5px;font-weight:600;color:var(--text-2);background:transparent;border:none;cursor:pointer;transition:all .18s;text-align:center;white-space:nowrap}
     .tab-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(0,102,204,0.22)}
     .tab-pane{display:none}
     .tab-pane.active{display:block}
@@ -324,9 +324,7 @@
           </tbody>
         </table>
       </div>
-    </div>
-  </main>
-</div>
+    </div><!-- /table-card -->
 
     </div><!-- /tab-appointments -->
 
@@ -334,6 +332,9 @@
     <div class="tab-pane" id="tab-settings">
       <!-- settings injected by JS -->
     </div>
+
+  </main>
+</div><!-- /adminShell -->
 
 <!-- EDIT MODAL -->
 <div class="modal-backdrop" id="editModal">
