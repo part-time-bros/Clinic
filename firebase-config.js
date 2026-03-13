@@ -55,13 +55,35 @@ export async function updateAppointmentStatus(id, status) {
   await updateDoc(doc(db, 'appointments', id), { status });
 }
 
-// Update any set of fields on an appointment
 export async function updateAppointment(id, fields) {
   await updateDoc(doc(db, 'appointments', id), fields);
 }
 
-// Full field update — used by admin edit modal
-export async function updateAppointment(id, data) {
-  await updateDoc(doc(db, 'appointments', id), data);
-}
-
+// ─────────────────────────────────────────────────────────────
+// Updated Firestore Security Rules — paste into Firebase console
+// ─────────────────────────────────────────────────────────────
+//
+// rules_version = '2';
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /appointments/{id} {
+//
+//       // Anyone can submit a booking form
+//       allow create: if
+//         request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
+//         && request.resource.data.name is string
+//         && request.resource.data.name.size() > 0
+//         && request.resource.data.name.size() < 120
+//         && request.resource.data.phone is string
+//         && request.resource.data.status == 'pending';
+//
+//       // Only logged-in admins can read or update
+//       allow read, update: if request.auth != null;
+//
+//       // Nobody can delete from the client
+//       allow delete: if false;
+//     }
+//   }
+// }
+//
+// ─────────────────────────────────────────────────────────────
