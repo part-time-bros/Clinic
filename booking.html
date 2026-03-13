@@ -85,6 +85,10 @@
         <div class="form-title">Book Your Appointment</div>
         <div class="form-sub">All fields marked are required. We do not share your details with third parties.</div>
         <div id="fullBookingForm">
+          <!-- Honeypot: hidden from real users, bots fill this in and get blocked -->
+          <div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+            <input type="text" name="clinic_ref" id="hpField" tabindex="-1" autocomplete="off">
+          </div>
           <div class="form-row">
             <div class="form-group"><label class="form-lbl">Full Name *</label><input type="text" class="form-in" placeholder="Your full name"></div>
             <div class="form-group"><label class="form-lbl">Phone Number *</label><input type="tel" class="form-in" placeholder="+91 98765 43210"></div>
@@ -179,50 +183,86 @@
 <script type="module">
   import { saveAppointment } from './firebase-config.js';
 
-  const form       = document.getElementById('fullBookingForm');
-  const successEl  = document.getElementById('fullBookingSuccess');
-  const submitBtn  = document.getElementById('bkSubmitBtn');
-  const errorEl    = document.getElementById('bkError');
+  const form      = document.getElementById('fullBookingForm');
+  const successEl = document.getElementById('fullBookingSuccess');
+  const submitBtn = document.getElementById('bkSubmitBtn');
+  const errorEl   = document.getElementById('bkError');
+  const HP_KEY    = 'ac_bk_submissions';
+  const LIMIT     = 2;
+  const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+  function getRateData() {
+    try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
+    catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
+  }
+
+  function isRateLimited() {
+    const data = getRateData();
+    if (Date.now() > data.resetAt) {
+      // Window expired — reset
+      localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS }));
+      return false;
+    }
+    return data.count >= LIMIT;
+  }
+
+  function incrementRate() {
+    const data = getRateData();
+    data.count += 1;
+    localStorage.setItem(HP_KEY, JSON.stringify(data));
+  }
 
   submitBtn.addEventListener('click', async () => {
-    // Collect values
-    const inputs  = form.querySelectorAll('input, select, textarea');
     const getValue = sel => form.querySelector(sel)?.value?.trim() ?? '';
 
-    const name     = getValue('input[placeholder="Your full name"]');
-    const phone    = getValue('input[type="tel"]');
-    const email    = getValue('input[type="email"]');
+    const name      = getValue('input[placeholder="Your full name"]');
+    const phone     = getValue('input[type="tel"]');
+    const email     = getValue('input[type="email"]');
     const specialty = getValue('select:nth-of-type(1)');
-    const doctor   = getValue('select:nth-of-type(2)');
-    const date     = getValue('input[type="date"]');
-    const time     = getValue('select:nth-of-type(3)');
+    const doctor    = getValue('select:nth-of-type(2)');
+    const date      = getValue('input[type="date"]');
+    const time      = getValue('select:nth-of-type(3)');
     const visitType = getValue('select:nth-of-type(4)');
-    const notes    = getValue('textarea');
+    const notes     = getValue('textarea');
 
-    // Basic validation
+    // Honeypot check — if filled, silently fake success without writing to Firestore
+    if (document.getElementById('hpField')?.value) {
+      form.style.display  = 'none';
+      successEl.style.display = 'flex';
+      return;
+    }
+
+    // Rate limit check
+    if (isRateLimited()) {
+      errorEl.textContent  = 'You have already submitted 2 appointment requests today. Please call us directly at +91 98765 43210.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    // Validation
     if (!name || !phone || !specialty || !date) {
-      errorEl.textContent = 'Please fill in all required fields.';
+      errorEl.textContent  = 'Please fill in all required fields.';
       errorEl.style.display = 'block';
       return;
     }
     errorEl.style.display = 'none';
 
-    // Disable button while saving
-    submitBtn.disabled = true;
+    submitBtn.disabled    = true;
     submitBtn.textContent = 'Submitting...';
 
     try {
       await saveAppointment({ name, phone, email, specialty, doctor, date, time, visitType, notes, source: 'booking-page' });
-      form.style.display = 'none';
+      incrementRate();
+      form.style.display      = 'none';
       successEl.style.display = 'flex';
     } catch (err) {
       console.error('Firestore write failed:', err);
-      errorEl.textContent = 'Something went wrong. Please try again or call us directly.';
+      errorEl.textContent   = 'Something went wrong. Please try again or call us directly.';
       errorEl.style.display = 'block';
-      submitBtn.disabled = false;
+      submitBtn.disabled    = false;
       submitBtn.textContent = 'Request Appointment';
     }
   });
 </script>
 </body>
-          </html>
+  </html>
