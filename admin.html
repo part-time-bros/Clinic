@@ -1426,7 +1426,20 @@
     auditTabInitialised = true;
     const list = document.getElementById('auditLogList');
     list.innerHTML = '<div class="audit-empty">Loading...</div>';
-    unsubAuditLog = subscribeToAuditLog(entries => renderAuditLog(entries));
+    try {
+      unsubAuditLog = subscribeToAuditLog(
+        entries => renderAuditLog(entries),
+        err => {
+          list.innerHTML = `<div style="padding:24px;color:#DC2626;font-size:13px;background:#FEF2F2;border-radius:12px;margin-top:8px">
+            <strong>Error loading audit log:</strong><br>${err?.code || ''} — ${err?.message || String(err)}
+          </div>`;
+        }
+      );
+    } catch(e) {
+      list.innerHTML = `<div style="padding:24px;color:#DC2626;font-size:13px;background:#FEF2F2;border-radius:12px;margin-top:8px">
+        <strong>Setup error:</strong><br>${e?.message || String(e)}
+      </div>`;
+    }
   }
 
   function renderAuditLog(entries) {
