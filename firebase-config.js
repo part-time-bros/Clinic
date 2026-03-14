@@ -38,11 +38,18 @@ const SESSION_KEY = 'ac_login_at';
 const MAX_SESSION = 24 * 60 * 60 * 1000;
 
 export async function adminLogin(email, password) {
-  // Set session persistence first so it's guaranteed before sign-in
   await setPersistence(auth, browserSessionPersistence);
-  const cred = await signInWithEmailAndPassword(auth, email, password);
+  // Stamp session BEFORE sign-in — onAuthStateChanged fires before the
+  // signInWithEmailAndPassword promise resolves, so the stamp must exist first.
   sessionStorage.setItem(SESSION_KEY, Date.now().toString());
-  return cred;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, password);
+    return cred;
+  } catch (err) {
+    // Clear stamp if login actually failed
+    sessionStorage.removeItem(SESSION_KEY);
+    throw err;
+  }
 }
 
 export async function adminLogout() {
@@ -143,27 +150,3 @@ export async function saveDoctorsList(list) {
   await setDoc(doc(db, 'settings', 'doctors'), { list });
 }
 
-// ─────────────────────────────────────────────────────────────
-// Firestore Security Rules — UPDATED (paste into Firebase console)
-// ─────────────────────────────────────────────────────────────
-//
-// rules_version = '2';
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//     match /appointments/{id} {
-//       allow create: if
-//         request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
-//         && request.resource.data.name is string
-//         && request.resource.data.name.size() > 0
-//         && request.resource.data.name.size() < 120
-//         && request.resource.data.phone is string
-//         && request.resource.data.status == 'pending';
-//       allow read, update: if request.auth != null;
-//       allow delete: if false;
-//     }
-//     match /settings/{document} {
-//       allow read: if true;
-//       allow write: if request.auth != null;
-//     }
-//   }
-// }
