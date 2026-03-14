@@ -225,6 +225,94 @@
     @media(max-width:900px){.settings-grid{grid-template-columns:1fr}.settings-card.full{grid-column:1}}
     @media(max-width:600px){.doc-row{grid-template-columns:36px 1fr auto}}
 
+  
+    /* ── VIEW TOGGLE ── */
+    .view-toggle{display:flex;gap:4px;background:#F1F5F9;border:1px solid var(--border);border-radius:var(--r);padding:3px}
+    .vt-btn{padding:6px 13px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--text-2);background:transparent;border:none;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:5px}
+    .vt-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+    .vt-btn.active{background:var(--card);color:var(--blue);box-shadow:var(--shadow-sm)}
+
+    /* ── TOOLBAR EXTRA BUTTONS ── */
+    .btn-csv{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r);background:#ECFDF5;border:1.5px solid #A7F3D0;font-size:13px;font-weight:600;color:#059669;cursor:pointer;transition:all .18s;white-space:nowrap}
+    .btn-csv:hover{background:#059669;color:#fff;border-color:#059669}
+    .btn-csv svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
+    /* ── CALENDAR ── */
+    #calendarView{display:none}
+    .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+    .cal-nav-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px}
+    .btn-cal-nav{width:34px;height:34px;border-radius:var(--r);background:var(--card);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;color:var(--text-2)}
+    .btn-cal-nav:hover{background:#F1F5F9;color:var(--text)}
+    .btn-cal-nav svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round}
+    .cal-grid-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .cal-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border)}
+    .cal-day-lbl{padding:10px 0;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);background:#F8FAFC}
+    .cal-body{display:grid;grid-template-columns:repeat(7,1fr)}
+    .cal-cell{min-height:88px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 6px;position:relative;cursor:default}
+    .cal-cell:nth-child(7n){border-right:none}
+    .cal-cell.empty{background:#FAFBFC}
+    .cal-cell.today{background:#EFF6FF}
+    .cal-cell-num{font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:4px}
+    .cal-cell.today .cal-cell-num{color:var(--blue)}
+    .cal-dot{display:flex;align-items:center;gap:3px;font-size:10.5px;font-weight:600;padding:2px 5px;border-radius:5px;margin-bottom:2px;cursor:pointer;line-height:1.3;max-width:100%;overflow:hidden;white-space:nowrap}
+    .cal-dot.pending  {background:#FEF9C3;color:#854D0E}
+    .cal-dot.confirmed{background:#ECFDF5;color:#065F46}
+    .cal-dot.completed{background:#EFF6FF;color:#1E40AF}
+    .cal-dot.cancelled{background:#FEF2F2;color:#991B1B}
+    .cal-dot-circle{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .cal-dot.pending   .cal-dot-circle{background:#D97706}
+    .cal-dot.confirmed .cal-dot-circle{background:#059669}
+    .cal-dot.completed .cal-dot-circle{background:#3B82F6}
+    .cal-dot.cancelled .cal-dot-circle{background:#DC2626}
+    .cal-more{font-size:10px;color:var(--text-3);padding:1px 4px;cursor:pointer}
+    .cal-more:hover{color:var(--blue);text-decoration:underline}
+    @media(max-width:700px){.cal-cell{min-height:56px;padding:4px 3px}.cal-dot span{display:none}.cal-cell-num{font-size:11px}}
+
+    /* ── PRINT SLIP ── */
+    .btn-print{color:#7C3AED;border-color:#DDD6FE;background:#F5F3FF} .btn-print:hover:not(:disabled){background:#7C3AED;color:#fff;border-color:#7C3AED}
+    @media print{
+      body > *{display:none!important}
+      #printSlip{display:block!important;position:static!important}
+    }
+    #printSlip{display:none;position:fixed;inset:0;z-index:9999;background:#fff;padding:0}
+    .slip-wrap{max-width:480px;margin:40px auto;padding:32px;font-family:'DM Sans',sans-serif}
+    .slip-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:2px solid #0066CC}
+    .slip-logo-mark{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#0066CC,#0052A3);display:flex;align-items:center;justify-content:center}
+    .slip-logo-mark svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round}
+    .slip-clinic-name{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.02em}
+    .slip-clinic-name em{font-style:normal;color:#0066CC}
+    .slip-title{font-family:'Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px;color:#0F172A}
+    .slip-id{font-size:12px;color:#94A3B8;margin-bottom:20px}
+    .slip-row{display:flex;margin-bottom:12px;gap:12px}
+    .slip-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94A3B8;width:110px;flex-shrink:0;padding-top:2px}
+    .slip-val{font-size:14px;color:#0F172A;font-weight:500}
+    .slip-status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .slip-footer{margin-top:28px;padding-top:16px;border-top:1px solid #E2E8F0;font-size:11.5px;color:#94A3B8;text-align:center}
+    .slip-close-btn{position:fixed;top:16px;right:16px;padding:8px 18px;border-radius:999px;background:#0F172A;color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;z-index:10000}
+    @media print{.slip-close-btn{display:none}}
+
+    /* ── AVAILABILITY IN SETTINGS ── */
+    .avail-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 16px}
+    .avail-day{display:flex;flex-direction:column;align-items:center;gap:5px}
+    .avail-day-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
+    .avail-day-toggle{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text-2)}
+    .avail-day-toggle.off{background:#FEF2F2;border-color:#FECACA;color:#DC2626}
+    .avail-day-toggle.on{background:#ECFDF5;border-color:#A7F3D0;color:#059669}
+    .blocked-dates-wrap{margin-top:10px}
+    .blocked-date-list{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+    .blocked-date-chip{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--r-full);background:#FEF9C3;border:1px solid #FDE68A;font-size:12px;font-weight:600;color:#854D0E}
+    .blocked-date-chip button{background:none;border:none;cursor:pointer;color:#D97706;font-size:14px;line-height:1;padding:0 0 0 2px}
+    .blocked-date-chip button:hover{color:#DC2626}
+    .avail-doc-card{background:#F8FAFC;border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+    .avail-doc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;cursor:pointer}
+    .avail-doc-av{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0}
+    .avail-doc-name{font-weight:700;font-size:14px}
+    .avail-doc-spec{font-size:12px;color:var(--text-3)}
+    .avail-doc-body{padding-top:4px}
+    .avail-collapse-icon{margin-left:auto;font-size:16px;color:var(--text-3);transition:transform .2s}
+    .avail-doc-card.collapsed .avail-doc-body{display:none}
+    .avail-doc-card.collapsed .avail-collapse-icon{transform:rotate(-90deg)}
+
   </style>
 </head>
 <body>
@@ -298,13 +386,44 @@
         <option>Paediatrics</option>
         <option>Diagnostics</option>
       </select>
+      <div class="view-toggle">
+        <button class="vt-btn active" id="viewTableBtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Table
+        </button>
+        <button class="vt-btn" id="viewCalBtn">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Calendar
+        </button>
+      </div>
+      <button class="btn-csv" id="exportCsvBtn">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
       <button class="btn-refresh" id="refreshBtn">
         <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         Refresh
       </button>
     </div>
 
-    <div class="table-card">
+    <!-- Calendar view -->
+    <div id="calendarView">
+      <div class="cal-nav">
+        <button class="btn-cal-nav" id="calPrevBtn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="cal-nav-title" id="calTitle">March 2026</div>
+        <button class="btn-cal-nav" id="calNextBtn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="cal-grid-wrap">
+        <div class="cal-header">
+          <div class="cal-day-lbl">Sun</div><div class="cal-day-lbl">Mon</div><div class="cal-day-lbl">Tue</div>
+          <div class="cal-day-lbl">Wed</div><div class="cal-day-lbl">Thu</div><div class="cal-day-lbl">Fri</div>
+          <div class="cal-day-lbl">Sat</div>
+        </div>
+        <div class="cal-body" id="calBody"></div>
+      </div>
+    </div>
+
+    <div class="table-card" id="tableView">
       <div class="table-wrap">
         <table>
           <thead>
@@ -324,7 +443,7 @@
           </tbody>
         </table>
       </div>
-    </div><!-- /table-card -->
+    </div><!-- /table-card + tableView -->
 
     </div><!-- /tab-appointments -->
 
@@ -445,7 +564,8 @@
   import {
     adminLogin, adminLogout, onAuthChange,
     getAppointments, updateAppointmentStatus, updateAppointment,
-    getClinicSettings, saveClinicSettings, getDoctorsList, saveDoctorsList
+    getClinicSettings, saveClinicSettings, getDoctorsList, saveDoctorsList,
+    getAvailability, saveAvailability
   } from './firebase-config.js';
 
   // ── State ────────────────────────────────────────────────────
@@ -453,6 +573,10 @@
   let sortCol         = 'createdAt';
   let sortDir         = 'desc';
   let editingId       = null;
+  let calYear         = new Date().getFullYear();
+  let calMonth        = new Date().getMonth();
+  let currentView     = 'table';
+  let availData       = {};
 
   // ── Elements ─────────────────────────────────────────────────
   const loginScreen    = document.getElementById('loginScreen');
@@ -499,6 +623,7 @@
       adminShell.style.display  = 'block';
       adminEmailEl.textContent  = user.email;
       loadAppointments();
+      loadAvailability();
     } else {
       loginScreen.style.display = 'flex';
       adminShell.style.display  = 'none';
@@ -610,6 +735,7 @@
         <td>${esc(a.visitType || '—')}</td>
         <td><span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span></td>
         <td><div class="action-wrap">
+          <button class="btn-act btn-print">Print</button>
           <button class="btn-act btn-edit">Edit</button>
           ${a.status === 'pending'    ? '<button class="btn-act btn-confirm"  data-status="confirmed">Confirm</button>' : ''}
           ${a.status === 'confirmed'  ? '<button class="btn-act btn-complete" data-status="completed">Complete</button>' : ''}
@@ -622,6 +748,15 @@
       btn.addEventListener('click', () => {
         const id = btn.closest('tr').dataset.id;
         changeStatus(id, btn.dataset.status, btn);
+      });
+    });
+
+    // print button listeners
+    tableBody.querySelectorAll('.btn-print').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id   = btn.closest('tr').dataset.id;
+        const appt = allAppointments.find(a => a.id === id);
+        if (appt) openPrintSlip(appt);
       });
     });
 
@@ -769,7 +904,285 @@
     toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
   }
 
-  // ── TABS ─────────────────────────────────────────────────────
+  // ── VIEW TOGGLE ──────────────────────────────────────────────
+  document.getElementById('viewTableBtn').addEventListener('click', () => {
+    currentView = 'table';
+    document.getElementById('viewTableBtn').classList.add('active');
+    document.getElementById('viewCalBtn').classList.remove('active');
+    document.getElementById('tableView').style.display = 'block';
+    document.getElementById('calendarView').style.display = 'none';
+  });
+  document.getElementById('viewCalBtn').addEventListener('click', () => {
+    currentView = 'calendar';
+    document.getElementById('viewCalBtn').classList.add('active');
+    document.getElementById('viewTableBtn').classList.remove('active');
+    document.getElementById('tableView').style.display = 'none';
+    document.getElementById('calendarView').style.display = 'block';
+    renderCalendar();
+  });
+
+  // ── CALENDAR ─────────────────────────────────────────────────
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  document.getElementById('calPrevBtn').addEventListener('click', () => {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  });
+  document.getElementById('calNextBtn').addEventListener('click', () => {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  });
+
+  function renderCalendar() {
+    document.getElementById('calTitle').textContent = `${MONTHS[calMonth]} ${calYear}`;
+    const body   = document.getElementById('calBody');
+    const today  = new Date();
+    const first  = new Date(calYear, calMonth, 1).getDay();
+    const days   = new Date(calYear, calMonth + 1, 0).getDate();
+
+    // Group appointments by date
+    const byDate = {};
+    allAppointments.forEach(a => {
+      if (!a.date) return;
+      const d = a.date.slice(0, 10);
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(a);
+    });
+
+    let cells = '';
+    // Empty cells before first day
+    for (let i = 0; i < first; i++) cells += '<div class="cal-cell empty"></div>';
+
+    for (let d = 1; d <= days; d++) {
+      const dateStr  = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const isToday  = d === today.getDate() && calMonth === today.getMonth() && calYear === today.getFullYear();
+      const appts    = byDate[dateStr] || [];
+      const MAX_SHOW = 3;
+      const shown    = appts.slice(0, MAX_SHOW);
+      const extra    = appts.length - MAX_SHOW;
+
+      const dots = shown.map(a =>
+        `<div class="cal-dot ${a.status}" onclick="calDotClick('${a.id}')">
+          <div class="cal-dot-circle"></div>
+          <span>${esc(a.name?.split(' ')[0] || '—')}</span>
+        </div>`
+      ).join('');
+
+      const moreEl = extra > 0 ? `<div class="cal-more" onclick="calMoreClick('${dateStr}')">+${extra} more</div>` : '';
+
+      cells += `<div class="cal-cell${isToday ? ' today' : ''}">
+        <div class="cal-cell-num">${d}</div>
+        ${dots}${moreEl}
+      </div>`;
+    }
+    body.innerHTML = cells;
+  }
+
+  window.calDotClick = function(id) {
+    const appt = allAppointments.find(a => a.id === id);
+    if (appt) openEditModal(appt);
+  };
+
+  window.calMoreClick = function(dateStr) {
+    // Switch to table view filtered by that date
+    currentView = 'table';
+    document.getElementById('viewTableBtn').classList.add('active');
+    document.getElementById('viewCalBtn').classList.remove('active');
+    document.getElementById('tableView').style.display = 'block';
+    document.getElementById('calendarView').style.display = 'none';
+    // Apply date as search
+    document.getElementById('searchIn').value = dateStr;
+    renderTable();
+  };
+
+  // ── CSV EXPORT ───────────────────────────────────────────────
+  document.getElementById('exportCsvBtn').addEventListener('click', () => {
+    const sf  = document.getElementById('filterStatus').value;
+    const spf = document.getElementById('filterSpecialty').value;
+    const q   = document.getElementById('searchIn').value.toLowerCase().trim();
+
+    const rows = allAppointments.filter(a => {
+      if (sf  !== 'all' && a.status    !== sf)  return false;
+      if (spf !== 'all' && a.specialty !== spf) return false;
+      if (q) { const hay = `${a.name||''} ${a.phone||''}`.toLowerCase(); if (!hay.includes(q)) return false; }
+      return true;
+    });
+
+    const headers = ['Name','Phone','Email','Specialty','Doctor','Date','Time','Visit Type','Status','Notes','Admin Notes','Submitted'];
+    const csvRows = [headers.join(',')];
+
+    rows.forEach(a => {
+      const submitted = a.createdAt?.seconds
+        ? new Date(a.createdAt.seconds * 1000).toLocaleDateString('en-IN')
+        : '';
+      const row = [
+        a.name, a.phone, a.email, a.specialty, a.doctor,
+        a.date, a.time, a.visitType, a.status,
+        a.notes, a.adminNotes, submitted
+      ].map(v => `"${String(v||'').replace(/"/g,'""')}"`);
+      csvRows.push(row.join(','));
+    });
+
+    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `auraclinic-appointments-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast(`Exported ${rows.length} appointment${rows.length !== 1 ? 's' : ''}`);
+  });
+
+  // ── PRINT SLIP ───────────────────────────────────────────────
+  function openPrintSlip(appt) {
+    const slipColors = {
+      pending:'background:#FEF9C3;color:#854D0E', confirmed:'background:#ECFDF5;color:#065F46',
+      completed:'background:#EFF6FF;color:#1E40AF', cancelled:'background:#FEF2F2;color:#991B1B'
+    };
+    document.getElementById('slipId').textContent = `Appointment ID: ${appt.id}`;
+
+    const rows = [
+      ['Patient Name', appt.name],
+      ['Phone',        `+91 ${appt.phone}`],
+      ['Email',        appt.email || '—'],
+      ['Specialty',    appt.specialty],
+      ['Doctor',       appt.doctor || 'Any available'],
+      ['Date',         formatDate(appt.date)],
+      ['Time',         appt.time || 'Any time'],
+      ['Visit Type',   appt.visitType || '—'],
+      ['Status',       `<span class="slip-status" style="${slipColors[appt.status]||''}">${cap(appt.status)}</span>`],
+      ['Notes',        appt.notes || '—'],
+    ];
+    if (appt.adminNotes) rows.push(['Admin Notes', appt.adminNotes]);
+
+    document.getElementById('slipRows').innerHTML = rows
+      .map(([l, v]) => `<div class="slip-row"><div class="slip-lbl">${esc(l)}</div><div class="slip-val">${v}</div></div>`)
+      .join('');
+
+    document.getElementById('printSlip').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  window.closePrintSlip = function() {
+    document.getElementById('printSlip').style.display = 'none';
+    document.body.style.overflow = '';
+  };
+
+  // ── AVAILABILITY ─────────────────────────────────────────────
+  const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+  async function loadAvailability() {
+    availData = await getAvailability();
+  }
+
+  function renderAvailabilitySection(doctors) {
+    return `
+      <div class="settings-card full">
+        <div class="settings-card-title">Doctor Availability</div>
+        <div class="settings-card-sub">Block days of the week or specific dates per doctor. Blocked slots prevent booking on those days.</div>
+        <div id="availDocList">
+          ${doctors.filter(d => d.active !== false).map(d => renderAvailDoc(d)).join('')}
+        </div>
+        <div style="display:flex;align-items:center;margin-top:8px">
+          <button class="btn-save-section" onclick="saveAvailabilityData()">Save Availability</button>
+          <span class="save-status" id="statusAvail">Saved</span>
+        </div>
+      </div>`;
+  }
+
+  function renderAvailDoc(d) {
+    const avail   = availData[d.id] || { offDays: [], blockedDates: [] };
+    const offDays = avail.offDays || [];
+    const blocked = avail.blockedDates || [];
+
+    const dayToggles = DAY_NAMES.map((name, i) => {
+      const isOff = offDays.includes(i);
+      return `<div class="avail-day">
+        <div class="avail-day-lbl">${name}</div>
+        <button class="avail-day-toggle ${isOff ? 'off' : 'on'}" data-doc-id="${d.id}" data-day="${i}" onclick="toggleAvailDay(this)">${isOff ? '✕' : '✓'}</button>
+      </div>`;
+    }).join('');
+
+    const chips = blocked.map(date =>
+      `<div class="blocked-date-chip">${date}<button onclick="removeBlockedDate(${d.id},'${date}')" title="Remove">×</button></div>`
+    ).join('');
+
+    return `
+      <div class="avail-doc-card" id="availDoc${d.id}">
+        <div class="avail-doc-header" onclick="toggleAvailCollapse(${d.id})">
+          <div class="avail-doc-av" style="background:linear-gradient(135deg,${esc(d.color)})">${esc(d.initials)}</div>
+          <div><div class="avail-doc-name">${esc(d.name)}</div><div class="avail-doc-spec">${esc(d.specialty)}</div></div>
+          <div class="avail-collapse-icon">▾</div>
+        </div>
+        <div class="avail-doc-body">
+          <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:8px">Weekly Off Days (click to toggle)</div>
+          <div class="avail-grid">${dayToggles}</div>
+          <div class="blocked-dates-wrap">
+            <div style="font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-3);margin-bottom:6px">Block Specific Dates</div>
+            <div class="blocked-date-list" id="blockedList${d.id}">${chips}</div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="date" class="s-in" id="blockDateInput${d.id}" style="width:auto;padding:7px 10px;font-size:13px">
+              <button class="btn-save-section" style="padding:8px 16px;font-size:12.5px" onclick="addBlockedDate(${d.id})">Add Date</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  window.toggleAvailCollapse = function(docId) {
+    document.getElementById('availDoc' + docId)?.classList.toggle('collapsed');
+  };
+
+  window.toggleAvailDay = function(btn) {
+    const docId = parseInt(btn.dataset.docId, 10);
+    const day   = parseInt(btn.dataset.day, 10);
+    if (!availData[docId]) availData[docId] = { offDays: [], blockedDates: [] };
+    const offs  = availData[docId].offDays;
+    const idx   = offs.indexOf(day);
+    if (idx === -1) { offs.push(day); btn.classList.replace('on','off'); btn.textContent = '✕'; }
+    else            { offs.splice(idx,1); btn.classList.replace('off','on'); btn.textContent = '✓'; }
+  };
+
+  window.addBlockedDate = function(docId) {
+    const input = document.getElementById('blockDateInput' + docId);
+    const date  = input.value;
+    if (!date) return;
+    if (!availData[docId]) availData[docId] = { offDays: [], blockedDates: [] };
+    if (!availData[docId].blockedDates.includes(date)) {
+      availData[docId].blockedDates.push(date);
+      availData[docId].blockedDates.sort();
+      // Re-render chips
+      const list = document.getElementById('blockedList' + docId);
+      list.innerHTML = availData[docId].blockedDates.map(d =>
+        `<div class="blocked-date-chip">${d}<button onclick="removeBlockedDate(${docId},'${d}')" title="Remove">×</button></div>`
+      ).join('');
+    }
+    input.value = '';
+  };
+
+  window.removeBlockedDate = function(docId, date) {
+    if (!availData[docId]?.blockedDates) return;
+    availData[docId].blockedDates = availData[docId].blockedDates.filter(d => d !== date);
+    const list = document.getElementById('blockedList' + docId);
+    if (list) list.innerHTML = availData[docId].blockedDates.map(d =>
+      `<div class="blocked-date-chip">${d}<button onclick="removeBlockedDate(${docId},'${d}')" title="Remove">×</button></div>`
+    ).join('');
+  };
+
+  window.saveAvailabilityData = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      await saveAvailability(availData);
+      flashSaved('statusAvail', btn);
+      showToast('Availability saved');
+    } catch(e) {
+      console.error(e); showToast('Save failed'); btn.disabled = false; btn.textContent = btn.dataset.label;
+    }
+  };
+
+    // ── TABS ─────────────────────────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -846,6 +1259,9 @@
             <span class="save-status" id="statusHours">Saved</span>
           </div>
         </div>
+
+        <!-- Availability -->
+        ${renderAvailabilitySection(doctors)}
 
         <!-- Doctors -->
         <div class="settings-card full">
@@ -978,5 +1394,23 @@
   };
 
 </script>
+
+<!-- Print Slip -->
+<div id="printSlip">
+  <button class="slip-close-btn" onclick="closePrintSlip()">Close</button>
+  <div class="slip-wrap">
+    <div class="slip-header">
+      <div class="slip-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+      <div>
+        <div class="slip-clinic-name">Aura<em>Clinic</em></div>
+        <div style="font-size:12px;color:#94A3B8">42 Wellness Avenue, Indiranagar, Bangalore</div>
+      </div>
+    </div>
+    <div class="slip-title">Appointment Slip</div>
+    <div class="slip-id" id="slipId"></div>
+    <div id="slipRows"></div>
+    <div class="slip-footer">This is a system-generated appointment slip. Please bring this when you visit.<br>Questions? Call +91 98765 43210 or WhatsApp us.</div>
+  </div>
+</div>
 </body>
 </html>

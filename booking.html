@@ -264,7 +264,14 @@
       const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
       if (chosen < today)    return 'Please select a future date.';
       if (chosen > maxDate)  return 'Appointments can only be booked up to 3 months ahead.';
-      // No Sundays (clinic open Sun 9AM-2PM but keep it simple — remove this if needed)
+      // Check doctor availability from data attributes set by site-data.js
+      const dateEl  = document.getElementById('bkDate');
+      const offDays = JSON.parse(dateEl?.dataset?.offdays || '[]');
+      const blocked = JSON.parse(dateEl?.dataset?.blocked || '[]');
+      const dayOfWk = chosen.getDay();
+      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      if (offDays.includes(dayOfWk)) return `${dayNames[dayOfWk]} is not available for this doctor.`;
+      if (blocked.includes(v))       return 'This date is not available for this doctor.';
       return null;
     },
   };

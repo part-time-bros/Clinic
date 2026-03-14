@@ -1,7 +1,7 @@
 // AuraClinic — Site Data
 // Fetches clinic settings and doctors from Firestore, updates all pages dynamically.
 
-import { getClinicSettings, getDoctorsList } from './firebase-config.js';
+import { getClinicSettings, getDoctorsList, getAvailability } from './firebase-config.js';
 
 function fmtPhone(digits) {
   const d = String(digits).replace(/\D/g, '').replace(/^91/, '');
@@ -145,12 +145,12 @@ function renderDoctorsPage(doctors) {
 
 // ── Bootstrap ─────────────────────────────────────────────────
 
-Promise.all([getClinicSettings(), getDoctorsList()])
-  .then(([settings, doctors]) => {
+Promise.all([getClinicSettings(), getDoctorsList(), getAvailability()])
+  .then(([settings, doctors, availability]) => {
     applySettings(settings);
     renderDoctorsPage(doctors);
     renderHomeDocGrid(doctors);
-    populateDoctorSelect(doctors);
+    populateDoctorSelect(doctors, availability);
   })
   .catch(console.error);
 
@@ -176,18 +176,116 @@ function renderHomeDocGrid(doctors) {
   else grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
 }
 
-// ── Booking page doctor dropdown ──────────────────────────────
+// ── Booking page doctor dropdown + availability enforcement ──────
 
-function populateDoctorSelect(doctors) {
-  const sel = document.getElementById('bkDoctorSelect');
-  if (!sel) return;
+function populateDoctorSelect(doctors, availability) {
+  const sel     = document.getElementById('bkDoctorSelect');
+  const dateIn  = document.getElementById('bkDate');
+  if (!sel || !dateIn) return;
+
   const active = doctors.filter(d => d.active !== false);
   active.forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d.name;
+    const opt   = document.createElement('option');
+    opt.value   = d.name;
     opt.textContent = d.name;
+    // Store doctor id for availability lookup
+    opt.dataset.docId = d.id;
     sel.appendChild(opt);
   });
+
+  // Set global min date to today
+  const today = new Date().toISOString().slice(0, 10);
+  dateIn.min  = today;
+
+  function applyAvailability() {
+    const selectedOpt = sel.options[sel.selectedIndex];
+    const docId       = selectedOpt ? parseInt(selectedOpt.dataset.docId, 10) : null;
+    const avail       = (docId && availability[docId]) || { offDays: [], blockedDates: [] };
+    const offDays     = avail.offDays     || [];
+    const blocked     = avail.blockedDates || [];
+
+    // Clear previous invalid state
+    dateIn.style.borderColor = '';
+    dateIn.style.boxShadow   = '';
+    const existing = dateIn.parentElement.querySelector('.avail-hint');
+    if (existing) existing.remove();
+
+    // If no specific doctor selected, just reset to today min
+    if (!docId) {
+      dateIn.min = today;
+      dateIn.removeAttribute('data-blocked');
+      dateIn.removeAttribute('data-offdays');
+      return;
+    }
+
+    // Store on the input for validation in submit handler
+    dateIn.dataset.blocked = JSON.stringify(blocked);
+    dateIn.dataset.offdays = JSON.stringify(offDays);
+
+    // Build a hint string
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const offNames = offDays.map(d => dayNames[d]);
+    const parts    = [];
+    if (offNames.length) parts.push(`Not available on ${offNames.join(', ')}`);
+    if (blocked.length)  parts.push(`${blocked.length} date(s) blocked`);
+
+    if (parts.length) {
+      const hint = document.createElement('div');
+      hint.className = 'avail-hint';
+      hint.style.cssText = 'font-size:12px;color:#D97706;margin-top:5px;display:flex;align-items:center;gap:4px';
+      hint.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${parts.join(' · ')}`;
+      dateIn.parentElement.appendChild(hint);
+    }
+
+    // Validate current date selection immediately
+    if (dateIn.value) validateDateAvailability(dateIn, offDays, blocked);
+  }
+
+  sel.addEventListener('change', applyAvailability);
+
+  // Validate on date change
+  dateIn.addEventListener('change', () => {
+    const offDays = JSON.parse(dateIn.dataset.offdays || '[]');
+    const blocked = JSON.parse(dateIn.dataset.blocked || '[]');
+    validateDateAvailability(dateIn, offDays, blocked);
+  });
+
+  // Initial apply if a doctor is pre-selected
+  applyAvailability();
+}
+
+function validateDateAvailability(dateIn, offDays, blocked) {
+  if (!dateIn.value) return true;
+  const chosen  = new Date(dateIn.value + 'T00:00:00');
+  const dayOfWk = chosen.getDay();
+  let errMsg    = null;
+
+  if (offDays.includes(dayOfWk)) {
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    errMsg = `${dayNames[dayOfWk]} is not available for this doctor.`;
+  } else if (blocked.includes(dateIn.value)) {
+    errMsg = 'This date is not available for this doctor. Please choose another.';
+  }
+
+  if (errMsg) {
+    dateIn.style.borderColor = '#DC2626';
+    dateIn.style.boxShadow   = '0 0 0 3px rgba(220,38,38,0.1)';
+    let tip = dateIn.parentElement.querySelector('.field-tip');
+    if (!tip) {
+      tip = document.createElement('div');
+      tip.className = 'field-tip';
+      tip.style.cssText = 'font-size:12px;color:#DC2626;margin-top:4px;';
+      dateIn.parentElement.appendChild(tip);
+    }
+    tip.textContent = errMsg;
+    return false;
+  } else {
+    dateIn.style.borderColor = '#059669';
+    dateIn.style.boxShadow   = '0 0 0 3px rgba(5,150,105,0.08)';
+    const tip = dateIn.parentElement.querySelector('.field-tip');
+    if (tip) tip.remove();
+    return true;
+  }
 }
 
 

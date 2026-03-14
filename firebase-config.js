@@ -150,6 +150,20 @@ export async function saveDoctorsList(list) {
   await setDoc(doc(db, 'settings', 'doctors'), { list });
 }
 
+// ── DOCTOR AVAILABILITY ───────────────────────────────────────
+// Stored as { doctorId: { offDays: [0,6], blockedDates: ['2026-03-25'] } }
+
+export async function getAvailability() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'availability'));
+    return snap.exists() ? snap.data() : {};
+  } catch { return {}; }
+}
+
+export async function saveAvailability(data) {
+  await setDoc(doc(db, 'settings', 'availability'), data, { merge: true });
+}
+
 // ─────────────────────────────────────────────────────────────
 // Firestore Security Rules — UPDATED (paste into Firebase console)
 // ─────────────────────────────────────────────────────────────
