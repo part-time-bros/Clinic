@@ -1,7 +1,7 @@
 // AuraClinic — Site Data
 // Fetches clinic settings and doctors from Firestore, updates all pages dynamically.
 
-import { getClinicSettings, getDoctorsList, getAvailability } from './firebase-config.js';
+import { getClinicSettings, getDoctorsList, getAvailability, getHeroContent, getTestimonials, getServices } from './firebase-config.js';
 
 function fmtPhone(digits) {
   const d = String(digits).replace(/\D/g, '').replace(/^91/, '');
@@ -175,14 +175,108 @@ showInfoSkeletons();
 showDocSkeletons(document.getElementById('homeDocGrid'), 3);
 showDocSkeletons(document.getElementById('doctorsContainer') ? document.querySelector('#doctorsContainer .container') : null, 3);
 
-Promise.all([getClinicSettings(), getDoctorsList(), getAvailability()])
-  .then(([settings, doctors, availability]) => {
-    applySettings(settings);
-    renderDoctorsPage(doctors);
-    renderHomeDocGrid(doctors);
-    populateDoctorSelect(doctors, availability);
-  })
-  .catch(console.error);
+Promise.all([
+  getClinicSettings(), getDoctorsList(), getAvailability(),
+  getHeroContent(), getTestimonials(), getServices()
+]).then(([settings, doctors, availability, hero, testimonials, services]) => {
+  applySettings(settings);
+  applyHeroContent(hero);
+  renderDoctorsPage(doctors);
+  renderHomeDocGrid(doctors);
+  renderServicesGrid(services);
+  renderTestimonials(testimonials);
+  populateDoctorSelect(doctors, availability);
+}).catch(console.error);
+
+
+// ── Hero content ──────────────────────────────────────────────
+
+function applyHeroContent(h) {
+  const titleEl = document.getElementById('heroTitle');
+  const subEl   = document.getElementById('heroSubtitle');
+  if (titleEl) titleEl.innerHTML = esc(h.title).replace(/,/g, ',<br>');
+  if (subEl)   subEl.textContent = h.subtitle;
+
+  // Stats — update data-count so count-up script picks it up
+  const pairs = [
+    ['stat1Num', h.stat1_num, 'stat1Lbl', h.stat1_lbl],
+    ['stat2Num', h.stat2_num, 'stat2Lbl', h.stat2_lbl],
+    ['stat3Num', h.stat3_num, 'stat3Lbl', h.stat3_lbl],
+    ['stat4Num', h.stat4_num, 'stat4Lbl', h.stat4_lbl],
+  ];
+  pairs.forEach(([numId, num, lblId, lbl]) => {
+    const numEl = document.getElementById(numId);
+    const lblEl = document.getElementById(lblId);
+    if (numEl) {
+      const isNumeric = /^\d+$/.test(String(num));
+      if (isNumeric) {
+        numEl.dataset.count = num;
+        numEl.textContent   = '0';
+      } else {
+        numEl.textContent = num;
+        delete numEl.dataset.count;
+      }
+    }
+    if (lblEl) lblEl.textContent = lbl;
+  });
+}
+
+// ── Services grid ─────────────────────────────────────────────
+
+// SVG icons keyed by lowercase service title word
+const SVC_ICONS = {
+  general:    '<path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6 6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"/><path d="M8 15v1a6 6 0 0 0 6 6h0a6 6 0 0 0 6-6v-4"/>',
+  cardiology: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+  dermatology:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3 5 5M17.7 6.3 19 5M17.7 17.7 19 19M6.3 17.7 5 19"/>',
+  dental:     '<path d="M12 5.5c-1.5-2-3.5-3-5-2-2 1.5-2 5 0 7l5 8 5-8c2-2 2-5.5 0-7-1.5-1-3.5 0-5 2z"/>',
+  paediatrics:'<circle cx="12" cy="8" r="4"/><path d="M9 13c-2.5.5-5 2-5 4v1h16v-1c0-2-2.5-3.5-5-4"/>',
+  diagnostics:'<path d="M9 3h6v8l3 9H6l3-9z"/><path d="M9 11h6"/>',
+};
+
+function getSvcIcon(title) {
+  const key = Object.keys(SVC_ICONS).find(k => title.toLowerCase().includes(k));
+  const path = key ? SVC_ICONS[key] : SVC_ICONS.general;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">${path}</svg>`;
+}
+
+function renderServicesGrid(services) {
+  const grid = document.getElementById('servicesGrid');
+  if (!grid || !services?.length) return;
+  const delays = ['rv-d1','rv-d2','rv-d3'];
+  grid.innerHTML = services.map((s, i) => `
+    <div class="card service-card reveal ${delays[i % 3]}">
+      <div class="svc-icon">${getSvcIcon(s.title)}</div>
+      <div class="svc-title">${esc(s.title)}</div>
+      <p class="svc-desc">${esc(s.desc)}</p>
+      <a href="services.html" class="svc-link">Learn more <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></a>
+    </div>`).join('');
+  if (typeof window.__acReveal === 'function') window.__acReveal();
+  else grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+}
+
+// ── Testimonials ──────────────────────────────────────────────
+
+function starsSvg(n) {
+  const star = '<svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg>';
+  return Array(Math.min(5, Math.max(1, n || 5))).fill(star).join('');
+}
+
+function renderTestimonials(testimonials) {
+  const grid = document.getElementById('testiGrid');
+  if (!grid || !testimonials?.length) return;
+  const delays = ['rv-d1','rv-d2','rv-d3'];
+  grid.innerHTML = testimonials.map((t, i) => `
+    <div class="card testi-card reveal ${delays[i % 3]}">
+      <div class="testi-stars">${starsSvg(t.stars)}</div>
+      <p class="testi-text">${esc(t.text)}</p>
+      <div class="testi-author">
+        <div class="testi-av" style="background:linear-gradient(135deg,${esc(t.color)})">${esc(t.initials)}</div>
+        <div><div class="testi-name">${esc(t.name)}</div><div class="testi-note">${esc(t.note)}</div></div>
+      </div>
+    </div>`).join('');
+  if (typeof window.__acReveal === 'function') window.__acReveal();
+  else grid.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+}
 
 // ── Homepage doctor preview grid (shows first 3 active doctors) ──
 

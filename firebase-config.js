@@ -197,6 +197,69 @@ export async function saveAvailability(data) {
   await setDoc(doc(db, 'settings', 'availability'), data, { merge: true });
 }
 
+// ── HERO CONTENT ─────────────────────────────────────────────
+
+const DEFAULT_HERO = {
+  title:       'Healthcare you can trust, close to home.',
+  subtitle:    'Expert doctors, modern diagnostics, and personalised care — all under one roof in Indiranagar, Bangalore.',
+  stat1_num:   '5000', stat1_lbl: 'Patients Treated',
+  stat2_num:   '15',   stat2_lbl: 'Years of Care',
+  stat3_num:   '12',   stat3_lbl: 'Specialist Doctors',
+  stat4_num:   '98%',  stat4_lbl: 'Patient Satisfaction',
+};
+
+export async function getHeroContent() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'hero'));
+    return snap.exists() ? { ...DEFAULT_HERO, ...snap.data() } : DEFAULT_HERO;
+  } catch { return DEFAULT_HERO; }
+}
+
+export async function saveHeroContent(data) {
+  await setDoc(doc(db, 'settings', 'hero'), data, { merge: true });
+}
+
+// ── TESTIMONIALS ─────────────────────────────────────────────
+
+const DEFAULT_TESTIMONIALS = [
+  { id:1, text:"Dr. Raghavan spent a full 20 minutes explaining my diagnosis and treatment plan. I never felt rushed. The clinic is spotlessly clean and the staff are genuinely warm.", name:'Rohit Sharma', note:'Patient since 2021', initials:'RS', color:'#0066CC,#0052A3', stars:5 },
+  { id:2, text:"Got my ECG, blood work, and cardiologist review all in one visit. The WhatsApp report arrived that evening. Incredibly convenient for working professionals.", name:'Ananya Nair', note:'Patient since 2022', initials:'AN', color:'#00957A,#007A63', stars:5 },
+  { id:3, text:"Brought my 4-year-old for a vaccination and she did not cry once. The paediatric team has a real gift with children. This is our family clinic for life.", name:'Divya Menon', note:'Patient since 2023', initials:'DM', color:'#7C3AED,#6D28D9', stars:5 },
+];
+
+export async function getTestimonials() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'testimonials'));
+    return snap.exists() ? snap.data().list : DEFAULT_TESTIMONIALS;
+  } catch { return DEFAULT_TESTIMONIALS; }
+}
+
+export async function saveTestimonials(list) {
+  await setDoc(doc(db, 'settings', 'testimonials'), { list });
+}
+
+// ── SERVICES ─────────────────────────────────────────────────
+
+const DEFAULT_SERVICES = [
+  { id:1, title:'General Medicine',    desc:'Comprehensive diagnosis and treatment for acute and chronic conditions. Preventive health checks and wellness programmes.' },
+  { id:2, title:'Cardiology',          desc:'Advanced cardiac diagnostics including ECG, Echo, and Holter monitoring. Management of hypertension and heart disease.' },
+  { id:3, title:'Dermatology',         desc:'Diagnosis and treatment of skin, hair, and nail conditions. Acne, eczema, psoriasis, and cosmetic dermatology.' },
+  { id:4, title:'Dental Care',         desc:'Complete dental services from routine cleaning and fillings to root canals, braces, and cosmetic corrections.' },
+  { id:5, title:'Paediatrics',         desc:'Dedicated child healthcare from newborn through adolescence. Vaccinations, growth monitoring, and developmental assessments.' },
+  { id:6, title:'Diagnostics and Lab', desc:'In-house pathology lab, digital X-ray, ultrasound, and ECG. Same-day reports for most tests with WhatsApp delivery.' },
+];
+
+export async function getServices() {
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'services'));
+    return snap.exists() ? snap.data().list : DEFAULT_SERVICES;
+  } catch { return DEFAULT_SERVICES; }
+}
+
+export async function saveServices(list) {
+  await setDoc(doc(db, 'settings', 'services'), { list });
+}
+
 // ─────────────────────────────────────────────────────────────
 // Firestore Security Rules — UPDATED (paste into Firebase console)
 // ─────────────────────────────────────────────────────────────

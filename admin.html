@@ -68,7 +68,7 @@
     .admin-main{max-width:1280px;margin:0 auto;padding:32px 28px}
 
     /* stats */
-    .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+    .stats-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px}
     .stat-chip{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px 22px;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .2s var(--spring)}
     .stat-chip:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
     .stat-chip-num{font-family:'Plus Jakarta Sans',sans-serif;font-size:30px;font-weight:800;line-height:1;margin-bottom:5px}
@@ -114,12 +114,14 @@
     .badge.confirmed{background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0} .badge.confirmed .badge-dot{background:#059669}
     .badge.completed{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE} .badge.completed .badge-dot{background:#3B82F6}
     .badge.cancelled{background:#FEF2F2;color:#991B1B;border:1px solid #FECACA} .badge.cancelled .badge-dot{background:#DC2626}
+    .badge.missed{background:#F1F5F9;color:#475569;border:1px solid #CBD5E1} .badge.missed .badge-dot{background:#94A3B8}
 
     /* action buttons */
     .action-wrap{display:flex;gap:6px;flex-wrap:wrap}
     .btn-act{padding:5px 12px;border-radius:var(--r-full);font-size:12px;font-weight:600;border:1.5px solid;cursor:pointer;transition:all .18s;white-space:nowrap}
     .btn-act:disabled{opacity:.4;cursor:not-allowed}
     .btn-confirm {color:#059669;border-color:#A7F3D0;background:#ECFDF5} .btn-confirm:hover:not(:disabled){background:#059669;color:#fff;border-color:#059669}
+    .btn-attended{color:#0066CC;border-color:#BFDBFE;background:#EFF6FF} .btn-attended:hover:not(:disabled){background:#0066CC;color:#fff;border-color:#0066CC}
     .btn-complete{color:#3B82F6;border-color:#BFDBFE;background:#EFF6FF} .btn-complete:hover:not(:disabled){background:#3B82F6;color:#fff;border-color:#3B82F6}
     .btn-cancel  {color:#DC2626;border-color:#FECACA;background:#FEF2F2} .btn-cancel:hover:not(:disabled){background:#DC2626;color:#fff;border-color:#DC2626}
     .btn-edit    {color:var(--blue);border-color:var(--border-blue);background:#EFF6FF} .btn-edit:hover:not(:disabled){background:var(--blue);color:#fff;border-color:var(--blue)}
@@ -172,7 +174,7 @@
     .result-count{font-size:13px;color:var(--text-3);margin-left:8px;font-weight:400}
 
     @media(max-width:900px){
-      .stats-strip{grid-template-columns:1fr 1fr}
+      .stats-strip{grid-template-columns:1fr 1fr 1fr}
       .admin-main{padding:20px 16px}
       .admin-nav{padding:0 16px}
       .admin-email{display:none}
@@ -413,7 +415,8 @@
   <main class="admin-main">
     <!-- Tab bar -->
     <div class="tab-bar">
-      <button class="tab-btn active" data-tab="appointments">Appointments</button>
+      <button class="tab-btn active" data-tab="appointments">Appointments <span id="pendingBadge" style="display:none;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px"></span></button>
+      <button class="tab-btn" data-tab="history">Patient History</button>
       <button class="tab-btn" data-tab="audit">Audit Log</button>
       <button class="tab-btn" data-tab="settings">Clinic Settings</button>
     </div>
@@ -424,6 +427,7 @@
       <div class="stat-chip"><div class="stat-chip-num" id="statPending" style="color:#D97706">—</div><div class="stat-chip-lbl">Pending</div></div>
       <div class="stat-chip"><div class="stat-chip-num" id="statConfirmed" style="color:#059669">—</div><div class="stat-chip-lbl">Confirmed</div></div>
       <div class="stat-chip"><div class="stat-chip-num" id="statCompleted" style="color:#3B82F6">—</div><div class="stat-chip-lbl">Completed</div></div>
+      <div class="stat-chip"><div class="stat-chip-num" id="statMissed"    style="color:#94A3B8">—</div><div class="stat-chip-lbl">Missed</div></div>
     </div>
 
     <div class="toolbar">
@@ -438,6 +442,7 @@
         <option value="confirmed">Confirmed</option>
         <option value="completed">Completed</option>
         <option value="cancelled">Cancelled</option>
+        <option value="missed">Missed</option>
       </select>
       <select class="filter-select" id="filterSpecialty">
         <option value="all">All Specialties</option>
@@ -521,6 +526,26 @@
     </div>
 
     </div><!-- /tab-appointments -->
+
+    <!-- PATIENT HISTORY TAB -->
+    <div class="tab-pane" id="tab-history">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;flex:1">Patient History</div>
+      </div>
+      <div class="table-card" style="margin-bottom:20px">
+        <div style="padding:20px 22px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <div class="search-wrap" style="flex:1;min-width:200px">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="search" class="search-in" id="historySearchIn" placeholder="Enter phone number or name..." style="width:100%">
+          </div>
+          <button class="btn-refresh" id="historySearchBtn">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            Search
+          </button>
+        </div>
+      </div>
+      <div id="historyResults"></div>
+    </div>
 
     <!-- AUDIT LOG TAB -->
     <div class="tab-pane" id="tab-audit">
@@ -645,6 +670,7 @@
             <option value="confirmed">Confirmed</option>
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
+            <option value="missed">Missed</option>
           </select>
         </div>
         <div class="f-group full">
@@ -673,7 +699,10 @@
     updateAppointmentStatus, updateAppointment,
     getClinicSettings, saveClinicSettings, getDoctorsList, saveDoctorsList,
     getAvailability, saveAvailability,
-    writeAuditLog, subscribeToAuditLog
+    writeAuditLog, subscribeToAuditLog,
+    getHeroContent, saveHeroContent,
+    getTestimonials, saveTestimonials,
+    getServices, saveServices
   } from './firebase-config.js';
 
   // ── State ────────────────────────────────────────────────────
@@ -690,6 +719,9 @@
   let unsubAppointments = null;
   let unsubAuditLog    = null;
   let currentAdminEmail = '';
+  let currentHero         = {};
+  let currentTestimonials = [];
+  let currentServices     = [];
 
   // ── Elements ─────────────────────────────────────────────────
   const loginScreen    = document.getElementById('loginScreen');
@@ -769,13 +801,41 @@
   function startRealtimeListener() {
     if (unsubAppointments) unsubAppointments(); // clean up previous
     tableBody.innerHTML = '<tr class="loading-row"><td colspan="8">Connecting...</td></tr>';
-    unsubAppointments = subscribeToAppointments(data => {
+    unsubAppointments = subscribeToAppointments(async data => {
+      // Auto-flag missed appointments before rendering
+      await autoMarkMissed(data);
       allAppointments = data;
       updateStats();
       renderTable();
       if (currentView === 'calendar') renderCalendar();
       refreshBtn.classList.remove('spinning');
     });
+  }
+
+  // Automatically mark confirmed appointments as missed if their date has passed
+  async function autoMarkMissed(appointments) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const toMiss = appointments.filter(a => {
+      if (a.status !== 'confirmed') return false;
+      if (!a.date) return false;
+      const apptDate = new Date(a.date + 'T00:00:00');
+      return apptDate < today;
+    });
+    if (!toMiss.length) return;
+    // Update Firestore and local state in parallel
+    await Promise.all(toMiss.map(async a => {
+      try {
+        await updateAppointmentStatus(a.id, 'missed');
+        a.status = 'missed';
+        writeAuditLog({
+          action:        'auto',
+          description:   `Auto-marked as Missed: ${a.name}'s appointment on ${a.date}`,
+          appointmentId: a.id,
+          adminEmail:    'system',
+        }).catch(()=>{});
+      } catch(e) { console.error('Auto-miss failed for', a.id, e); }
+    }));
   }
 
   // Manual refresh re-subscribes (forces reconnect)
@@ -794,6 +854,16 @@
     document.getElementById('statPending').textContent   = c('pending');
     document.getElementById('statConfirmed').textContent = c('confirmed');
     document.getElementById('statCompleted').textContent = c('completed');
+    document.getElementById('statMissed').textContent    = c('missed');
+    // Browser tab badge
+    const pending = c('pending');
+    document.title = pending > 0 ? `(${pending}) Admin — AuraClinic` : 'Admin — AuraClinic';
+    // Tab button badge
+    const badge = document.getElementById('pendingBadge');
+    if (badge) {
+      badge.textContent    = pending;
+      badge.style.display  = pending > 0 ? 'inline' : 'none';
+    }
   }
 
   // ── Sort ──────────────────────────────────────────────────────
@@ -870,8 +940,9 @@
         <td><div class="action-wrap">
           <button class="btn-act btn-print">Print</button>
           <button class="btn-act btn-edit">Edit</button>
-          ${a.status === 'pending'    ? '<button class=\"btn-act btn-confirm\"  data-status=\"confirmed\">Confirm</button>' : ''}
-          ${a.status === 'confirmed'  ? '<button class=\"btn-act btn-complete\" data-status=\"completed\">Complete</button>' : ''}
+          ${a.status === 'pending'   ? '<button class=\"btn-act btn-confirm\"   data-status=\"confirmed\">Confirm</button>' : ''}
+          ${a.status === 'confirmed' ? '<button class=\"btn-act btn-complete\"  data-status=\"completed\">Mark Attended</button>' : ''}
+          ${a.status === 'missed'    ? '<button class=\"btn-act btn-attended\"  data-status=\"completed\">Mark Attended</button>' : ''}
           ${a.status !== 'cancelled' && a.status !== 'completed' ? '<button class=\"btn-act btn-cancel\" data-status=\"cancelled\">Cancel</button>' : ''}
         </div></td>
       </tr>`).join('');
@@ -1482,8 +1553,9 @@
         <div class="m-card-actions">
           <button class="btn-act btn-print" data-id="${a.id}">Print</button>
           <button class="btn-act btn-edit" data-id="${a.id}">Edit</button>
-          ${a.status==='pending'   ? `<button class="btn-act btn-confirm"  data-id="${a.id}" data-status="confirmed">Confirm</button>` : ''}
-          ${a.status==='confirmed' ? `<button class="btn-act btn-complete" data-id="${a.id}" data-status="completed">Complete</button>` : ''}
+          ${a.status==='pending'   ? `<button class="btn-act btn-confirm"   data-id="${a.id}" data-status="confirmed">Confirm</button>` : ''}
+          ${a.status==='confirmed' ? `<button class="btn-act btn-complete"  data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
+          ${a.status==='missed'    ? `<button class="btn-act btn-attended"  data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
           ${a.status!=='cancelled'&&a.status!=='completed' ? `<button class="btn-act btn-cancel" data-id="${a.id}" data-status="cancelled">Cancel</button>` : ''}
         </div>
       </div>`).join('');
@@ -1501,7 +1573,146 @@
   }
 
 
-    // ── TABS ─────────────────────────────────────────────────────
+    // ── PATIENT HISTORY ──────────────────────────────────────────
+  function initPatientHistory() {
+    document.getElementById('historySearchBtn').onclick = runHistorySearch;
+    document.getElementById('historySearchIn').onkeydown = e => { if (e.key === 'Enter') runHistorySearch(); };
+  }
+
+  function runHistorySearch() {
+    const q       = document.getElementById('historySearchIn').value.trim().toLowerCase();
+    const results = document.getElementById('historyResults');
+    if (!q) { results.innerHTML = ''; return; }
+
+    const matched = allAppointments.filter(a => {
+      const phone = (a.phone || '').replace(/\D/g,'');
+      const qdig  = q.replace(/\D/g,'');
+      return (a.name || '').toLowerCase().includes(q) ||
+             (qdig && phone.includes(qdig));
+    });
+
+    // Group by phone number
+    const grouped = {};
+    matched.forEach(a => {
+      const key = a.phone || 'unknown';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(a);
+    });
+
+    if (!Object.keys(grouped).length) {
+      results.innerHTML = '<div class="table-card"><div style="padding:40px;text-align:center;color:var(--text-3)">No records found.</div></div>';
+      return;
+    }
+
+    results.innerHTML = Object.entries(grouped).map(([phone, appts]) => {
+      const latest   = appts[0];
+      const total    = appts.length;
+      const statCounts = {};
+      appts.forEach(a => { statCounts[a.status] = (statCounts[a.status]||0)+1; });
+      const rows = appts.map(a => `
+        <tr>
+          <td class="td-date">${formatDate(a.date)}</td>
+          <td>${esc(a.specialty||'—')}</td>
+          <td>${esc(a.doctor||'Any')}</td>
+          <td><span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span></td>
+          <td>${esc(a.notes||'—')}</td>
+        </tr>`).join('');
+      return `
+        <div class="table-card" style="margin-bottom:16px">
+          <div style="padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px">${esc(latest.name||'—')}</div>
+              <div style="font-size:13px;color:var(--text-2);margin-top:3px">
+                <a href="tel:+91${esc(phone)}" style="color:var(--blue);font-weight:500">+91 ${esc(phone)}</a>
+                ${latest.email ? ` · <a href="mailto:${esc(latest.email)}" style="color:var(--text-2)">${esc(latest.email)}</a>` : ''}
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <span style="background:#F1F5F9;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">${total} visit${total!==1?'s':''}</span>
+              ${Object.entries(statCounts).map(([s,c]) => `<span class="badge ${s}"><span class="badge-dot"></span>${c} ${cap(s)}</span>`).join('')}
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Specialty</th><th>Doctor</th><th>Status</th><th>Notes</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+
+  window.saveHeroData = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const data = {
+      title:     document.getElementById('sHeroTitle').value.trim(),
+      subtitle:  document.getElementById('sHeroSub').value.trim(),
+      stat1_num: document.getElementById('sStat1Num').value.trim(),
+      stat1_lbl: document.getElementById('sStat1Lbl').value.trim(),
+      stat2_num: document.getElementById('sStat2Num').value.trim(),
+      stat2_lbl: document.getElementById('sStat2Lbl').value.trim(),
+      stat3_num: document.getElementById('sStat3Num').value.trim(),
+      stat3_lbl: document.getElementById('sStat3Lbl').value.trim(),
+      stat4_num: document.getElementById('sStat4Num').value.trim(),
+      stat4_lbl: document.getElementById('sStat4Lbl').value.trim(),
+    };
+    try {
+      await saveHeroContent(data);
+      currentHero = data;
+      writeAuditLog({ action:'settings', description:'Updated homepage hero content', adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusHero', btn); showToast('Hero content saved');
+    } catch(e) { showToast('Save failed: '+(e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  window.saveServicesData = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const rows = document.querySelectorAll('[data-svc-idx]');
+    const updated = Array.from(rows).map((row, i) => ({
+      id:    currentServices[i]?.id || i+1,
+      title: row.querySelector('[data-svc-field="title"]')?.value?.trim() || '',
+      desc:  row.querySelector('[data-svc-field="desc"]')?.value?.trim()  || '',
+    }));
+    try {
+      await saveServices(updated);
+      currentServices = updated;
+      writeAuditLog({ action:'settings', description:'Updated services list', adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusServices', btn); showToast('Services saved');
+    } catch(e) { showToast('Save failed: '+(e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  window.addTesti = function() {
+    currentTestimonials.push({ id:Date.now(), text:'', name:'', note:'', initials:'PT', color:'#0066CC,#0052A3', stars:5 });
+    settingsLoaded = false; initSettings();
+  };
+  window.deleteTesti = function(i) {
+    if (!confirm('Remove this testimonial?')) return;
+    currentTestimonials.splice(i,1);
+    settingsLoaded = false; initSettings();
+  };
+  window.saveTestimonialsData = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const rows = document.querySelectorAll('[data-testi-idx]');
+    const updated = Array.from(rows).map((row, i) => ({
+      id:       currentTestimonials[i]?.id || i+1,
+      text:     row.querySelector('[data-testi-field="text"]')?.value?.trim()     || '',
+      name:     row.querySelector('[data-testi-field="name"]')?.value?.trim()     || '',
+      note:     row.querySelector('[data-testi-field="note"]')?.value?.trim()     || '',
+      initials: row.querySelector('[data-testi-field="initials"]')?.value?.trim() || 'PT',
+      color:    row.querySelector('[data-testi-field="color"]')?.value?.trim()    || '#0066CC,#0052A3',
+      stars:    parseInt(row.querySelector('[data-testi-field="stars"]')?.value)  || 5,
+    }));
+    try {
+      await saveTestimonials(updated);
+      currentTestimonials = updated;
+      writeAuditLog({ action:'settings', description:`Updated testimonials (${updated.length})`, adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusTestimonials', btn); showToast('Testimonials saved');
+    } catch(e) { showToast('Save failed: '+(e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
+  // ── TABS ─────────────────────────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1510,6 +1721,7 @@
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
       if (btn.dataset.tab === 'settings') initSettings();
       if (btn.dataset.tab === 'audit')    initAuditLog();
+      if (btn.dataset.tab === 'history')  initPatientHistory();
     });
   });
 
@@ -1524,13 +1736,22 @@
     const pane = document.getElementById('tab-settings');
     pane.innerHTML = '<p style="padding:32px;color:var(--text-3)">Loading settings...</p>';
 
-    const [s, doctors] = await Promise.all([getClinicSettings(), getDoctorsList()]);
-    currentSettings = s;
-    currentDoctors  = doctors;
+    const [s, doctors, hero, testimonials, services] = await Promise.all([
+      getClinicSettings(), getDoctorsList(),
+      getHeroContent(), getTestimonials(), getServices()
+    ]);
+    currentSettings     = s;
+    currentDoctors      = doctors;
+    currentHero         = hero;
+    currentTestimonials = testimonials;
+    currentServices     = services;
     renderSettings(s, doctors);
   }
 
   function renderSettings(s, doctors) {
+    const hero         = currentHero;
+    const testimonials = currentTestimonials;
+    const services     = currentServices;
     const pane = document.getElementById('tab-settings');
     pane.innerHTML = `
       <div class="settings-grid">
@@ -1582,6 +1803,77 @@
 
         <!-- Availability -->
         ${renderAvailabilitySection(doctors)}
+
+        <!-- Hero Content -->
+        <div class="settings-card full">
+          <div class="settings-card-title">Homepage Hero</div>
+          <div class="settings-card-sub">Main headline, subtitle and stat numbers shown in the hero section.</div>
+          <div class="modal-grid">
+            <div class="s-group full"><label class="s-lbl">Main Headline</label><input class="s-in" id="sHeroTitle" value="${esc(hero.title)}" placeholder="Healthcare you can trust..."></div>
+            <div class="s-group full"><label class="s-lbl">Subtitle</label><textarea class="s-in" id="sHeroSub" rows="2">${esc(hero.subtitle)}</textarea></div>
+            <div class="s-group"><label class="s-lbl">Stat 1 Number</label><input class="s-in" id="sStat1Num" value="${esc(hero.stat1_num)}" placeholder="5000"></div>
+            <div class="s-group"><label class="s-lbl">Stat 1 Label</label><input class="s-in" id="sStat1Lbl" value="${esc(hero.stat1_lbl)}" placeholder="Patients Treated"></div>
+            <div class="s-group"><label class="s-lbl">Stat 2 Number</label><input class="s-in" id="sStat2Num" value="${esc(hero.stat2_num)}" placeholder="15"></div>
+            <div class="s-group"><label class="s-lbl">Stat 2 Label</label><input class="s-in" id="sStat2Lbl" value="${esc(hero.stat2_lbl)}" placeholder="Years of Care"></div>
+            <div class="s-group"><label class="s-lbl">Stat 3 Number</label><input class="s-in" id="sStat3Num" value="${esc(hero.stat3_num)}" placeholder="12"></div>
+            <div class="s-group"><label class="s-lbl">Stat 3 Label</label><input class="s-in" id="sStat3Lbl" value="${esc(hero.stat3_lbl)}" placeholder="Specialist Doctors"></div>
+            <div class="s-group"><label class="s-lbl">Stat 4 Number</label><input class="s-in" id="sStat4Num" value="${esc(hero.stat4_num)}" placeholder="98%"></div>
+            <div class="s-group"><label class="s-lbl">Stat 4 Label</label><input class="s-in" id="sStat4Lbl" value="${esc(hero.stat4_lbl)}" placeholder="Patient Satisfaction"></div>
+          </div>
+          <div style="display:flex;align-items:center;margin-top:8px">
+            <button class="btn-save-section" onclick="saveHeroData()">Save Hero Content</button>
+            <span class="save-status" id="statusHero">Saved</span>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div class="settings-card full">
+          <div class="settings-card-title">Services</div>
+          <div class="settings-card-sub">Service names and descriptions shown on the homepage and services page.</div>
+          <div id="servicesList">
+            ${services.map((s,i) => '<div class="doc-row" data-svc-idx="'+i+'" style="margin-bottom:10px">' +
+              '<div class="doc-av-sm" style="background:linear-gradient(135deg,#0066CC,#0052A3);font-size:9px;font-weight:800;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:9px;width:36px;height:36px;flex-shrink:0">'+(i+1)+'</div>' +
+              '<div class="doc-row-inputs">' +
+              '<input class="s-in-sm" placeholder="Service title" value="'+esc(s.title)+'" data-svc-field="title">' +
+              '<textarea class="s-in-sm" placeholder="Description" rows="2" data-svc-field="desc">'+esc(s.desc)+'</textarea>' +
+              '</div></div>').join('')}
+          </div>
+          <div style="display:flex;align-items:center;margin-top:8px">
+            <button class="btn-save-section" onclick="saveServicesData()">Save Services</button>
+            <span class="save-status" id="statusServices">Saved</span>
+          </div>
+        </div>
+
+        <!-- Testimonials -->
+        <div class="settings-card full">
+          <div class="settings-card-title">Testimonials</div>
+          <div class="settings-card-sub">Patient reviews shown on the homepage.</div>
+          <div class="doc-list" id="testimonialsList">
+            ${testimonials.map((t,i) => 
+              '<div class="doc-row" data-testi-idx="'+i+'">' +
+              '<div class="doc-av-sm" style="background:linear-gradient(135deg,'+esc(t.color)+')">'+esc(t.initials)+'</div>' +
+              '<div class="doc-row-inputs">' +
+                '<input class="s-in-sm" placeholder="Patient name" value="'+esc(t.name)+'" data-testi-field="name">' +
+                '<input class="s-in-sm" placeholder="e.g. Patient since 2021" value="'+esc(t.note)+'" data-testi-field="note">' +
+                '<input class="s-in-sm" placeholder="Initials" value="'+esc(t.initials)+'" maxlength="3" data-testi-field="initials" style="width:80px">' +
+                '<input class="s-in-sm" placeholder="Avatar colours" value="'+esc(t.color)+'" data-testi-field="color">' +
+              '</div>' +
+              '<div class="doc-row-inputs">' +
+                '<textarea class="s-in-sm" placeholder="Review text" rows="3" data-testi-field="text">'+esc(t.text)+'</textarea>' +
+                '<input class="s-in-sm" type="number" min="1" max="5" placeholder="Stars (1-5)" value="'+(t.stars||5)+'" data-testi-field="stars">' +
+              '</div>' +
+              '<button class="btn-doc-del" onclick="deleteTesti('+i+')">Remove</button>' +
+              '</div>'
+            ).join('')}
+          </div>          <button class="btn-add-doc" onclick="addTesti()" style="margin-top:8px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Testimonial
+          </button>
+          <div style="display:flex;align-items:center;margin-top:12px">
+            <button class="btn-save-section" onclick="saveTestimonialsData()">Save Testimonials</button>
+            <span class="save-status" id="statusTestimonials">Saved</span>
+          </div>
+        </div>
 
         <!-- Doctors -->
         <div class="settings-card full">
