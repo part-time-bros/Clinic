@@ -929,10 +929,10 @@
       // Audit log
       writeAuditLog({
         action:      'status_change',
-        description: `Changed status of ${name}'s appointment from ${cap(oldStatus)} → ${cap(status)}`,
+        description: `Changed status of ${name}'s appointment from ${cap(oldStatus)} to ${cap(status)}`,
         appointmentId: id,
         adminEmail:  currentAdminEmail,
-      }).catch(console.error);
+      }).catch(e => showToast('Audit write failed: ' + (e?.message||e)));
 
       showToast(`Marked as ${cap(status)}`);
     } catch (err) {
@@ -1037,7 +1037,7 @@
         description:   `Edited appointment for ${updated.name}`,
         appointmentId: editingId,
         adminEmail:    currentAdminEmail,
-      }).catch(console.error);
+      }).catch(e => showToast('Audit write failed: ' + (e?.message||e)));
       closeModal();
       showToast('Appointment updated');
     } catch (err) {
@@ -1676,8 +1676,13 @@
       whatsapp: document.getElementById('sWhatsapp').value.trim().replace(/\D/g,''),
       email:    document.getElementById('sEmail').value.trim(),
     };
-    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusContact', btn); showToast('Contact info saved'); }
-    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+    try {
+      await saveClinicSettings(data);
+      currentSettings={...currentSettings,...data};
+      writeAuditLog({ action:'settings', description:'Updated contact info (phone/WhatsApp/email)', adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusContact', btn); showToast('Contact info saved');
+    }
+    catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
 
   window.saveAddress = async function() {
@@ -1689,8 +1694,13 @@
       addressNote:  document.getElementById('sAddrNote').value.trim(),
       mapEmbed:     document.getElementById('sMapEmbed').value.trim(),
     };
-    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusAddress', btn); showToast('Address saved'); }
-    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+    try {
+      await saveClinicSettings(data);
+      currentSettings={...currentSettings,...data};
+      writeAuditLog({ action:'settings', description:'Updated address / map', adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusAddress', btn); showToast('Address saved');
+    }
+    catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
 
   window.saveHours = async function() {
@@ -1702,15 +1712,25 @@
       hoursFooter:  document.getElementById('sHrsFooter').value.trim(),
       hoursCall:    document.getElementById('sHrsCall').value.trim(),
     };
-    try { await saveClinicSettings(data); currentSettings={...currentSettings,...data}; flashSaved('statusHours', btn); showToast('Hours saved'); }
-    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+    try {
+      await saveClinicSettings(data);
+      currentSettings={...currentSettings,...data};
+      writeAuditLog({ action:'settings', description:'Updated business hours', adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusHours', btn); showToast('Hours saved');
+    }
+    catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
 
   window.saveDoctors = async function() {
     const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
     const updated = collectDoctorsFromDOM();
-    try { await saveDoctorsList(updated); currentDoctors=updated; flashSaved('statusDoctors', btn); showToast('Doctors saved'); }
-    catch(e) { console.error(e); showToast('Save failed'); btn.disabled=false; btn.textContent=btn.dataset.label; }
+    try {
+      await saveDoctorsList(updated);
+      currentDoctors=updated;
+      writeAuditLog({ action:'settings', description:`Updated doctor profiles (${updated.length} doctors)`, adminEmail:currentAdminEmail }).catch(()=>{});
+      flashSaved('statusDoctors', btn); showToast('Doctors saved');
+    }
+    catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
 
 </script>
