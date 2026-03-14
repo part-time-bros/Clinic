@@ -107,9 +107,13 @@ export async function writeAuditLog(entry) {
 }
 
 export function subscribeToAuditLog(callback) {
-  const q = query(collection(db, 'auditLog'), orderBy('timestamp', 'desc'));
-  return onSnapshot(q, snap => {
-    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  // No orderBy — avoids requiring a Firestore composite index on a new collection.
+  // Sorting is done client-side in renderAuditLog.
+  return onSnapshot(collection(db, 'auditLog'), snap => {
+    const data = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.timestamp?.seconds ?? 0) - (a.timestamp?.seconds ?? 0));
+    callback(data);
   }, err => console.error('Audit log listener error:', err));
 }
 
