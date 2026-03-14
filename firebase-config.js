@@ -3,7 +3,7 @@
 import { initializeApp }                                from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs,
          doc, updateDoc, setDoc, getDoc,
-         query, orderBy, serverTimestamp }              from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
+         query, orderBy, serverTimestamp, onSnapshot }  from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
 import { getAuth, signInWithEmailAndPassword, signOut,
          onAuthStateChanged, setPersistence,
          browserSessionPersistence }                    from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js';
@@ -85,6 +85,32 @@ export async function getAppointments() {
   const q    = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'));
   const snap = await getDocs(q);
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// Real-time listener — calls callback whenever appointments change
+// Returns an unsubscribe function
+export function subscribeToAppointments(callback) {
+  const q = query(collection(db, 'appointments'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, snap => {
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(data);
+  }, err => console.error('Realtime listener error:', err));
+}
+
+// ── AUDIT LOG ────────────────────────────────────────────────
+
+export async function writeAuditLog(entry) {
+  await addDoc(collection(db, 'auditLog'), {
+    ...entry,
+    timestamp: serverTimestamp(),
+  });
+}
+
+export function subscribeToAuditLog(callback) {
+  const q = query(collection(db, 'auditLog'), orderBy('timestamp', 'desc'));
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  }, err => console.error('Audit log listener error:', err));
 }
 
 export async function updateAppointmentStatus(id, status) {
@@ -185,6 +211,10 @@ export async function saveAvailability(data) {
 //     match /settings/{document} {
 //       allow read: if true;
 //       allow write: if request.auth != null;
+//     }
+//     match /auditLog/{entry} {
+//       allow create, read: if request.auth != null;
+//       allow update, delete: if false;
 //     }
 //   }
 // }

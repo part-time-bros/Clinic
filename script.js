@@ -39,12 +39,19 @@
   } else {
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
   }
+  // Observe rv-stagger containers
+  const staggerObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
+  document.querySelectorAll('.rv-stagger').forEach(el => staggerObs.observe(el));
+
   // Exposed so site-data.js can re-observe dynamically injected cards
   window.__acReveal = function() {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
       if (revealObs) revealObs.observe(el);
       else el.classList.add('visible');
     });
+    document.querySelectorAll('.rv-stagger:not(.visible)').forEach(el => staggerObs.observe(el));
   };
 
   /* Count-up for stat numbers */
@@ -96,3 +103,22 @@
   document.querySelectorAll('input[type="date"]').forEach(el => { el.min = today; });
 
 })();
+
+  /* ── Page transition overlay ── */
+  const overlay = document.createElement('div');
+  overlay.className = 'page-transition-overlay';
+  document.body.appendChild(overlay);
+
+  document.querySelectorAll('a[href]').forEach(link => {
+    const href = link.getAttribute('href');
+    // Only internal same-site .html links, not anchors or external
+    if (!href || href.startsWith('#') || href.startsWith('http') ||
+        href.startsWith('tel:') || href.startsWith('mailto:') ||
+        href.startsWith('https://wa') || link.target === '_blank') return;
+
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      overlay.classList.add('active');
+      setTimeout(() => { window.location.href = href; }, 200);
+    });
+  });

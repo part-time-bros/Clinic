@@ -143,7 +143,37 @@ function renderDoctorsPage(doctors) {
   }
 }
 
+// ── Skeleton loaders ─────────────────────────────────────────
+
+function showDocSkeletons(container, count = 3) {
+  if (!container) return;
+  container.innerHTML = Array(count).fill(0).map(() => `
+    <div class="doc-skeleton">
+      <div class="skeleton doc-skeleton-av"></div>
+      <div class="skeleton doc-skeleton-name"></div>
+      <div class="skeleton doc-skeleton-spec"></div>
+      <div class="skeleton doc-skeleton-qual"></div>
+      <div class="skeleton doc-skeleton-bio"></div>
+    </div>`).join('');
+}
+
+function showInfoSkeletons() {
+  // Replace data-site text elements with skeleton bars while loading
+  document.querySelectorAll('[data-site]').forEach(el => {
+    const key = el.dataset.site;
+    if (['phone-text','email-text','address-full','address-line1','address-line2','hours-footer','hours-call'].includes(key)) {
+      const w = key.includes('address') ? 180 : key.includes('hours') ? 140 : 110;
+      el.innerHTML = `<span class="skeleton info-skeleton" style="width:${w}px"></span>`;
+    }
+  });
+}
+
 // ── Bootstrap ─────────────────────────────────────────────────
+
+// Show skeletons immediately before Firestore responds
+showInfoSkeletons();
+showDocSkeletons(document.getElementById('homeDocGrid'), 3);
+showDocSkeletons(document.getElementById('doctorsContainer') ? document.querySelector('#doctorsContainer .container') : null, 3);
 
 Promise.all([getClinicSettings(), getDoctorsList(), getAvailability()])
   .then(([settings, doctors, availability]) => {

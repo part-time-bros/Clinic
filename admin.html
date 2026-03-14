@@ -313,6 +313,67 @@
     .avail-doc-card.collapsed .avail-doc-body{display:none}
     .avail-doc-card.collapsed .avail-collapse-icon{transform:rotate(-90deg)}
 
+  
+    /* ── PAGINATION ── */
+    .pagination{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-top:1px solid var(--border);flex-wrap:wrap;gap:10px}
+    .page-info{font-size:13px;color:var(--text-3)}
+    .page-info strong{color:var(--text);font-weight:600}
+    .page-btns{display:flex;gap:6px;align-items:center}
+    .btn-page{padding:6px 12px;border-radius:var(--r);background:var(--card);border:1.5px solid var(--border);font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .18s}
+    .btn-page:hover:not(:disabled){background:#F1F5F9;color:var(--text)}
+    .btn-page:disabled{opacity:.4;cursor:not-allowed}
+    .btn-page.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-backdrop{display:none;position:fixed;inset:0;z-index:600;background:rgba(15,23,42,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:20px}
+    .confirm-backdrop.open{display:flex}
+    .confirm-box{background:var(--card);border-radius:16px;padding:28px;max-width:380px;width:100%;box-shadow:var(--shadow-xl);transform:scale(0.95);opacity:0;transition:all .22s var(--spring)}
+    .confirm-backdrop.open .confirm-box{transform:scale(1);opacity:1}
+    .confirm-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+    .confirm-icon.warn{background:#FEF9C3} .confirm-icon.danger{background:#FEF2F2}
+    .confirm-icon svg{width:20px;height:20px;fill:none;stroke-width:2;stroke-linecap:round}
+    .confirm-icon.warn svg{stroke:#D97706} .confirm-icon.danger svg{stroke:#DC2626}
+    .confirm-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px}
+    .confirm-msg{font-size:13.5px;color:var(--text-2);margin-bottom:22px;line-height:1.5}
+    .confirm-btns{display:flex;gap:10px}
+    .btn-confirm-cancel{flex:1;padding:11px;border-radius:var(--r-full);background:var(--bg);border:1.5px solid var(--border);font-size:13.5px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .18s}
+    .btn-confirm-cancel:hover{background:#E2E8F0}
+    .btn-confirm-ok{flex:1;padding:11px;border-radius:var(--r-full);font-size:13.5px;font-weight:600;color:#fff;border:none;cursor:pointer;transition:all .18s}
+    .btn-confirm-ok.warn{background:#D97706} .btn-confirm-ok.warn:hover{background:#B45309}
+    .btn-confirm-ok.danger{background:#DC2626} .btn-confirm-ok.danger:hover{background:#B91C1C}
+
+    /* ── AUDIT LOG ── */
+    .audit-list{display:flex;flex-direction:column;gap:0}
+    .audit-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-bottom:1px solid var(--border)}
+    .audit-row:last-child{border-bottom:none}
+    .audit-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .audit-dot.status  {background:#0066CC}
+    .audit-dot.edit    {background:#00957A}
+    .audit-dot.create  {background:#059669}
+    .audit-body{flex:1;min-width:0}
+    .audit-action{font-size:13.5px;color:var(--text);font-weight:500}
+    .audit-action strong{font-weight:700}
+    .audit-meta{font-size:11.5px;color:var(--text-3);margin-top:3px}
+    .audit-empty{padding:48px 24px;text-align:center;color:var(--text-3);font-size:14px}
+
+    /* ── MOBILE TABLE → CARDS ── */
+    @media(max-width:640px){
+      #tableView .table-wrap{display:none}
+      #mobileCards{display:block}
+      .m-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;margin-bottom:10px;box-shadow:var(--shadow-sm)}
+      .m-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+      .m-card-name{font-weight:700;font-size:15px}
+      .m-card-row{display:flex;gap:6px;font-size:13px;color:var(--text-2);margin-bottom:5px;align-items:center}
+      .m-card-row svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0;opacity:.5}
+      .m-card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+    }
+    @media(min-width:641px){#mobileCards{display:none}}
+
+    /* real-time indicator */
+    .live-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#059669;background:#ECFDF5;border:1px solid #A7F3D0;padding:3px 9px;border-radius:var(--r-full);letter-spacing:.04em}
+    .live-dot{width:6px;height:6px;border-radius:50%;background:#059669;animation:pulse-green 2s infinite}
+    @keyframes pulse-green{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.8)}}
+
   </style>
 </head>
 <body>
@@ -353,6 +414,7 @@
     <!-- Tab bar -->
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="appointments">Appointments</button>
+      <button class="tab-btn" data-tab="audit">Audit Log</button>
       <button class="tab-btn" data-tab="settings">Clinic Settings</button>
     </div>
 
@@ -365,7 +427,7 @@
     </div>
 
     <div class="toolbar">
-      <div class="toolbar-title">Appointments <span class="result-count" id="resultCount"></span></div>
+      <div class="toolbar-title">Appointments <span class="result-count" id="resultCount"></span><span class="live-badge" style="margin-left:10px"><span class="live-dot"></span>LIVE</span></div>
       <div class="search-wrap">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="search" class="search-in" id="searchIn" placeholder="Search name or phone...">
@@ -445,7 +507,36 @@
       </div>
     </div><!-- /table-card + tableView -->
 
+    <!-- Mobile card view -->
+    <div id="mobileCards"></div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="paginationBar" style="display:none">
+      <div class="page-info" id="pageInfo"></div>
+      <div class="page-btns">
+        <button class="btn-page" id="pagePrevBtn">← Prev</button>
+        <span id="pageNumbers" style="display:flex;gap:4px"></span>
+        <button class="btn-page" id="pageNextBtn">Next →</button>
+      </div>
+    </div>
+
     </div><!-- /tab-appointments -->
+
+    <!-- AUDIT LOG TAB -->
+    <div class="tab-pane" id="tab-audit">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px">Audit Log</div>
+        <span class="live-badge"><span class="live-dot"></span>LIVE</span>
+      </div>
+      <div class="table-card">
+        <div style="padding:20px 22px;border-bottom:1px solid var(--border)">
+          <div style="font-size:13px;color:var(--text-2)">All admin actions — status changes, edits, and settings updates — are recorded here automatically.</div>
+        </div>
+        <div style="padding:4px 22px 22px" id="auditLogList">
+          <div class="audit-empty">No activity recorded yet.</div>
+        </div>
+      </div>
+    </div>
 
     <!-- SETTINGS TAB -->
     <div class="tab-pane" id="tab-settings">
@@ -454,6 +545,21 @@
 
   </main>
 </div><!-- /adminShell -->
+
+<!-- CONFIRM DIALOG -->
+<div class="confirm-backdrop" id="confirmDialog">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirmIcon">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="confirm-title" id="confirmTitle">Are you sure?</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button class="btn-confirm-cancel" id="confirmCancelBtn">Cancel</button>
+      <button class="btn-confirm-ok" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
 
 <!-- EDIT MODAL -->
 <div class="modal-backdrop" id="editModal">
@@ -563,20 +669,27 @@
 <script type="module">
   import {
     adminLogin, adminLogout, onAuthChange,
-    getAppointments, updateAppointmentStatus, updateAppointment,
+    getAppointments, subscribeToAppointments,
+    updateAppointmentStatus, updateAppointment,
     getClinicSettings, saveClinicSettings, getDoctorsList, saveDoctorsList,
-    getAvailability, saveAvailability
+    getAvailability, saveAvailability,
+    writeAuditLog, subscribeToAuditLog
   } from './firebase-config.js';
 
   // ── State ────────────────────────────────────────────────────
-  let allAppointments = [];
-  let sortCol         = 'createdAt';
-  let sortDir         = 'desc';
-  let editingId       = null;
-  let calYear         = new Date().getFullYear();
-  let calMonth        = new Date().getMonth();
-  let currentView     = 'table';
-  let availData       = {};
+  let allAppointments  = [];
+  let sortCol          = 'createdAt';
+  let sortDir          = 'desc';
+  let editingId        = null;
+  let calYear          = new Date().getFullYear();
+  let calMonth         = new Date().getMonth();
+  let currentView      = 'table';
+  let availData        = {};
+  let currentPage      = 1;
+  const PAGE_SIZE      = 20;
+  let unsubAppointments = null;
+  let unsubAuditLog    = null;
+  let currentAdminEmail = '';
 
   // ── Elements ─────────────────────────────────────────────────
   const loginScreen    = document.getElementById('loginScreen');
@@ -622,7 +735,8 @@
       loginScreen.style.display = 'none';
       adminShell.style.display  = 'block';
       adminEmailEl.textContent  = user.email;
-      loadAppointments();
+      currentAdminEmail         = user.email;
+      startRealtimeListener();
       loadAvailability();
     } else {
       loginScreen.style.display = 'flex';
@@ -645,23 +759,30 @@
   }
   loginBtn.addEventListener('click', doLogin);
   loginPwEl.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-  logoutBtn.addEventListener('click', () => adminLogout());
+  logoutBtn.addEventListener('click', () => {
+    if (unsubAppointments) { unsubAppointments(); unsubAppointments = null; }
+    if (unsubAuditLog)     { unsubAuditLog();     unsubAuditLog = null; }
+    adminLogout();
+  });
 
-  // ── Load ─────────────────────────────────────────────────────
-  async function loadAppointments() {
-    refreshBtn.classList.add('spinning');
-    tableBody.innerHTML = '<tr class="loading-row"><td colspan="8">Loading...</td></tr>';
-    try {
-      allAppointments = await getAppointments();
+  // ── Real-time subscription ───────────────────────────────────
+  function startRealtimeListener() {
+    if (unsubAppointments) unsubAppointments(); // clean up previous
+    tableBody.innerHTML = '<tr class="loading-row"><td colspan="8">Connecting...</td></tr>';
+    unsubAppointments = subscribeToAppointments(data => {
+      allAppointments = data;
       updateStats();
       renderTable();
-    } catch (err) {
-      tableBody.innerHTML = '<tr class="loading-row"><td colspan="8">Failed to load. Check Firestore rules.</td></tr>';
-      console.error(err);
-    }
-    refreshBtn.classList.remove('spinning');
+      if (currentView === 'calendar') renderCalendar();
+      refreshBtn.classList.remove('spinning');
+    });
   }
-  refreshBtn.addEventListener('click', loadAppointments);
+
+  // Manual refresh re-subscribes (forces reconnect)
+  refreshBtn.addEventListener('click', () => {
+    refreshBtn.classList.add('spinning');
+    startRealtimeListener();
+  });
   filterStatus.addEventListener('change', renderTable);
   filterSpec.addEventListener('change', renderTable);
   searchIn.addEventListener('input', renderTable);
@@ -691,9 +812,9 @@
 
   // ── Render ────────────────────────────────────────────────────
   function renderTable() {
-    const sf  = filterStatus.value;
-    const spf = filterSpec.value;
-    const q   = searchIn.value.toLowerCase().trim();
+    const sf  = document.getElementById('filterStatus').value;
+    const spf = document.getElementById('filterSpecialty').value;
+    const q   = document.getElementById('searchIn').value.toLowerCase().trim();
 
     let rows = allAppointments.filter(a => {
       if (sf  !== 'all' && a.status    !== sf)  return false;
@@ -716,19 +837,31 @@
       return 0;
     });
 
-    resultCount.textContent = rows.length === allAppointments.length
+    const totalFiltered = rows.length;
+
+    // Reset page if out of bounds
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+    if (currentPage > totalPages) currentPage = totalPages;
+
+    // Paginate
+    const pageRows = rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    document.getElementById('resultCount').textContent = rows.length === allAppointments.length
       ? `(${rows.length})`
       : `(${rows.length} of ${allAppointments.length})`;
 
+    updatePagination(totalFiltered);
+
     if (rows.length === 0) {
       tableBody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>No appointments found.</p></div></td></tr>`;
+      document.getElementById('mobileCards').innerHTML = '';
       return;
     }
 
-    tableBody.innerHTML = rows.map(a => `
+    tableBody.innerHTML = pageRows.map(a => `
       <tr data-id="${a.id}">
         <td class="td-name">${esc(a.name || '—')}${a.adminNotes ? '<br><span style="font-size:11px;color:var(--text-3);font-weight:400">'+esc(a.adminNotes)+'</span>' : ''}</td>
-        <td class="td-phone"><a href="tel:${esc(a.phone)}">${esc(a.phone || '—')}</a>${a.email ? '<br><a href="mailto:'+esc(a.email)+'" style="font-size:11.5px;color:var(--text-3)">'+esc(a.email)+'</a>' : ''}</td>
+        <td class="td-phone"><a href="tel:+91${esc(a.phone)}">${esc(a.phone || '—')}</a>${a.email ? '<br><a href="mailto:'+esc(a.email)+'" style="font-size:11.5px;color:var(--text-3)">'+esc(a.email)+'</a>' : ''}</td>
         <td class="td-spec">${esc(a.specialty || '—')}</td>
         <td class="td-date">${formatDate(a.date)}${a.time ? '<br><span style="font-size:11.5px;color:var(--text-3)">'+esc(a.time)+'</span>' : ''}</td>
         <td class="td-doctor">${esc(a.doctor || 'Any')}</td>
@@ -737,14 +870,17 @@
         <td><div class="action-wrap">
           <button class="btn-act btn-print">Print</button>
           <button class="btn-act btn-edit">Edit</button>
-          ${a.status === 'pending'    ? '<button class="btn-act btn-confirm"  data-status="confirmed">Confirm</button>' : ''}
-          ${a.status === 'confirmed'  ? '<button class="btn-act btn-complete" data-status="completed">Complete</button>' : ''}
-          ${a.status !== 'cancelled' && a.status !== 'completed' ? '<button class="btn-act btn-cancel" data-status="cancelled">Cancel</button>' : ''}
+          ${a.status === 'pending'    ? '<button class=\"btn-act btn-confirm\"  data-status=\"confirmed\">Confirm</button>' : ''}
+          ${a.status === 'confirmed'  ? '<button class=\"btn-act btn-complete\" data-status=\"completed\">Complete</button>' : ''}
+          ${a.status !== 'cancelled' && a.status !== 'completed' ? '<button class=\"btn-act btn-cancel\" data-status=\"cancelled\">Cancel</button>' : ''}
         </div></td>
       </tr>`).join('');
 
+    // Mobile cards
+    renderMobileCards(pageRows);
+
     // action button listeners
-    tableBody.querySelectorAll('.btn-act:not(.btn-edit)').forEach(btn => {
+    tableBody.querySelectorAll('.btn-act:not(.btn-edit):not(.btn-print)').forEach(btn => {
       btn.addEventListener('click', () => {
         const id = btn.closest('tr').dataset.id;
         changeStatus(id, btn.dataset.status, btn);
@@ -770,14 +906,34 @@
     });
   }
 
-  // ── Status change ─────────────────────────────────────────────
+  // ── Status change (with confirmation for destructive actions) ──
   async function changeStatus(id, status, btn) {
+    const appt = allAppointments.find(a => a.id === id);
+    const name = appt?.name || 'this patient';
+
+    // Require confirmation for cancel
+    if (status === 'cancelled') {
+      const ok = await showConfirm({
+        title:   'Cancel appointment?',
+        msg:     `This will cancel the appointment for ${name}. You can still edit it later if needed.`,
+        type:    'danger',
+        okLabel: 'Yes, Cancel',
+      });
+      if (!ok) return;
+    }
+
     btn.disabled = true;
+    const oldStatus = appt?.status;
     try {
       await updateAppointmentStatus(id, status);
-      const appt = allAppointments.find(a => a.id === id);
-      if (appt) appt.status = status;
-      updateStats(); renderTable();
+      // Audit log
+      writeAuditLog({
+        action:      'status_change',
+        description: `Changed status of ${name}'s appointment from ${cap(oldStatus)} → ${cap(status)}`,
+        appointmentId: id,
+        adminEmail:  currentAdminEmail,
+      }).catch(console.error);
+
       showToast(`Marked as ${cap(status)}`);
     } catch (err) {
       console.error(err); showToast('Update failed. Try again.'); btn.disabled = false;
@@ -875,6 +1031,13 @@
       if (idx !== -1) allAppointments[idx] = { ...allAppointments[idx], ...updated };
 
       updateStats(); renderTable();
+      // Audit log
+      writeAuditLog({
+        action:        'edit',
+        description:   `Edited appointment for ${updated.name}`,
+        appointmentId: editingId,
+        adminEmail:    currentAdminEmail,
+      }).catch(console.error);
       closeModal();
       showToast('Appointment updated');
     } catch (err) {
@@ -1182,6 +1345,149 @@
     }
   };
 
+  
+  // ── CONFIRMATION DIALOG ───────────────────────────────────────
+  let confirmResolver = null;
+
+  function showConfirm({ title, msg, type = 'warn', okLabel = 'Confirm' }) {
+    return new Promise(resolve => {
+      confirmResolver = resolve;
+      document.getElementById('confirmTitle').textContent   = title;
+      document.getElementById('confirmMsg').textContent     = msg;
+      document.getElementById('confirmIcon').className      = `confirm-icon ${type}`;
+      const okBtn = document.getElementById('confirmOkBtn');
+      okBtn.textContent  = okLabel;
+      okBtn.className    = `btn-confirm-ok ${type}`;
+      document.getElementById('confirmDialog').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  function closeConfirm(result) {
+    document.getElementById('confirmDialog').classList.remove('open');
+    document.body.style.overflow = '';
+    if (confirmResolver) { confirmResolver(result); confirmResolver = null; }
+  }
+
+  document.getElementById('confirmOkBtn').addEventListener('click',    () => closeConfirm(true));
+  document.getElementById('confirmCancelBtn').addEventListener('click', () => closeConfirm(false));
+  document.getElementById('confirmDialog').addEventListener('click', e => {
+    if (e.target === document.getElementById('confirmDialog')) closeConfirm(false);
+  });
+
+  // ── PAGINATION ────────────────────────────────────────────────
+  document.getElementById('pagePrevBtn').addEventListener('click', () => {
+    if (currentPage > 1) { currentPage--; renderTable(); }
+  });
+  document.getElementById('pageNextBtn').addEventListener('click', () => {
+    currentPage++; renderTable();
+  });
+
+  function updatePagination(totalFiltered) {
+    const totalPages = Math.ceil(totalFiltered / PAGE_SIZE);
+    const bar        = document.getElementById('paginationBar');
+
+    if (totalFiltered <= PAGE_SIZE) {
+      bar.style.display = 'none';
+      return;
+    }
+    bar.style.display = 'flex';
+    document.getElementById('pageInfo').innerHTML =
+      `Showing <strong>${Math.min((currentPage-1)*PAGE_SIZE+1, totalFiltered)}–${Math.min(currentPage*PAGE_SIZE, totalFiltered)}</strong> of <strong>${totalFiltered}</strong>`;
+    document.getElementById('pagePrevBtn').disabled = currentPage === 1;
+    document.getElementById('pageNextBtn').disabled = currentPage === totalPages;
+
+    // Page number buttons (show max 5)
+    const nums = document.getElementById('pageNumbers');
+    let pages  = [];
+    if (totalPages <= 7) {
+      pages = Array.from({length: totalPages}, (_, i) => i + 1);
+    } else {
+      pages = [1];
+      if (currentPage > 3) pages.push('…');
+      for (let i = Math.max(2, currentPage-1); i <= Math.min(totalPages-1, currentPage+1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('…');
+      pages.push(totalPages);
+    }
+    nums.innerHTML = pages.map(p =>
+      p === '…'
+        ? `<span style="padding:6px 4px;color:var(--text-3)">…</span>`
+        : `<button class="btn-page${p === currentPage ? ' active' : ''}" onclick="goToPage(${p})">${p}</button>`
+    ).join('');
+  }
+
+  window.goToPage = function(p) { currentPage = p; renderTable(); };
+
+  // ── AUDIT LOG ─────────────────────────────────────────────────
+  let auditTabInitialised = false;
+
+  function initAuditLog() {
+    if (auditTabInitialised) return;
+    auditTabInitialised = true;
+    const list = document.getElementById('auditLogList');
+    list.innerHTML = '<div class="audit-empty">Loading...</div>';
+    unsubAuditLog = subscribeToAuditLog(entries => renderAuditLog(entries));
+  }
+
+  function renderAuditLog(entries) {
+    const list = document.getElementById('auditLogList');
+    if (!list) return;
+    if (!entries.length) {
+      list.innerHTML = '<div class="audit-empty">No activity recorded yet.</div>';
+      return;
+    }
+    list.innerHTML = '<div class="audit-list">' + entries.slice(0, 100).map(e => {
+      const ts  = e.timestamp?.seconds
+        ? new Date(e.timestamp.seconds * 1000).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+        : 'Just now';
+      const dotClass = e.action === 'status_change' ? 'status' : e.action === 'edit' ? 'edit' : 'create';
+      return `<div class="audit-row">
+        <div class="audit-dot ${dotClass}"></div>
+        <div class="audit-body">
+          <div class="audit-action">${esc(e.description || e.action)}</div>
+          <div class="audit-meta">${esc(e.adminEmail || 'Admin')} · ${ts}</div>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  // ── MOBILE CARDS ──────────────────────────────────────────────
+  function renderMobileCards(rows) {
+    const container = document.getElementById('mobileCards');
+    if (!container) return;
+    if (!rows.length) { container.innerHTML = ''; return; }
+
+    container.innerHTML = rows.map(a => `
+      <div class="m-card">
+        <div class="m-card-top">
+          <div class="m-card-name">${esc(a.name || '—')}</div>
+          <span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span>
+        </div>
+        <div class="m-card-row"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81"/></svg><a href="tel:+91${esc(a.phone)}" style="color:var(--blue);font-weight:500">+91 ${esc(a.phone||'—')}</a></div>
+        <div class="m-card-row"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${esc(formatDate(a.date))}${a.time ? ' · '+esc(a.time) : ''}</div>
+        <div class="m-card-row"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${esc(a.specialty||'—')}${a.doctor ? ' · '+esc(a.doctor) : ''}</div>
+        <div class="m-card-actions">
+          <button class="btn-act btn-print" data-id="${a.id}">Print</button>
+          <button class="btn-act btn-edit" data-id="${a.id}">Edit</button>
+          ${a.status==='pending'   ? `<button class="btn-act btn-confirm"  data-id="${a.id}" data-status="confirmed">Confirm</button>` : ''}
+          ${a.status==='confirmed' ? `<button class="btn-act btn-complete" data-id="${a.id}" data-status="completed">Complete</button>` : ''}
+          ${a.status!=='cancelled'&&a.status!=='completed' ? `<button class="btn-act btn-cancel" data-id="${a.id}" data-status="cancelled">Cancel</button>` : ''}
+        </div>
+      </div>`).join('');
+
+    // Wire mobile card buttons
+    container.querySelectorAll('.btn-print[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => { const a = allAppointments.find(x => x.id===btn.dataset.id); if(a) openPrintSlip(a); });
+    });
+    container.querySelectorAll('.btn-edit[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => { const a = allAppointments.find(x => x.id===btn.dataset.id); if(a) openEditModal(a); });
+    });
+    container.querySelectorAll('.btn-act[data-status][data-id]').forEach(btn => {
+      btn.addEventListener('click', () => changeStatus(btn.dataset.id, btn.dataset.status, btn));
+    });
+  }
+
+
     // ── TABS ─────────────────────────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1190,6 +1496,7 @@
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
       if (btn.dataset.tab === 'settings') initSettings();
+      if (btn.dataset.tab === 'audit')    initAuditLog();
     });
   });
 
