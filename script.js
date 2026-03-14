@@ -30,14 +30,22 @@
 
   /* Reveal on scroll */
   const isLow = navigator.deviceMemory <= 1 || navigator.hardwareConcurrency <= 2;
+  let revealObs = null;
   if (!isLow) {
-    const obs = new IntersectionObserver(entries => {
+    revealObs = new IntersectionObserver(entries => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
     }, { threshold: 0.08, rootMargin: '0px 0px -36px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
   } else {
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
   }
+  // Exposed so site-data.js can re-observe dynamically injected cards
+  window.__acReveal = function() {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
+      if (revealObs) revealObs.observe(el);
+      else el.classList.add('visible');
+    });
+  };
 
   /* Count-up for stat numbers */
   function countUp(el) {

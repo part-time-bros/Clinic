@@ -150,3 +150,27 @@ export async function saveDoctorsList(list) {
   await setDoc(doc(db, 'settings', 'doctors'), { list });
 }
 
+// ─────────────────────────────────────────────────────────────
+// Firestore Security Rules — UPDATED (paste into Firebase console)
+// ─────────────────────────────────────────────────────────────
+//
+// rules_version = '2';
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /appointments/{id} {
+//       allow create: if
+//         request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
+//         && request.resource.data.name is string
+//         && request.resource.data.name.size() > 0
+//         && request.resource.data.name.size() < 120
+//         && request.resource.data.phone is string
+//         && request.resource.data.status == 'pending';
+//       allow read, update: if request.auth != null;
+//       allow delete: if false;
+//     }
+//     match /settings/{document} {
+//       allow read: if true;
+//       allow write: if request.auth != null;
+//     }
+//   }
+// }
