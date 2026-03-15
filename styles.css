@@ -618,3 +618,9 @@ body {
 .btn-primary:active, .btn-secondary:active, .btn-outline:active {
   transform: scale(0.97) !important;
 }
+
+/* mob-cta-fix: push above demo banner on mobile */
+@media(max-width:767px){
+  .mob-cta{bottom:52px!important;}
+  body{padding-bottom:110px!important;}
+}

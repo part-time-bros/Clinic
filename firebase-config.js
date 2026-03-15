@@ -133,11 +133,11 @@ export async function updateAppointment(id, fields) {
 const DEFAULT_SETTINGS = {
   phone:        '9876543210',
   whatsapp:     '919876543210',
-  email:        'care@auraclinic.in',
-  addressLine1: '42 Wellness Avenue, Indiranagar',
-  addressLine2: 'Bangalore 560038, Karnataka',
-  addressFull:  '42 Wellness Avenue, Indiranagar, Bangalore 560038',
-  addressNote:  'Near Indiranagar Metro Station',
+  email:        'care@medicareclinic.in',
+  addressLine1: '12 Health Avenue, Kowdiar',
+  addressLine2: 'Trivandrum 695003, Kerala',
+  addressFull:  '12 Health Avenue, Kowdiar, Trivandrum 695003',
+  addressNote:  'Near Kowdiar Junction',
   mapEmbed:     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.9!2d77.6408!3d12.9784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDU4JzQyLjIiTiA3N8KwMzgnMjYuOSJF!5e0!3m2!1sen!2sin!4v1234567890',
   hoursWeekday: 'Mon-Fri: 8AM-8PM',
   hoursSat:     'Sat: 8AM-6PM',
@@ -162,12 +162,12 @@ export async function saveClinicSettings(data) {
 // ── DOCTOR PROFILES ───────────────────────────────────────────
 
 const DEFAULT_DOCTORS = [
-  { id:1, initials:'SR', color:'#0066CC,#0052A3', name:'Dr. Sudha Raghavan',  specialty:'General and Internal Medicine', quals:'MBBS, MD (Internal Medicine) — AIIMS Delhi',                  bio:'Dr. Raghavan has 18 years of experience managing complex internal medicine cases. She completed her residency at AIIMS Delhi and has a particular interest in preventive medicine.',  years:18, tags:'Preventive Health,Womens Health,Diabetes',          active:true },
-  { id:2, initials:'RK', color:'#059669,#047857', name:'Dr. Ramesh Krishnan', specialty:'General Medicine',              quals:'MBBS, DNB (General Medicine) — Kasturba Medical College',     bio:'Dr. Krishnan brings 12 years of broad clinical experience across both urban hospitals and community health settings. He has a calm, patient-centred approach.',                        years:12, tags:'Elderly Care,Hypertension,Thyroid',                 active:true },
-  { id:3, initials:'AK', color:'#00957A,#007A63', name:'Dr. Arvind Kumar',    specialty:'Interventional Cardiology',     quals:'MBBS, DM (Cardiology) — Manipal University',                 bio:'Dr. Kumar is an interventional cardiologist with 14 years of experience. He trained at Manipal University and completed a fellowship at Apollo Hospitals.',                           years:14, tags:'ECG and Echo,Hypertension,Arrhythmia',             active:true },
-  { id:4, initials:'PM', color:'#7C3AED,#6D28D9', name:'Dr. Priya Menon',     specialty:'Dermatology and Cosmetology',   quals:'MBBS, MD (Dermatology) — St. Johns Medical College',         bio:'Dr. Menon has 11 years of clinical dermatology experience with advanced training in cosmetic procedures. She is one of the most sought-after dermatologists in Indiranagar.',         years:11, tags:'Acne and Eczema,PRP Therapy,Cosmetic Dermatology',  active:true },
-  { id:5, initials:'VN', color:'#DC2626,#B91C1C', name:'Dr. Vikram Nair',     specialty:'Dental Surgery',               quals:'BDS, MDS (Oral Surgery) — Manipal College of Dental Sciences',bio:'Dr. Nair is a senior dental surgeon with 9 years of experience in both restorative and cosmetic dentistry. He has a particular interest in painless dentistry.',                     years:9,  tags:'Root Canal,Implants,Smile Design',                  active:true },
-  { id:6, initials:'SA', color:'#D97706,#B45309', name:'Dr. Sreeja Anil',     specialty:'Paediatrics and Neonatology',   quals:'MBBS, MD (Paediatrics) — Bangalore Medical College',         bio:'Dr. Sreeja Anil is a paediatrician with 8 years of experience covering newborn care through adolescent health. She is beloved by her young patients for her calm, friendly manner.', years:8,  tags:'Newborn Care,Vaccinations,Growth Monitoring',      active:true },
+  { id:1, initials:'LN', color:'#0066CC,#0052A3', name:'Dr. Lakshmi Nair',     specialty:'General and Internal Medicine', quals:'MBBS, MD (Internal Medicine) — Amrita Institute of Medical Sciences',    bio:'Dr. Nair has 16 years of experience in internal medicine. She trained at Amrita Institute, Kochi and specialises in chronic disease management and preventive care.', years:16, tags:'Preventive Health,Womens Health,Diabetes', active:true },
+  { id:2, initials:'SM', color:'#059669,#047857', name:'Dr. Suresh Menon',    specialty:'General Medicine',              quals:'MBBS, DNB (General Medicine) — Government Medical College Trivandrum', bio:'Dr. Menon has 13 years of experience in general practice. He completed his DNB from GMC Trivandrum and is known for his thorough approach to diagnosis and patient care.', years:13, tags:'Elderly Care,Hypertension,Thyroid', active:true },
+  { id:3, initials:'AP', color:'#00957A,#007A63', name:'Dr. Arun Pillai',     specialty:'Interventional Cardiology',     quals:'MBBS, DM (Cardiology) — SCTIMST Trivandrum',                  bio:'Dr. Pillai is a cardiologist trained at the prestigious SCTIMST, Trivandrum with 15 years of experience. He specialises in ECG interpretation, hypertension management and cardiac risk.', years:15, tags:'ECG and Echo,Hypertension,Arrhythmia', active:true },
+  { id:4, initials:'PM', color:'#7C3AED,#6D28D9', name:'Dr. Priya Menon',     specialty:'Dermatology and Cosmetology',   quals:'MBBS, MD (Dermatology) — Government Medical College Kochi',   bio:'Dr. Menon has 11 years of clinical dermatology experience with advanced training in cosmetic procedures. She is one of the most sought-after dermatologists in Trivandrum.', years:11, tags:'Acne and Eczema,PRP Therapy,Cosmetic Dermatology', active:true },
+  { id:5, initials:'VK', color:'#DC2626,#B91C1C', name:'Dr. Vishnu Kumar',    specialty:'Dental Surgery',               quals:'BDS, MDS (Oral Surgery) — PMS College of Dental Science Trivandrum', bio:'Dr. Kumar is a dental surgeon with 10 years of experience in restorative and cosmetic dentistry. He is known for his gentle, painless approach — particularly popular with anxious patients.', years:10, tags:'Root Canal,Implants,Smile Design', active:true },
+  { id:6, initials:'DK', color:'#D97706,#B45309', name:'Dr. Deepa Krishnan',  specialty:'Paediatrics and Neonatology',   quals:'MBBS, MD (Paediatrics) — Government Medical College Trivandrum', bio:'Dr. Deepa Krishnan is a paediatrician with 9 years of experience from newborn care through teenage health. She is beloved by young patients and parents alike for her warm, gentle manner.', years:9, tags:'Newborn Care,Vaccinations,Growth Monitoring', active:true },
 ];
 
 export async function getDoctorsList() {
