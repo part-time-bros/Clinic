@@ -1,4 +1,4 @@
-// AuraClinic — Site Data
+// MediCare Clinic — Site Data
 // Fetches clinic settings and doctors from Firestore, updates all pages dynamically.
 
 import { getClinicSettings, getDoctorsList, getAvailability, getHeroContent, getTestimonials, getServices } from './firebase-config.js';

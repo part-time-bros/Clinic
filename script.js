@@ -102,8 +102,6 @@
   const today = new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type="date"]').forEach(el => { el.min = today; });
 
-})();
-
   /* ── Page transition overlay ── */
   const overlay = document.createElement('div');
   overlay.className = 'page-transition-overlay';
@@ -122,3 +120,5 @@
       setTimeout(() => { window.location.href = href; }, 200);
     });
   });
+
+})();

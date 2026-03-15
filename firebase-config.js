@@ -1,4 +1,5 @@
-// AuraClinic — Firebase Config
+// MediCare Clinic — Firebase Config
+// Replace firebaseConfig with the client's own Firebase project for each new deployment.
 
 import { initializeApp }                                from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
 import { getFirestore, collection, addDoc, getDocs,
@@ -138,7 +139,7 @@ const DEFAULT_SETTINGS = {
   addressLine2: 'Trivandrum 695003, Kerala',
   addressFull:  '12 Health Avenue, Kowdiar, Trivandrum 695003',
   addressNote:  'Near Kowdiar Junction',
-  mapEmbed:     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3887.9!2d77.6408!3d12.9784!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTLCsDU4JzQyLjIiTiA3N8KwMzgnMjYuOSJF!5e0!3m2!1sen!2sin!4v1234567890',
+  mapEmbed:     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.8!2d76.9386!3d8.5169!2m3!1f0!2f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bea6ffffffff%3A0x1!2sKowdiar%2C+Thiruvananthapuram%2C+Kerala!5e0!3m2!1sen!2sin!4v1710000000000',
   hoursWeekday: 'Mon-Fri: 8AM-8PM',
   hoursSat:     'Sat: 8AM-6PM',
   hoursSun:     'Sun: 9AM-2PM',
@@ -201,7 +202,7 @@ export async function saveAvailability(data) {
 
 const DEFAULT_HERO = {
   title:       'Healthcare you can trust, close to home.',
-  subtitle:    'Expert doctors, modern diagnostics, and personalised care — all under one roof in Indiranagar, Bangalore.',
+  subtitle:    'Expert doctors, modern diagnostics, and personalised care — all under one roof in Kowdiar, Trivandrum.',
   stat1_num:   '5000', stat1_lbl: 'Patients Treated',
   stat2_num:   '15',   stat2_lbl: 'Years of Care',
   stat3_num:   '12',   stat3_lbl: 'Specialist Doctors',
@@ -222,8 +223,8 @@ export async function saveHeroContent(data) {
 // ── TESTIMONIALS ─────────────────────────────────────────────
 
 const DEFAULT_TESTIMONIALS = [
-  { id:1, text:"Dr. Raghavan spent a full 20 minutes explaining my diagnosis and treatment plan. I never felt rushed. The clinic is spotlessly clean and the staff are genuinely warm.", name:'Rohit Sharma', note:'Patient since 2021', initials:'RS', color:'#0066CC,#0052A3', stars:5 },
-  { id:2, text:"Got my ECG, blood work, and cardiologist review all in one visit. The WhatsApp report arrived that evening. Incredibly convenient for working professionals.", name:'Ananya Nair', note:'Patient since 2022', initials:'AN', color:'#00957A,#007A63', stars:5 },
+  { id:1, text:"Dr. Nair spent a full 20 minutes explaining my diagnosis and treatment plan. I never felt rushed. The clinic is spotlessly clean and the staff are genuinely warm.", name:'Arjun Nair', note:'Patient since 2021', initials:'AJ', color:'#0066CC,#0052A3', stars:5 },
+  { id:2, text:"Got my ECG, blood work, and cardiologist review all in one visit. The WhatsApp report arrived that evening. Incredibly convenient for working professionals.", name:'Ananya Pillai', note:'Patient since 2022', initials:'AN', color:'#00957A,#007A63', stars:5 },
   { id:3, text:"Brought my 4-year-old for a vaccination and she did not cry once. The paediatric team has a real gift with children. This is our family clinic for life.", name:'Divya Menon', note:'Patient since 2023', initials:'DM', color:'#7C3AED,#6D28D9', stars:5 },
 ];
 

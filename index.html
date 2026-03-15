@@ -4,12 +4,20 @@
   <meta charset="UTF-8">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230066CC'/%3E%3Cpath d='M16 6a6 6 0 1 0 0 12A6 6 0 0 0 16 6zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 12c-2.21 0-4 1.34-4 3v1h22v-1c0-1.66-1.79-3-4-3H9z' fill='white'/%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MediCare Clinic — Premium Healthcare in Kowdiar, Trivandrum</title>
+  <title>MediCare Clinic — Trusted Healthcare in Kowdiar, Trivandrum</title>
   <meta name="description" content="Expert doctors, modern diagnostics and personalised care in Kowdiar, Trivandrum.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap"></noscript>
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MediCare Clinic — Trusted Healthcare in Kowdiar, Trivandrum">
+  <meta property="og:description" content="Expert doctors, modern diagnostics and personalised care in Kowdiar, Trivandrum. Book appointments online.">
+  <meta property="og:image" content="https://medicareclinic.in/og.jpg">
+  <meta property="og:url" content="https://medicareclinic.in/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MediCare Clinic — Trusted Healthcare in Trivandrum">
+  <meta name="twitter:description" content="Expert doctors, modern diagnostics and personalised care in Kowdiar, Trivandrum.">
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
@@ -68,8 +76,6 @@
     </div>
   </div>
 </div>
-<!-- Spacer so content isn't hidden behind banner -->
-<div id="demoBannerSpacer" style="height:48px;"></div>
 <style>
 /* ── Demo banner responsive fixes ── */
 @media(max-width:600px){
@@ -151,10 +157,10 @@ footer{padding-bottom:56px;}
     <div class="hero-visual">
       <div class="hero-float fl-top reveal">
         <div class="fl-icon" style="background:#EFF6FF;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0066CC" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div><div class="fl-num">NABH</div><div class="fl-lbl">Accredited Clinic</div></div>
+        <div><div class="fl-num">ISO</div><div class="fl-lbl">Certified Clinic</div></div>
       </div>
       <div class="hero-card">
-        <div class="hero-card-label">Today's Schedule</div>
+        <div class="hero-card-label" id="heroScheduleDate">Today's Schedule</div>
         <div class="hero-appt-row">
           <div class="doc-av-sm" style="background:linear-gradient(135deg,#0066CC,#0052A3)">LN</div>
           <div class="appt-info"><div class="appt-name">Dr. Lakshmi Nair</div><div class="appt-spec">General Medicine — 9:00 AM</div></div>
@@ -181,13 +187,13 @@ footer{padding-bottom:56px;}
 
 <div class="trust-bar">
   <div class="container"><div class="trust-items">
-    <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>NABH Accredited</div>
+    <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>Certified Clinic</div>
     <div class="trust-sep"></div>
     <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>Open Mon-Sat 8AM-8PM</div>
     <div class="trust-sep"></div>
     <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81 19.79 19.79 0 0 1 .12 2.18 2 2 0 0 1 2.11 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L6.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92v2z"/></svg></div>24hr WhatsApp Support</div>
     <div class="trust-sep"></div>
-    <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>12 Specialist Doctors</div>
+    <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>Specialist Doctors</div>
     <div class="trust-sep"></div>
     <div class="trust-item"><div class="trust-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>Online Booking</div>
   </div></div>
@@ -264,8 +270,8 @@ footer{padding-bottom:56px;}
     <div class="why-grid rv-stagger">
       <div class="why-card reveal rv-d1">
         <div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="why-title">NABH Accredited</div>
-        <p class="why-desc">Our clinic meets the highest national standards for patient safety, hygiene, and clinical outcomes.</p>
+        <div class="why-title">Quality Certified</div>
+        <p class="why-desc">Our clinic follows strict quality standards for patient safety, hygiene, and clinical outcomes at every stage of care.</p>
       </div>
       <div class="why-card reveal rv-d2">
         <div class="why-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
@@ -320,10 +326,10 @@ footer{padding-bottom:56px;}
           </div>
           <div class="form-row">
             <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" placeholder="Your full name"></div>
-            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" placeholder="+91 70345 25123"></div>
+            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" placeholder="+91 XXXXX XXXXX"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-lbl">Specialty</label><select class="form-in"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Orthopaedics</option></select></div>
+            <div class="form-group"><label class="form-lbl">Specialty</label><select class="form-in"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Diagnostics</option></select></div>
             <div class="form-group"><label class="form-lbl">Preferred Date</label><input type="date" class="form-in" id="apptDate"></div>
           </div>
           <div class="form-actions">
@@ -336,6 +342,7 @@ footer{padding-bottom:56px;}
           <div class="success-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
           <div class="success-ttl">Appointment Requested</div>
           <p class="success-sub">We will confirm your booking via WhatsApp within 30 minutes.</p>
+          <button onclick="document.getElementById('bookingForm').style.display='';document.getElementById('bookingSuccess').style.display='none';" class="btn btn-outline" style="margin-top:10px;font-size:13px;">Book Another Appointment</button>
         </div>
       </div>
     </div>
@@ -352,7 +359,7 @@ footer{padding-bottom:56px;}
       <div class="card testi-card reveal rv-d1">
         <div class="testi-stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg></div>
         <p class="testi-text">Dr. Raghavan spent a full 20 minutes explaining my diagnosis and treatment plan. I never felt rushed. The clinic is spotlessly clean and the staff are genuinely warm.</p>
-        <div class="testi-author"><div class="testi-av" style="background:linear-gradient(135deg,#0066CC,#0052A3)">RS</div><div><div class="testi-name">Arjun Nair</div><div class="testi-note">Patient since 2021</div></div></div>
+        <div class="testi-author"><div class="testi-av" style="background:linear-gradient(135deg,#0066CC,#0052A3)">AJ</div><div><div class="testi-name">Arjun Nair</div><div class="testi-note">Patient since 2021</div></div></div>
       </div>
       <div class="card testi-card reveal rv-d2">
         <div class="testi-stars"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="none"/></svg></div>
@@ -378,7 +385,7 @@ footer{padding-bottom:56px;}
       <div class="faq-item"><button class="faq-q">Do I need an appointment or can I walk in?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Walk-ins are welcome during all clinic hours. Booking an appointment online guarantees your slot and significantly reduces your waiting time.</div></div></div>
       <div class="faq-item"><button class="faq-q">Which insurance panels do you accept?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">We accept most major TPA panels including Mediassist, Vidal Health, Religare, Star Health, and HDFC Ergo. Please call ahead to confirm your specific plan.</div></div></div>
       <div class="faq-item"><button class="faq-q">How quickly will I receive my lab results?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Routine blood panels are ready within 4-6 hours and delivered via WhatsApp. Specialised panels may take 24-48 hours. Your doctor will inform you of the timeline at the time of testing.</div></div></div>
-      <div class="faq-item"><button class="faq-q">Is parking available at the clinic?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Yes, dedicated two-wheeler and car parking is available in the building basement. The Kowdiar Metro Station is also a 7-minute walk away.</div></div></div>
+      <div class="faq-item"><button class="faq-q">Is parking available at the clinic?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Yes, dedicated two-wheeler and car parking is available in the building basement. The clinic is well connected by KSRTC and city buses. Auto-rickshaws are readily available at Kowdiar Junction.</div></div></div>
       <div class="faq-item"><button class="faq-q">Can I consult a doctor via video call?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Teleconsultation is available for follow-up visits and prescription renewals. First-time consultations for new conditions require an in-person visit for a thorough examination.</div></div></div>
       <div class="faq-item"><button class="faq-q">What should I bring to my first appointment?<span class="faq-ico"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span></button><div class="faq-a"><div class="faq-a-inner">Please bring a valid photo ID, your Aadhaar or insurance card, any previous prescriptions or reports, and a list of current medications. Arriving 10 minutes early helps with registration.</div></div></div>
     </div>
@@ -407,8 +414,8 @@ footer{padding-bottom:56px;}
         </div>
         <p class="footer-desc">Compassionate, expert healthcare for your entire family. Serving Trivandrum and Kerala since 2012.</p>
         <div class="footer-socials">
-          <a href="#" class="social-ic" aria-label="Instagram"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg></a>
-          <a href="#" class="social-ic" aria-label="Facebook"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="#" onclick="return false;" title="Your Instagram link goes here" class="social-ic" style="opacity:0.45;cursor:default;" aria-label="Instagram"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.5" fill="currentColor"/></svg></a>
+          <a href="#" onclick="return false;" title="Your Facebook link goes here" class="social-ic" style="opacity:0.45;cursor:default;" aria-label="Facebook"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
           <a href="https://wa.me/917034525123" data-site="wa-link" class="social-ic wa-ic" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
         </div>
       </div>
@@ -457,6 +464,7 @@ footer{padding-bottom:56px;}
   <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
 </a>
 <script src="script.js"></script>
+<style>.page-transition-overlay{position:fixed;inset:0;background:#fff;z-index:999998;opacity:0;pointer-events:none;transition:opacity 0.2s ease}.page-transition-overlay.active{opacity:1;pointer-events:all}</style>
 <script type="module">
   import { saveAppointment } from './firebase-config.js';
 
@@ -606,9 +614,9 @@ footer{padding-bottom:56px;}
 <script type="module" src="./site-data.js"></script>
 
 <!-- Privacy Policy & Terms Modal -->
-<div id="legalModal" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;">
+<div id="legalModal" onclick="if(event.target===this){this.style.display='none';document.body.style.overflow='';}" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
   <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
-    <button onclick="document.getElementById('legalModal').style.display='none'" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
+    <button onclick="document.getElementById('legalModal').style.display='none';document.body.style.overflow='';" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
     <div id="legalContent"></div>
   </div>
 </div>
@@ -629,8 +637,26 @@ const LEGAL = {
 };
 function showLegal(type) {
   document.getElementById('legalContent').innerHTML = LEGAL[type];
-  document.getElementById('legalModal').style.display = 'flex';
+  var modal = document.getElementById('legalModal');
+  modal.style.display = 'flex';
+  // Scroll modal inner content to top
+  var inner = modal.querySelector('div');
+  if (inner) inner.scrollTop = 0;
+  // Lock body scroll and scroll page to top so modal is always visible
+  document.body.style.overflow = 'hidden';
+  window.scrollTo({ top: 0, behavior: 'instant' });
 }
+</script>
+<script>
+  (function(){
+    var el = document.getElementById('heroScheduleDate');
+    if(el){
+      var d = new Date();
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      el.textContent = days[d.getDay()] + ', ' + d.getDate() + ' ' + months[d.getMonth()];
+    }
+  })();
 </script>
 </body>
 </html>
