@@ -131,8 +131,8 @@ export async function updateAppointment(id, fields) {
 // ── CLINIC SETTINGS ───────────────────────────────────────────
 
 const DEFAULT_SETTINGS = {
-  phone:        '9876543210',
-  whatsapp:     '919876543210',
+  phone:        '7034525123',
+  whatsapp:     '917034525123',
   email:        'care@medicareclinic.in',
   addressLine1: '12 Health Avenue, Kowdiar',
   addressLine2: 'Trivandrum 695003, Kerala',
