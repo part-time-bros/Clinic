@@ -19,6 +19,9 @@
   <!-- Razorpay checkout — uncomment when client has Razorpay account -->
   <!-- <script src="https://checkout.razorpay.com/v1/checkout.js"></script> -->
   <link rel="stylesheet" href="styles.css">
+<style>
+body.modal-open{overflow:hidden;position:fixed;width:100%;top:var(--scroll-y,0px);}
+</style>
 </head>
 <body>
 <div id="demoBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#0F172A,#1e3a5f);color:#fff;box-shadow:0 -4px 24px rgba(0,0,0,0.3);">
@@ -144,14 +147,14 @@ footer{padding-bottom:56px;}
           </div>
           <div class="form-group full"><label class="form-lbl">Email Address</label><input type="email" class="form-in" placeholder="your@email.com"></div>
           <div class="form-row">
-            <div class="form-group"><label class="form-lbl">Specialty *</label><select class="form-in"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Diagnostics</option></select></div>
+            <div class="form-group"><label class="form-lbl">Specialty *</label><select class="form-in" id="bkSpecialty"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Diagnostics</option></select></div>
             <div class="form-group"><label class="form-lbl">Preferred Doctor</label><select class="form-in" id="bkDoctorSelect"><option value="">Any available</option></select></div>
           </div>
           <div class="form-row">
             <div class="form-group"><label class="form-lbl">Preferred Date *</label><input type="date" class="form-in" id="bkDate"></div>
-            <div class="form-group"><label class="form-lbl">Preferred Time</label><select class="form-in"><option value="">Any time</option><option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option></select></div>
+            <div class="form-group"><label class="form-lbl">Preferred Time</label><select class="form-in" id="bkTime"><option value="">Any time</option><option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option><option>5:00 PM</option><option>6:00 PM</option></select></div>
           </div>
-          <div class="form-group full"><label class="form-lbl">Visit Type</label><select class="form-in"><option>First visit</option><option>Follow-up</option><option>Lab test only</option><option>Vaccination</option></select></div>
+          <div class="form-group full"><label class="form-lbl">Visit Type</label><select class="form-in" id="bkVisitType"><option>First visit</option><option>Follow-up</option><option>Lab test only</option><option>Vaccination</option></select></div>
           <div class="form-group full"><label class="form-lbl">Notes (optional)</label><textarea class="form-in" placeholder="Briefly describe your symptoms or reason for visit..." maxlength="500"></textarea></div>
           <div class="form-actions" style="display:none;">
             <button class="btn btn-primary btn-full btn-lg" id="bkSubmitBtn">Request Appointment</button>
@@ -233,7 +236,7 @@ footer{padding-bottom:56px;}
               // Validate form first before showing payment modal
               var nameIn  = document.querySelector('#fullBookingForm input[placeholder="Your full name"]');
               var phoneIn = document.querySelector('#fullBookingForm input[type="tel"]');
-              var specIn  = document.querySelector('#fullBookingForm select:nth-of-type(1)');
+              var specIn  = document.getElementById('bkSpecialty');
               var dateIn  = document.getElementById('bkDate');
               var hasEmpty = !nameIn?.value?.trim() || !phoneIn?.value?.trim() || !specIn?.value || !dateIn?.value;
               if (hasEmpty) {
@@ -249,18 +252,116 @@ footer{padding-bottom:56px;}
 
           <div id="bkError" style="display:none;margin-top:10px;padding:11px 14px;border-radius:10px;background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:13.5px;"></div>
         </div>
-        <div class="form-success" id="fullBookingSuccess">
-          <div class="success-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <div class="success-ttl">Request Received</div>
-          <p class="success-sub">We will confirm your appointment on WhatsApp within 30 minutes during clinic hours (8AM-8PM).</p>
-          <a href="index.html" class="btn btn-outline" style="margin-top:8px;">Back to Home</a>
-          <a href="https://wa.me/917034525123?text=Hi%2C+I+just+submitted+an+appointment+request+online.+Please+confirm+my+slot." data-site="wa-link" 
-             target="_blank" rel="noopener"
-             class="btn btn-primary" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp Us to Confirm
-          </a>
+        <div class="form-success" id="fullBookingSuccess" style="flex-direction:column;align-items:stretch;text-align:left;padding:24px;">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div class="success-ring" style="margin:0 auto 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="success-ttl">Appointment Requested!</div>
+            <p class="success-sub" style="margin-bottom:0;">We will confirm your slot on WhatsApp within 30 minutes.</p>
+          </div>
+          <div id="apptCard" style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:14px;padding:18px 20px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+              <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#0F172A;">Appointment Details</div>
+              <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:4px 12px;font-family:monospace;font-size:13px;font-weight:700;color:#0066CC;" id="successApptId">MC---------</div>
+            </div>
+            <div style="display:grid;gap:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid #F1F5F9;padding-bottom:6px;"><span style="color:#64748B;">Patient</span><span style="font-weight:600;color:#0F172A;" id="successPatientName">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid #F1F5F9;padding-bottom:6px;"><span style="color:#64748B;">Specialty</span><span style="font-weight:600;color:#0F172A;" id="successSpecialty">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;border-bottom:1px solid #F1F5F9;padding-bottom:6px;"><span style="color:#64748B;">Date</span><span style="font-weight:600;color:#0F172A;" id="successDate">—</span></div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:#64748B;">Time</span><span style="font-weight:600;color:#0F172A;" id="successTime">—</span></div>
+            </div>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid #E2E8F0;font-size:11px;color:#94A3B8;">Quote your Appointment ID when calling or messaging us.</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a id="successWaBtn" href="https://wa.me/917034525123" target="_blank" rel="noopener"
+               class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp Us to Confirm
+            </a>
+            <button onclick="printApptSlip()" class="btn btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Save / Print Appointment Slip
+            </button>
+            <a href="index.html" class="btn btn-outline" style="text-align:center;text-decoration:none;">Back to Home</a>
+          </div>
         </div>
+
+        <!-- ── PRINTABLE APPOINTMENT SLIP ──────────────────────── -->
+        <div id="printApptSlip" style="display:none;">
+          <style>
+            @media print {
+              body > *:not(#printApptSlip) { display: none !important; }
+              #printApptSlip {
+                display: block !important;
+                position: fixed !important;
+                inset: 0 !important;
+                background: white !important;
+                z-index: 999999 !important;
+                padding: 20px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
+              @page { margin: 0.5cm; size: A5 portrait; }
+            }
+          </style>
+          <div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;max-width:380px;margin:0 auto;border:2px solid #0066CC;border-radius:14px;padding:24px;background:#fff;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
+              <div style="width:36px;height:36px;background:#0066CC;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:800;font-size:15px;color:#0F172A;">MediCare Clinic</div>
+                <div style="font-size:10px;color:#94A3B8;">12 Health Avenue, Kowdiar, Trivandrum 695003</div>
+              </div>
+            </div>
+            <div style="text-align:center;margin-bottom:18px;">
+              <div style="font-size:10px;font-weight:700;color:#64748B;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">APPOINTMENT SLIP</div>
+              <div id="printApptId" style="font-family:monospace;font-size:20px;font-weight:900;color:#0066CC;letter-spacing:3px;background:#EFF6FF;border-radius:8px;padding:8px 16px;display:inline-block;"></div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;">
+              <tr style="border-bottom:1px solid #F1F5F9;"><td style="color:#64748B;font-weight:600;padding:6px 0;">Patient Name</td><td id="printName" style="font-weight:700;color:#0F172A;text-align:right;"></td></tr>
+              <tr style="border-bottom:1px solid #F1F5F9;"><td style="color:#64748B;font-weight:600;padding:6px 0;">Specialty</td><td id="printSpecialty" style="font-weight:700;color:#0F172A;text-align:right;"></td></tr>
+              <tr style="border-bottom:1px solid #F1F5F9;"><td style="color:#64748B;font-weight:600;padding:6px 0;">Date</td><td id="printDate" style="font-weight:700;color:#0F172A;text-align:right;"></td></tr>
+              <tr style="border-bottom:1px solid #F1F5F9;"><td style="color:#64748B;font-weight:600;padding:6px 0;">Time</td><td id="printTime" style="font-weight:700;color:#0F172A;text-align:right;"></td></tr>
+              <tr><td style="color:#64748B;font-weight:600;padding:6px 0;">Status</td><td style="font-weight:700;color:#D97706;text-align:right;">Pending Confirmation</td></tr>
+            </table>
+            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 12px;font-size:10.5px;color:#92400E;margin-bottom:14px;line-height:1.5;">
+              ⏰ We will confirm your slot via WhatsApp within 30 minutes during clinic hours (8AM–8PM, Mon–Sat).
+            </div>
+            <div style="text-align:center;font-size:10px;color:#94A3B8;line-height:1.6;">
+              Please bring this slip to your appointment<br>
+              <strong style="color:#0F172A;" id="printPhone">+91 70345 25123</strong> · <span id="printEmail">care@medicareclinic.in</span>
+            </div>
+          </div>
+        </div>
+
+        <script>
+        function printApptSlip() {
+          var id   = document.getElementById('successApptId').textContent;
+          var name = document.getElementById('successPatientName').textContent;
+          var spec = document.getElementById('successSpecialty').textContent;
+          var date = document.getElementById('successDate').textContent;
+          var time = document.getElementById('successTime').textContent;
+          // Populate clinic contact from live page data
+          var livePhone = document.querySelector('[data-site="phone-text"]')?.textContent || '+91 70345 25123';
+          var liveEmail = document.querySelector('[data-site="email-text"]')?.textContent || 'care@medicareclinic.in';
+          var printPhone = document.getElementById('printPhone');
+          var printEmail = document.getElementById('printEmail');
+          if (printPhone) printPhone.textContent = livePhone;
+          if (printEmail) printEmail.textContent = liveEmail;
+          document.getElementById('printApptId').textContent    = id;
+          document.getElementById('printName').textContent      = name;
+          document.getElementById('printSpecialty').textContent = spec;
+          document.getElementById('printDate').textContent      = date;
+          document.getElementById('printTime').textContent      = time;
+          var slip = document.getElementById('printApptSlip');
+          slip.style.display = 'block';
+          setTimeout(function() {
+            window.print();
+            setTimeout(function() { slip.style.display = 'none'; }, 500);
+          }, 100);
+        }
+        </script>
       </div>
     </div>
   </div>
@@ -333,7 +434,7 @@ footer{padding-bottom:56px;}
   const successEl = document.getElementById('fullBookingSuccess');
   const submitBtn = document.getElementById('bkSubmitBtn');
   const errorEl   = document.getElementById('bkError');
-  const HP_KEY    = 'ac_bk_submissions';
+  const HP_KEY    = 'ac_bk_booking_page';
   const LIMIT     = 2;
   const WINDOW_MS = 24 * 60 * 60 * 1000;
 
@@ -395,8 +496,15 @@ footer{padding-bottom:56px;}
     },
     email(v) {
       if (!v) return null; // optional field
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return 'Enter a valid email address.';
-      if (v.length > 120) return 'Email address is too long.';
+      v = v.trim();
+      if (v.length > 254) return 'Email too long (max 254 characters).';
+      const local = v.split('@')[0] || '';
+      if (local.length > 64) return 'Email username part too long (max 64 chars).';
+      if (v.includes('..')) return 'Email cannot contain consecutive dots.';
+      const re = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
+      if (!re.test(v)) return 'Enter a valid email address (e.g. name@example.com).';
+      const blocked = ['test@test.com','test@gmail.com','abc@abc.com','aaa@aaa.com','example@example.com','admin@admin.com'];
+      if (blocked.includes(v.toLowerCase())) return 'Please enter your actual email address.';
       return null;
     },
     specialty(v) {
@@ -405,7 +513,7 @@ footer{padding-bottom:56px;}
     },
     date(v) {
       if (!v) return 'Please select a preferred date.';
-      const chosen  = new Date(v);
+      const chosen  = new Date(v + 'T00:00:00');
       const today   = new Date(); today.setHours(0,0,0,0);
       const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
       if (chosen < today)    return 'Please select a future date.';
@@ -426,7 +534,7 @@ footer{padding-bottom:56px;}
   const nameIn  = form.querySelector('input[placeholder="Your full name"]');
   const phoneIn = form.querySelector('input[type="tel"]');
   const emailIn = form.querySelector('input[type="email"]');
-  const specIn  = form.querySelector('select');
+  const specIn  = document.getElementById('bkSpecialty') || form.querySelector('select');
   const dateIn  = form.querySelector('input[type="date"]');
 
   function attachBlur(input, rule) {
@@ -450,6 +558,39 @@ footer{padding-bottom:56px;}
     err ? fieldError(specIn, err) : fieldOk(specIn);
   });
 
+
+  // ── Appointment ID generator ─────────────────────────────────
+  function generateApptId() {
+    const now   = new Date();
+    const yy    = now.getFullYear();
+    const mm    = String(now.getMonth() + 1).padStart(2, '0');
+    const dd    = String(now.getDate()).padStart(2, '0');
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no confusable chars
+    let suffix  = '';
+    const arr = new Uint32Array(4);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < 4; i++) suffix += chars[arr[i] % chars.length];
+    return \`MC-\${yy}\${mm}\${dd}-\${suffix}\`;
+  }
+
+  // ── Get visitor IP (ipify — free, no API key, HTTPS) ─────────
+  async function getVisitorIP() {
+    try {
+      const res  = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      return data.ip || 'unknown';
+    } catch { return 'unknown'; }
+  }
+
+  // ── Format readable timestamp ─────────────────────────────────
+  function readableTimestamp() {
+    const now = new Date();
+    const opts = { day:'2-digit', month:'short', year:'numeric',
+                   hour:'2-digit', minute:'2-digit', second:'2-digit',
+                   hour12:true, timeZone:'Asia/Kolkata' };
+    return now.toLocaleString('en-IN', opts) + ' IST';
+  }
+
   // ── Submit ───────────────────────────────────────────────────
   submitBtn.addEventListener('click', async () => {
     // Honeypot
@@ -461,11 +602,11 @@ footer{padding-bottom:56px;}
     const name      = getValue('input[placeholder="Your full name"]');
     const phone     = getValue('input[type="tel"]');
     const email     = getValue('input[type="email"]');
-    const specialty = getValue('select:nth-of-type(1)');
-    const doctor    = getValue('select:nth-of-type(2)');
+    const specialty = document.getElementById('bkSpecialty')?.value?.trim() ?? '';
+    const doctor    = document.getElementById('bkDoctorSelect')?.value?.trim() ?? '';
     const date      = getValue('input[type="date"]');
-    const time      = getValue('select:nth-of-type(3)');
-    const visitType = getValue('select:nth-of-type(4)');
+    const time      = document.getElementById('bkTime')?.value?.trim() ?? '';
+    const visitType = document.getElementById('bkVisitType')?.value?.trim() ?? '';
     const notes     = getValue('textarea');
 
     // Run all validators and mark fields
@@ -505,7 +646,34 @@ footer{padding-bottom:56px;}
     const cleanPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
 
     try {
-      await saveAppointment({ name, phone: cleanPhone, email, specialty, doctor, date, time, visitType, notes, source: 'booking-page' });
+      const apptId    = generateApptId();
+      const visitorIP = await getVisitorIP();
+      const bookedAt  = readableTimestamp();
+      await saveAppointment({
+        apptId, name, phone: cleanPhone, email,
+        specialty, doctor, date, time, visitType, notes,
+        source: 'booking-page',
+        bookedAt,
+        visitorIP,
+      });
+      // Populate success screen
+      document.getElementById('successApptId').textContent    = apptId;
+      document.getElementById('successPatientName').textContent = name;
+      document.getElementById('successSpecialty').textContent   = specialty;
+      document.getElementById('successDate').textContent        = date;
+      document.getElementById('successTime').textContent        = time || 'Flexible';
+      // Update WhatsApp message with real details
+      const waMsg = encodeURIComponent(
+        'Hi, I just booked an appointment.\n\n' +
+        'Appointment ID: ' + apptId + '\n' +
+        'Name: ' + name + '\n' +
+        'Specialty: ' + specialty + '\n' +
+        'Date: ' + date + '\n' +
+        'Time: ' + (time || 'Flexible') + '\n\n' +
+        'Please confirm my slot. Thank you!'
+      );
+      const waBtn = document.getElementById('successWaBtn');
+      if (waBtn) waBtn.href = 'https://wa.me/917034525123?text=' + waMsg;
       incrementRate();
       form.style.display      = 'none';
       successEl.style.display = 'flex';
@@ -521,9 +689,9 @@ footer{padding-bottom:56px;}
 <script type="module" src="./site-data.js"></script>
 
 <!-- Privacy Policy & Terms Modal -->
-<div id="legalModal" onclick="if(event.target===this){this.style.display='none';document.body.style.overflow='';}" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+<div id="legalModal" onclick="if(event.target===this){ var m=document.getElementById('legalModal');m.style.display='none';var sy=document.documentElement.style.getPropertyValue('--scroll-y');document.body.classList.remove('modal-open');window.scrollTo(0,parseInt(sy||'0')*-1); }" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
   <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
-    <button onclick="document.getElementById('legalModal').style.display='none';document.body.style.overflow='';" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
+    <button onclick="var m=document.getElementById('legalModal');m.style.display='none';var sy=document.documentElement.style.getPropertyValue('--scroll-y');document.body.classList.remove('modal-open');window.scrollTo(0,parseInt(sy||'0')*-1);" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
     <div id="legalContent"></div>
   </div>
 </div>
@@ -545,13 +713,13 @@ const LEGAL = {
 function showLegal(type) {
   document.getElementById('legalContent').innerHTML = LEGAL[type];
   var modal = document.getElementById('legalModal');
-  modal.style.display = 'flex';
-  // Scroll modal inner content to top
   var inner = modal.querySelector('div');
   if (inner) inner.scrollTop = 0;
-  // Lock body scroll and scroll page to top so modal is always visible
-  document.body.style.overflow = 'hidden';
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  // iOS-safe scroll lock
+  var scrollY = window.scrollY;
+  document.documentElement.style.setProperty('--scroll-y', '-' + scrollY + 'px');
+  document.body.classList.add('modal-open');
+  modal.style.display = 'flex';
 }
 </script>
 </body>

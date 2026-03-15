@@ -1265,7 +1265,8 @@
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href     = url;
-    a.download = `medicareclinic-appointments-${new Date().toISOString().slice(0,10)}.csv`;
+    const clinicSlug = (window._clinicName || "clinic").toLowerCase().replace(/[^a-z0-9]/g,"-").slice(0,20);
+    a.download = `${clinicSlug}-appointments-${new Date().toISOString().slice(0,10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(`Exported ${rows.length} appointment${rows.length !== 1 ? 's' : ''}`);
@@ -1743,6 +1744,7 @@
       getHeroContent(), getTestimonials(), getServices()
     ]);
     currentSettings     = s;
+    window._clinicName = s.name || "medicareclinic";
     currentDoctors      = doctors;
     currentHero         = hero;
     currentTestimonials = testimonials;

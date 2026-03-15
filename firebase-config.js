@@ -139,7 +139,7 @@ const DEFAULT_SETTINGS = {
   addressLine2: 'Trivandrum 695003, Kerala',
   addressFull:  '12 Health Avenue, Kowdiar, Trivandrum 695003',
   addressNote:  'Near Kowdiar Junction',
-  mapEmbed:     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.8!2d76.9386!3d8.5169!2m3!1f0!2f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bea6ffffffff%3A0x1!2sKowdiar%2C+Thiruvananthapuram%2C+Kerala!5e0!3m2!1sen!2sin!4v1710000000000',
+  mapEmbed:     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.5423!2d76.9340!3d8.5241!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bba5d7cf739f%3A0x7f37b3a4e6b1c5a0!2sKowdiar%2C+Thiruvananthapuram%2C+Kerala+695003!5e0!3m2!1sen!2sin!4v1710500000000!5m2!1sen!2sin',
   hoursWeekday: 'Mon-Fri: 8AM-8PM',
   hoursSat:     'Sat: 8AM-6PM',
   hoursSun:     'Sun: 9AM-2PM',

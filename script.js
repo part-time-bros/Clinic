@@ -46,6 +46,7 @@
   document.querySelectorAll('.rv-stagger').forEach(el => staggerObs.observe(el));
 
   // Exposed so site-data.js can re-observe dynamically injected cards
+  window.__acCountUp = countUp;
   window.__acReveal = function() {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
       if (revealObs) revealObs.observe(el);

@@ -17,6 +17,9 @@
   <meta property="og:url" content="https://medicareclinic.in/contact.html">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="stylesheet" href="styles.css">
+<style>
+body.modal-open{overflow:hidden;position:fixed;width:100%;top:var(--scroll-y,0px);}
+</style>
 </head>
 <body>
 <div id="demoBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#0F172A,#1e3a5f);color:#fff;box-shadow:0 -4px 24px rgba(0,0,0,0.3);">
@@ -124,7 +127,7 @@ footer{padding-bottom:56px;}
     <div class="contact-two-col">
       <div>
         <div class="map-wrap">
-          <iframe data-site="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.8!2d76.9386!3d8.5169!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bea6ffffffff%3A0x1!2sKowdiar%2C+Thiruvananthapuram%2C+Kerala!5e0!3m2!1sen!2sin!4v1710000000000" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="MediCare Clinic, Kowdiar Trivandrum location"></iframe>
+          <iframe data-site="map-frame" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3945.5423!2d76.9340!3d8.5241!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b05bba5d7cf739f%3A0x7f37b3a4e6b1c5a0!2sKowdiar%2C+Thiruvananthapuram%2C+Kerala+695003!5e0!3m2!1sen!2sin!4v1710500000000!5m2!1sen!2sin" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="MediCare Clinic, Kowdiar Trivandrum location"></iframe>
         </div>
         <div class="contact-info">
           <div class="contact-card">
@@ -239,9 +242,9 @@ footer{padding-bottom:56px;}
 <script type="module" src="./site-data.js"></script>
 
 <!-- Privacy Policy & Terms Modal -->
-<div id="legalModal" onclick="if(event.target===this){this.style.display='none';document.body.style.overflow='';}" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
+<div id="legalModal" onclick="if(event.target===this){ var m=document.getElementById('legalModal');m.style.display='none';var sy=document.documentElement.style.getPropertyValue('--scroll-y');document.body.classList.remove('modal-open');window.scrollTo(0,parseInt(sy||'0')*-1); }" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;overflow-y:auto;">
   <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
-    <button onclick="document.getElementById('legalModal').style.display='none';document.body.style.overflow='';" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
+    <button onclick="var m=document.getElementById('legalModal');m.style.display='none';var sy=document.documentElement.style.getPropertyValue('--scroll-y');document.body.classList.remove('modal-open');window.scrollTo(0,parseInt(sy||'0')*-1);" style="position:absolute;top:16px;right:16px;background:#F1F5F9;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;line-height:1;color:#64748B;">×</button>
     <div id="legalContent"></div>
   </div>
 </div>
@@ -263,13 +266,13 @@ const LEGAL = {
 function showLegal(type) {
   document.getElementById('legalContent').innerHTML = LEGAL[type];
   var modal = document.getElementById('legalModal');
-  modal.style.display = 'flex';
-  // Scroll modal inner content to top
   var inner = modal.querySelector('div');
   if (inner) inner.scrollTop = 0;
-  // Lock body scroll and scroll page to top so modal is always visible
-  document.body.style.overflow = 'hidden';
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  // iOS-safe scroll lock
+  var scrollY = window.scrollY;
+  document.documentElement.style.setProperty('--scroll-y', '-' + scrollY + 'px');
+  document.body.classList.add('modal-open');
+  modal.style.display = 'flex';
 }
 </script>
 <script type="module">

@@ -201,7 +201,7 @@ function showInfoSkeletons() {
 // Show skeletons immediately before Firestore responds
 showInfoSkeletons();
 showDocSkeletons(document.getElementById('homeDocGrid'), 3);
-showDocSkeletons(document.getElementById('doctorsContainer') ? document.querySelector('#doctorsContainer .container') : null, 3);
+// Skeleton for doctors page handled by the loading spinner already injected in doctors.html
 
 Promise.all([
   getClinicSettings(), getDoctorsList(), getAvailability(),
@@ -240,6 +240,11 @@ function applyHeroContent(h) {
       if (isNumeric) {
         numEl.dataset.count = num;
         numEl.textContent   = '0';
+        // Re-trigger count-up if element already passed the observer threshold
+        if (numEl.classList.contains('visible') || numEl.closest('.visible') ||
+            numEl.getBoundingClientRect().top < window.innerHeight) {
+          if (typeof window.__acCountUp === 'function') window.__acCountUp(numEl);
+        }
       } else {
         numEl.textContent = num;
         delete numEl.dataset.count;
