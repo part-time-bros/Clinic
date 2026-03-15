@@ -416,7 +416,7 @@ footer{background:var(--text-primary);padding:56px 0 28px}
 .wa-float svg{width:26px;height:26px;fill:#fff}
 .wa-float:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(37,211,102,0.55);animation:none}
 @keyframes waFloat{0%,100%{box-shadow:0 4px 16px rgba(37,211,102,0.4)}50%{box-shadow:0 4px 24px rgba(37,211,102,0.6),0 0 0 8px rgba(37,211,102,0.07)}}
-@media(max-width:768px){.wa-float{bottom:80px;right:16px}}
+@media(max-width:768px){.wa-float{bottom:130px;right:14px}}
 
 /* ── REVEAL ── */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
@@ -621,6 +621,6 @@ body {
 
 /* mob-cta-fix: push above demo banner on mobile */
 @media(max-width:767px){
-  .mob-cta{bottom:52px!important;}
+  .mob-cta{bottom:48px!important;}
   body{padding-bottom:110px!important;}
 }

@@ -12,9 +12,37 @@ function esc(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Sanitize fetched settings — wipe any old auraclinic/bangalore data ──
+function sanitizeSettings(s) {
+  const DEMO_DEFAULTS = {
+    email:        'care@medicareclinic.in',
+    phone:        '7034525123',
+    whatsapp:     '917034525123',
+    addressLine1: '12 Health Avenue, Kowdiar',
+    addressLine2: 'Trivandrum 695003, Kerala',
+    addressFull:  '12 Health Avenue, Kowdiar, Trivandrum 695003',
+    addressNote:  'Near Kowdiar Junction',
+    hoursWeekday: 'Mon-Fri: 8AM-8PM',
+    hoursSat:     'Sat: 8AM-6PM',
+    hoursSun:     'Sun: 9AM-2PM',
+    hoursFooter:  'Mon-Sat: 8AM-8PM, Sun: 9AM-2PM',
+    hoursCall:    'Mon-Sat, 8AM-8PM',
+  };
+  const BAD = ['auraclinic', 'indiranagar', 'bangalore', '560038', '9876543210', '98765'];
+  const clean = { ...s };
+  for (const [key, val] of Object.entries(clean)) {
+    const v = String(val || '').toLowerCase();
+    if (BAD.some(p => v.includes(p)) && DEMO_DEFAULTS[key]) {
+      clean[key] = DEMO_DEFAULTS[key];
+    }
+  }
+  return clean;
+}
+
 // ── Apply clinic settings to data-site elements ───────────────
 
 function applySettings(s) {
+  s = sanitizeSettings(s);
   const displayPhone = fmtPhone(s.phone);
   const waNum        = s.whatsapp || `91${s.phone}`;
 

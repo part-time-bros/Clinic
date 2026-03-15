@@ -13,29 +13,48 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div id="demoBanner" style="
-  position:fixed;bottom:0;left:0;right:0;z-index:99999;padding-bottom:env(safe-area-inset-bottom,0px);
-  background:linear-gradient(135deg,#0F172A,#1e3a5f);
-  color:#fff;padding:10px 20px;
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:8px;
-  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
-  box-shadow:0 -4px 24px rgba(0,0,0,0.3);
-">
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span style="background:#0066CC;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;">DEMO</span>
-    <span style="color:#CBD5E1;">This is a demo site — your clinic name, doctors, and details replace everything you see here.</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:16px;flex-shrink:0;">
-    <span style="color:#94A3B8;font-size:12px;">Built by <strong style="color:#60A5FA;">TwinWaves Digital</strong></span>
-    <a href="https://wa.me/917034525123?text=Hi+Anandhu%2C+I+saw+your+clinic+website+demo+and+I%27m+interested+in+getting+one+for+my+clinic" 
-       target="_blank" rel="noopener"
-       style="background:#0066CC;color:#fff;padding:6px 14px;border-radius:20px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">
-      Get This for My Clinic →
-    </a>
+<div id="demoBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#0F172A,#1e3a5f);color:#fff;box-shadow:0 -4px 24px rgba(0,0,0,0.3);">
+  <!-- Desktop banner -->
+  <div class="demo-banner-inner" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:8px;padding:9px 20px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+      <span style="background:#0066CC;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;white-space:nowrap;flex-shrink:0;">DEMO</span>
+      <span class="demo-desc" style="color:#CBD5E1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">This is a demo — your clinic name &amp; details replace everything here.</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;flex-shrink:0;">
+      <span style="color:#94A3B8;font-size:12px;white-space:nowrap;">By <strong style="color:#60A5FA;">TwinWaves Digital</strong></span>
+      <a href="https://wa.me/917034525123?text=Hi+Anandhu%2C+I+saw+your+clinic+website+demo+and+I%27m+interested+in+getting+one+for+my+clinic" 
+         target="_blank" rel="noopener"
+         style="background:#0066CC;color:#fff;padding:6px 13px;border-radius:20px;text-decoration:none;font-size:12px;font-weight:600;white-space:nowrap;">
+        Get This →
+      </a>
+    </div>
   </div>
 </div>
-<div style="height:52px;"></div>
+<!-- Spacer so content isn't hidden behind banner -->
+<div id="demoBannerSpacer" style="height:48px;"></div>
+<style>
+/* ── Demo banner responsive fixes ── */
+@media(max-width:600px){
+  .demo-desc{display:none!important;}
+  #demoBanner .demo-banner-inner{padding:8px 14px;}
+}
+/* ── Mob CTA sits above demo banner ── */
+.mob-cta{bottom:48px!important;}
+/* ── WhatsApp float sits above mob-cta + demo banner ── */
+@media(max-width:768px){
+  .wa-float{bottom:130px!important;right:14px!important;}
+}
+@media(min-width:769px){
+  .wa-float{bottom:70px!important;}
+}
+/* ── Body padding so footer content clears everything ── */
+body{padding-bottom:0!important;}
+footer{padding-bottom:56px;}
+@media(max-width:767px){
+  footer{padding-bottom:120px;}
+}
+</style>
+
 
 <nav class="navbar" id="navbar">
   <div class="container nav-inner">
@@ -213,7 +232,7 @@
 </a>
 <script src="script.js"></script>
 <script type="module" src="./site-data.js"></script>
-<style>body{padding-bottom:60px!important;}</style>
+
 <!-- Privacy Policy & Terms Modal -->
 <div id="legalModal" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;max-width:580px;width:100%;max-height:80vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.25);">
