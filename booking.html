@@ -16,6 +16,8 @@
   <meta property="og:image" content="https://medicareclinic.in/og.jpg">
   <meta property="og:url" content="https://medicareclinic.in/booking.html">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://medicareclinic.in/booking.html">
+  <meta name="theme-color" content="#0066CC">
   <!-- Razorpay checkout — uncomment when client has Razorpay account -->
   <!-- <script src="https://checkout.razorpay.com/v1/checkout.js"></script> -->
   <link rel="stylesheet" href="styles.css">
@@ -42,25 +44,12 @@ html.legal-open { overflow: hidden; }
   </div>
 </div>
 <style>
-/* ── Demo banner responsive fixes ── */
+/* Activate demo banner offsets — single line, no !important arms race */
+:root { --demo-bar-h: 44px; }
+/* Hide description text on small screens */
 @media(max-width:600px){
-  .demo-desc{display:none!important;}
-  #demoBanner .demo-banner-inner{padding:8px 14px;}
-}
-/* ── Mob CTA sits above demo banner ── */
-.mob-cta{bottom:48px!important;}
-/* ── WhatsApp float sits above mob-cta + demo banner ── */
-@media(max-width:768px){
-  .wa-float{bottom:130px!important;right:14px!important;}
-}
-@media(min-width:769px){
-  .wa-float{bottom:70px!important;}
-}
-/* ── Body padding so footer content clears everything ── */
-body{padding-bottom:0!important;}
-footer{padding-bottom:56px;}
-@media(max-width:767px){
-  footer{padding-bottom:120px;}
+  .demo-desc            { display: none !important; }
+  #demoBanner .demo-banner-inner { padding: 8px 14px; }
 }
 </style>
 
@@ -428,131 +417,31 @@ footer{padding-bottom:56px;}
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
 <style>.page-transition-overlay{position:fixed;inset:0;background:#fff;z-index:999998;opacity:0;pointer-events:none;transition:opacity 0.2s ease}.page-transition-overlay.active{opacity:1;pointer-events:all}</style>
 <script type="module">
-  import { saveAppointment } from './firebase-config.js';
+  import { saveAppointment }                           from './firebase-config.js';
+  import { RULES, fieldError, fieldOk, attachBlur,
+           isRateLimited, incrementRate }              from './validate.js';
 
   const form      = document.getElementById('fullBookingForm');
   const successEl = document.getElementById('fullBookingSuccess');
   const submitBtn = document.getElementById('bkSubmitBtn');
   const errorEl   = document.getElementById('bkError');
-  const HP_KEY    = 'ac_bk_booking_page';
-  const LIMIT     = 2;
-  const WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  // ── Rate limit helpers ───────────────────────────────────────
-  function getRateData() {
-    try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
-    catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
-  }
-  function isRateLimited() {
-    const d = getRateData();
-    if (Date.now() > d.resetAt) { localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS })); return false; }
-    return d.count >= LIMIT;
-  }
-  function incrementRate() {
-    const d = getRateData(); d.count++;
-    localStorage.setItem(HP_KEY, JSON.stringify(d));
-  }
-
-  // ── Field-level error helpers ────────────────────────────────
-  function fieldError(input, msg) {
-    input.style.borderColor = '#DC2626';
-    input.style.boxShadow   = '0 0 0 3px rgba(220,38,38,0.1)';
-    let tip = input.parentElement.querySelector('.field-tip');
-    if (!tip) { tip = document.createElement('div'); tip.className = 'field-tip'; tip.style.cssText = 'font-size:12px;color:#DC2626;margin-top:4px;'; input.parentElement.appendChild(tip); }
-    tip.textContent = msg;
-  }
-  function fieldOk(input) {
-    input.style.borderColor = '#059669';
-    input.style.boxShadow   = '0 0 0 3px rgba(5,150,105,0.08)';
-    const tip = input.parentElement.querySelector('.field-tip');
-    if (tip) tip.remove();
-  }
-  function fieldReset(input) {
-    input.style.borderColor = '';
-    input.style.boxShadow   = '';
-    const tip = input.parentElement.querySelector('.field-tip');
-    if (tip) tip.remove();
-  }
-
-  // ── Validators ───────────────────────────────────────────────
-  const RULES = {
-    name(v) {
-      if (!v)                         return 'Full name is required.';
-      if (v.length < 3)               return 'Name must be at least 3 characters.';
-      if (v.length > 80)              return 'Name is too long.';
-      if (/[0-9]/.test(v))            return 'Name cannot contain numbers.';
-      if (/[^a-zA-Z\s\.\-']/.test(v)) return 'Name contains invalid characters.';
-      return null;
-    },
-    phone(v) {
-      const digits = v.replace(/[\s\-\+]/g, '');
-      if (!digits)                    return 'Phone number is required.';
-      if (!/^\d+$/.test(digits))      return 'Phone number must contain digits only.';
-      // Accept 10 digits or 91+10 digits
-      if (digits.length === 12 && digits.startsWith('91')) return null;
-      if (digits.length !== 10)       return 'Enter a valid 10-digit Indian mobile number.';
-      if (!/^[6-9]/.test(digits))     return 'Mobile number must start with 6, 7, 8, or 9.';
-      return null;
-    },
-    email(v) {
-      if (!v) return null; // optional field
-      v = v.trim();
-      if (v.length > 254) return 'Email too long (max 254 characters).';
-      const local = v.split('@')[0] || '';
-      if (local.length > 64) return 'Email username part too long (max 64 chars).';
-      if (v.includes('..')) return 'Email cannot contain consecutive dots.';
-      const re = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$/;
-      if (!re.test(v)) return 'Enter a valid email address (e.g. name@example.com).';
-      const blocked = ['test@test.com','test@gmail.com','abc@abc.com','aaa@aaa.com','example@example.com','admin@admin.com'];
-      if (blocked.includes(v.toLowerCase())) return 'Please enter your actual email address.';
-      return null;
-    },
-    specialty(v) {
-      if (!v) return 'Please select a specialty.';
-      return null;
-    },
-    date(v) {
-      if (!v) return 'Please select a preferred date.';
-      const chosen  = new Date(v + 'T00:00:00');
-      const today   = new Date(); today.setHours(0,0,0,0);
-      const maxDate = new Date(); maxDate.setMonth(maxDate.getMonth() + 3);
-      if (chosen < today)    return 'Please select a future date.';
-      if (chosen > maxDate)  return 'Appointments can only be booked up to 3 months ahead.';
-      // Check doctor availability from data attributes set by site-data.js
-      const dateEl  = document.getElementById('bkDate');
-      const offDays = JSON.parse(dateEl?.dataset?.offdays || '[]');
-      const blocked = JSON.parse(dateEl?.dataset?.blocked || '[]');
-      const dayOfWk = chosen.getDay();
-      const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      if (offDays.includes(dayOfWk)) return `${dayNames[dayOfWk]} is not available for this doctor.`;
-      if (blocked.includes(v))       return 'This date is not available for this doctor.';
-      return null;
-    },
-  };
-
-  // ── Live validation on blur ──────────────────────────────────
+  // ── Input references ─────────────────────────────────────────
   const nameIn  = form.querySelector('input[placeholder="Your full name"]');
   const phoneIn = form.querySelector('input[type="tel"]');
   const emailIn = form.querySelector('input[type="email"]');
   const specIn  = document.getElementById('bkSpecialty') || form.querySelector('select');
   const dateIn  = form.querySelector('input[type="date"]');
 
-  function attachBlur(input, rule) {
-    input.addEventListener('blur', () => {
-      const err = RULES[rule](input.value.trim());
-      if (input.value.trim()) err ? fieldError(input, err) : fieldOk(input);
-    });
-    input.addEventListener('input', () => {
-      if (input.style.borderColor) {
-        const err = RULES[rule](input.value.trim());
-        err ? fieldError(input, err) : fieldOk(input);
-      }
-    });
-  }
-  attachBlur(nameIn,  'name');
-  attachBlur(phoneIn, 'phone');
-  attachBlur(emailIn, 'email');
-  attachBlur(dateIn,  'date');
+  // ── Live validation — blur / input ───────────────────────────
+  attachBlur(nameIn,  v => RULES.name(v));
+  attachBlur(phoneIn, v => RULES.phone(v));
+  attachBlur(emailIn, v => RULES.email(v));
+  attachBlur(dateIn,  v => {
+    const offDays = JSON.parse(document.getElementById('bkDate')?.dataset?.offdays || '[]');
+    const blocked = JSON.parse(document.getElementById('bkDate')?.dataset?.blocked || '[]');
+    return RULES.date(v, { offDays, blockedDates: blocked });
+  });
   specIn.addEventListener('change', () => {
     const err = RULES.specialty(specIn.value);
     err ? fieldError(specIn, err) : fieldOk(specIn);
@@ -610,15 +499,17 @@ footer{padding-bottom:56px;}
     const notes     = getValue('textarea');
 
     // Run all validators and mark fields
-    const errors = [
+    const offDays = JSON.parse(document.getElementById('bkDate')?.dataset?.offdays || '[]');
+    const blocked = JSON.parse(document.getElementById('bkDate')?.dataset?.blocked || '[]');
+    const checks = [
       [nameIn,  RULES.name(name)],
       [phoneIn, RULES.phone(phone)],
       [emailIn, RULES.email(email)],
       [specIn,  RULES.specialty(specialty)],
-      [dateIn,  RULES.date(date)],
+      [dateIn,  RULES.date(date, { offDays, blockedDates: blocked })],
     ];
     let hasError = false;
-    errors.forEach(([input, err]) => {
+    checks.forEach(([input, err]) => {
       if (err) { fieldError(input, err); hasError = true; }
       else if (input.value.trim()) fieldOk(input);
     });
@@ -710,8 +601,14 @@ const LEGAL = {
 <p style="color:#475569;font-size:14px;line-height:1.8">These terms may be updated at any time. Continued use of this website constitutes acceptance of the latest terms.</p>`
 };
 function showLegal(type) {
-  document.getEle
-  </script>
+  document.getElementById('legalContent').innerHTML = LEGAL[type];
+  var modal = document.getElementById('legalModal');
+  var inner = modal.querySelector('div');
+  if (inner) inner.scrollTop = 0;
+  modal.style.display = 'flex';
+  document.documentElement.classList.add('legal-open');
+}
+</script>
   <script src="chatbot.js"></script>
 </body>
 </html>

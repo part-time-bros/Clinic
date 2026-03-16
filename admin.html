@@ -627,7 +627,7 @@
 
     <div class="f-group" id="sUidGroup"><label class="f-lbl">Firebase UID <span style="color:#DC2626">*</span></label><input class="f-in" id="staffUid" placeholder="Paste UID from Firebase Console"></div>
     <div class="f-group"><label class="f-lbl">Full Name</label><input class="f-in" id="staffName" placeholder="Dr. Priya Nair"></div>
-    <div class="f-group"><label class="f-lbl">Email</label><input class="f-in" type="email" id="staffEmail" placeholder="priya@medicareclinic.in"></div>
+    <div class="f-group"><label class="f-lbl">Email</label><input class="f-in" type="email" id="sEmail" placeholder="priya@medicareclinic.in"></div>
     <div class="f-group">
       <label class="f-lbl">Role</label>
       <select class="f-in" id="staffRole">
@@ -1967,7 +1967,7 @@
           <div class="settings-card-sub">Phone, WhatsApp, and email shown across all pages.</div>
           <div class="s-group"><label class="s-lbl">Phone Number (10 digits)</label><input class="s-in" id="sPhone" value="${esc(s.phone)}" maxlength="15" placeholder="7034525123"></div>
           <div class="s-group"><label class="s-lbl">WhatsApp Number (with country code)</label><input class="s-in" id="sWhatsapp" value="${esc(s.whatsapp)}" maxlength="15" placeholder="917034525123"></div>
-          <div class="s-group"><label class="s-lbl">Email Address</label><input class="s-in" id="staffEmail" type="email" value="${esc(s.email)}" placeholder="care@medicareclinic.in"></div>
+          <div class="s-group"><label class="s-lbl">Email Address</label><input class="s-in" id="sClinicEmail" type="email" value="${esc(s.email)}" placeholder="care@medicareclinic.in"></div>
           <div style="display:flex;align-items:center">
             <button class="btn-save-section" onclick="saveContactInfo()">Save Contact Info</button>
             <span class="save-status" id="statusContact">Saved</span>

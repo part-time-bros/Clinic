@@ -40,25 +40,12 @@ html.legal-open { overflow: hidden; }
   </div>
 </div>
 <style>
-/* ── Demo banner responsive fixes ── */
+/* Activate demo banner offsets — single line, no !important arms race */
+:root { --demo-bar-h: 44px; }
+/* Hide description text on small screens */
 @media(max-width:600px){
-  .demo-desc{display:none!important;}
-  #demoBanner .demo-banner-inner{padding:8px 14px;}
-}
-/* ── Mob CTA sits above demo banner ── */
-.mob-cta{bottom:48px!important;}
-/* ── WhatsApp float sits above mob-cta + demo banner ── */
-@media(max-width:768px){
-  .wa-float{bottom:130px!important;right:14px!important;}
-}
-@media(min-width:769px){
-  .wa-float{bottom:70px!important;}
-}
-/* ── Body padding so footer content clears everything ── */
-body{padding-bottom:0!important;}
-footer{padding-bottom:56px;}
-@media(max-width:767px){
-  footer{padding-bottom:120px;}
+  .demo-desc            { display: none !important; }
+  #demoBanner .demo-banner-inner { padding: 8px 14px; }
 }
 </style>
 

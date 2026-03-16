@@ -2,35 +2,42 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Bug 5 fix: use a single get() per helper to avoid multiple reads per operation.
-    // get() in rules costs 1 read from your Firestore quota — minimise calls.
+    // ── Helper: single get() per request scope ────────────────────
+    // Rules v2 supports 'let' inside functions, so we cache the doc
+    // in a local binding — one Firestore read instead of two per auth check.
 
     function staffDoc() {
       return get(/databases/$(database)/documents/staff/$(request.auth.uid));
     }
 
     function isSuperAdmin() {
+      let s = staffDoc();
       return request.auth != null
-        && exists(/databases/$(database)/documents/staff/$(request.auth.uid))
-        && staffDoc().data.role == 'super_admin'
-        && staffDoc().data.active == true;
+          && s != null
+          && s.data.role   == 'super_admin'
+          && s.data.active == true;
     }
 
     function isStaff() {
+      let s = staffDoc();
       return request.auth != null
-        && exists(/databases/$(database)/documents/staff/$(request.auth.uid))
-        && staffDoc().data.active == true;
+          && s != null
+          && s.data.active == true;
     }
 
     // Appointments — public can create, staff can read/update
+    // Field-level validation prevents arbitrary writes from the browser
     match /appointments/{id} {
-      allow create: if true;
+      allow create: if request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
+                    && request.resource.data.name      is string
+                    && request.resource.data.name.size() >= 2
+                    && request.resource.data.phone     is string
+                    && request.resource.data.specialty is string;
       allow read, update: if isStaff();
       allow delete: if false; // never delete — DPDP audit trail
     }
 
     // Staff profiles — any staff can read, only super_admin can write
-    // (No Cloud Functions needed — super_admin writes directly from admin panel)
     match /staff/{uid} {
       allow read:   if isStaff();
       allow create: if isSuperAdmin();
@@ -38,16 +45,16 @@ service cloud.firestore {
       allow delete: if false; // never delete — DPDP audit trail
     }
 
-    // Clinic settings — staff can read, only super_admin writes
+    // Clinic settings — public read (site-data.js needs it for all pages)
     match /settings/{document} {
-      allow read: if true;
+      allow read:  if true;
       allow write: if isSuperAdmin();
     }
 
-    // Audit log — staff can read, append-only (no update/delete)
+    // Audit log — staff read, append-only (no update/delete ever)
     match /auditLog/{entry} {
-      allow read:   if isStaff();
-      allow create: if isStaff();
+      allow read:           if isStaff();
+      allow create:         if isStaff();
       allow update, delete: if false;
     }
   }

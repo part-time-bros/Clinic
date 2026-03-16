@@ -201,12 +201,36 @@ function showInfoSkeletons() {
 // Show skeletons immediately before Firestore responds
 showInfoSkeletons();
 showDocSkeletons(document.getElementById('homeDocGrid'), 3);
-// Skeleton for doctors page handled by the loading spinner already injected in doctors.html
+
+// ── Error boundary + 8-second timeout ────────────────────────
+// If Firestore never responds (offline / rules block / cold start),
+// clear all skeletons and render defaults so the page is never
+// stuck showing empty shimmer bars.
+
+function clearSkeletons() {
+  // Restore data-site text elements to their default values
+  document.querySelectorAll('[data-site]').forEach(el => {
+    const skel = el.querySelector('.skeleton.info-skeleton');
+    if (skel) el.innerHTML = el.dataset.default || '';
+  });
+  // Clear doctor skeleton grid if still showing placeholder cards
+  const homeDocGrid = document.getElementById('homeDocGrid');
+  if (homeDocGrid && homeDocGrid.querySelector('.doc-skeleton')) {
+    homeDocGrid.innerHTML = '<p style="text-align:center;color:#94A3B8;padding:48px 0">Unable to load doctors. Please refresh.</p>';
+  }
+}
+
+const LOAD_TIMEOUT = 8_000; // 8 s
+const timeoutId = setTimeout(() => {
+  console.warn('[site-data] Firestore fetch timed out — rendering defaults');
+  clearSkeletons();
+}, LOAD_TIMEOUT);
 
 Promise.all([
   getClinicSettings(), getDoctorsList(), getAvailability(),
   getHeroContent(), getTestimonials(), getServices()
 ]).then(([settings, doctors, availability, hero, testimonials, services]) => {
+  clearTimeout(timeoutId);
   applySettings(settings);
   applyHeroContent(hero);
   renderDoctorsPage(doctors);
@@ -214,7 +238,11 @@ Promise.all([
   renderServicesGrid(services);
   renderTestimonials(testimonials);
   populateDoctorSelect(doctors, availability);
-}).catch(console.error);
+}).catch(err => {
+  clearTimeout(timeoutId);
+  console.error('[site-data] Firestore fetch failed:', err);
+  clearSkeletons();
+});
 
 
 // ── Hero content ──────────────────────────────────────────────

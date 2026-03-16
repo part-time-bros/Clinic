@@ -18,6 +18,9 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="MediCare Clinic — Trusted Healthcare in Trivandrum">
   <meta name="twitter:description" content="Expert doctors, modern diagnostics and personalised care in Kowdiar, Trivandrum.">
+  <link rel="canonical" href="https://medicareclinic.in/">
+  <meta name="theme-color" content="#0066CC">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230066CC'/%3E%3Cpath d='M16 6a6 6 0 1 0 0 12A6 6 0 0 0 16 6zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 12c-2.21 0-4 1.34-4 3v1h22v-1c0-1.66-1.79-3-4-3H9z' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <script type="application/ld+json">
   {
@@ -80,25 +83,12 @@ html.legal-open { overflow: hidden; }
   </div>
 </div>
 <style>
-/* ── Demo banner responsive fixes ── */
+/* Activate demo banner offsets — single line, no !important arms race */
+:root { --demo-bar-h: 44px; }
+/* Hide description text on small screens */
 @media(max-width:600px){
-  .demo-desc{display:none!important;}
-  #demoBanner .demo-banner-inner{padding:8px 14px;}
-}
-/* ── Mob CTA sits above demo banner ── */
-.mob-cta{bottom:48px!important;}
-/* ── WhatsApp float sits above mob-cta + demo banner ── */
-@media(max-width:768px){
-  .wa-float{bottom:130px!important;right:14px!important;}
-}
-@media(min-width:769px){
-  .wa-float{bottom:70px!important;}
-}
-/* ── Body padding so footer content clears everything ── */
-body{padding-bottom:0!important;}
-footer{padding-bottom:56px;}
-@media(max-width:767px){
-  footer{padding-bottom:120px;}
+  .demo-desc            { display: none !important; }
+  #demoBanner .demo-banner-inner { padding: 8px 14px; }
 }
 </style>
 
@@ -469,98 +459,30 @@ footer{padding-bottom:56px;}
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="script.js"></script>
 <style>.page-transition-overlay{position:fixed;inset:0;background:#fff;z-index:999998;opacity:0;pointer-events:none;transition:opacity 0.2s ease}.page-transition-overlay.active{opacity:1;pointer-events:all}</style>
 <script type="module">
-  import { saveAppointment } from './firebase-config.js';
+  import { saveAppointment }                             from './firebase-config.js';
+  import { RULES, fieldError, fieldOk, attachBlur,
+           isRateLimited, incrementRate }                from './validate.js';
 
   const submitBtn = document.getElementById('homeSubmitBtn');
   const form      = document.getElementById('bookingForm');
   const successEl = document.getElementById('bookingSuccess');
   const errorEl   = document.getElementById('homeError');
-  const HP_KEY    = 'ac_bk_submissions';
-  const LIMIT     = 2;
-  const WINDOW_MS = 24 * 60 * 60 * 1000;
-
-  function getRateData() {
-    try { return JSON.parse(localStorage.getItem(HP_KEY)) || { count: 0, resetAt: Date.now() + WINDOW_MS }; }
-    catch { return { count: 0, resetAt: Date.now() + WINDOW_MS }; }
-  }
-  function isRateLimited() {
-    const d = getRateData();
-    if (Date.now() > d.resetAt) { localStorage.setItem(HP_KEY, JSON.stringify({ count: 0, resetAt: Date.now() + WINDOW_MS })); return false; }
-    return d.count >= LIMIT;
-  }
-  function incrementRate() {
-    const d = getRateData(); d.count++;
-    localStorage.setItem(HP_KEY, JSON.stringify(d));
-  }
-
-  function fieldError(input, msg) {
-    input.style.borderColor = '#DC2626';
-    input.style.boxShadow   = '0 0 0 3px rgba(220,38,38,0.1)';
-    let tip = input.parentElement.querySelector('.field-tip');
-    if (!tip) { tip = document.createElement('div'); tip.className = 'field-tip'; tip.style.cssText = 'font-size:12px;color:#DC2626;margin-top:4px;'; input.parentElement.appendChild(tip); }
-    tip.textContent = msg;
-  }
-  function fieldOk(input) {
-    input.style.borderColor = '#059669';
-    input.style.boxShadow   = '0 0 0 3px rgba(5,150,105,0.08)';
-    const tip = input.parentElement.querySelector('.field-tip');
-    if (tip) tip.remove();
-  }
-
-  const RULES = {
-    name(v) {
-      if (!v)                return 'Full name is required.';
-      if (v.length < 3)      return 'Name must be at least 3 characters.';
-      if (/[0-9]/.test(v))   return 'Name cannot contain numbers.';
-      return null;
-    },
-    phone(v) {
-      const digits = v.replace(/[\s\-\+]/g, '');
-      if (!digits)           return 'Phone number is required.';
-      if (!/^\d+$/.test(digits)) return 'Digits only — no letters or symbols.';
-      if (digits.length === 12 && digits.startsWith('91')) return null;
-      if (digits.length !== 10) return 'Enter a valid 10-digit Indian mobile number.';
-      if (!/^[6-9]/.test(digits)) return 'Number must start with 6, 7, 8, or 9.';
-      return null;
-    },
-    specialty(v) { return v ? null : 'Please select a specialty.'; },
-    date(v) {
-      if (!v) return 'Please select a preferred date.';
-      const chosen = new Date(v + 'T00:00:00');
-      const today  = new Date(); today.setHours(0,0,0,0);
-      const max    = new Date(); max.setMonth(max.getMonth() + 3);
-      if (chosen < today) return 'Please select a future date.';
-      if (chosen > max)   return 'Appointments can only be booked up to 3 months ahead.';
-      return null;
-    },
-  };
 
   const nameIn  = form.querySelector('input[type="text"]');
   const phoneIn = form.querySelector('input[type="tel"]');
   const specIn  = form.querySelector('select');
   const dateIn  = form.querySelector('input[type="date"]');
 
-  function attachBlur(input, rule) {
-    input.addEventListener('blur', () => {
-      const err = RULES[rule](input.value.trim());
-      if (input.value.trim()) err ? fieldError(input, err) : fieldOk(input);
-    });
-    input.addEventListener('input', () => {
-      if (input.style.borderColor) {
-        const err = RULES[rule](input.value.trim());
-        err ? fieldError(input, err) : fieldOk(input);
-      }
-    });
-  }
-  attachBlur(nameIn,  'name');
-  attachBlur(phoneIn, 'phone');
-  attachBlur(dateIn,  'date');
+  attachBlur(nameIn,  v => RULES.name(v));
+  attachBlur(phoneIn, v => RULES.phone(v));
+  attachBlur(dateIn,  v => RULES.date(v));
   specIn.addEventListener('change', () => {
     const err = RULES.specialty(specIn.value);
     err ? fieldError(specIn, err) : fieldOk(specIn);
   });
 
   submitBtn.addEventListener('click', async () => {
+    // Honeypot — silent success for bots
     if (document.getElementById('hpFieldHome')?.value) {
       form.style.display = 'none'; successEl.style.display = 'flex'; return;
     }
@@ -570,14 +492,14 @@ footer{padding-bottom:56px;}
     const specialty = specIn.value;
     const date      = dateIn.value;
 
-    const errors = [
+    const checks = [
       [nameIn,  RULES.name(name)],
       [phoneIn, RULES.phone(phone)],
       [specIn,  RULES.specialty(specialty)],
       [dateIn,  RULES.date(date)],
     ];
     let hasError = false;
-    errors.forEach(([input, err]) => {
+    checks.forEach(([input, err]) => {
       if (err) { fieldError(input, err); hasError = true; }
       else if (input.value.trim()) fieldOk(input);
     });
@@ -596,9 +518,9 @@ footer{padding-bottom:56px;}
 
     errorEl.style.display = 'none';
     submitBtn.disabled    = true;
-    submitBtn.textContent = 'Submitting...';
+    submitBtn.textContent = 'Submitting…';
 
-    const cleanPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+    const cleanPhone = phone.replace(/[\s\-+]/g, '').replace(/^91/, '');
 
     try {
       await saveAppointment({ name, phone: cleanPhone, specialty, date, source: 'homepage' });
@@ -606,7 +528,7 @@ footer{padding-bottom:56px;}
       form.style.display      = 'none';
       successEl.style.display = 'flex';
     } catch (err) {
-      console.error('Firestore write failed:', err);
+      console.error('[homepage booking] Firestore write failed:', err);
       errorEl.textContent   = 'Something went wrong. Please call us directly.';
       errorEl.style.display = 'block';
       submitBtn.disabled    = false;
@@ -652,10 +574,13 @@ function showLegal(type) {
 <script>
   (function(){
     var el = document.getElementById('heroScheduleDate');
-    if(el){
-      var d = new Date();
-      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursda
-  </script>
+    if (!el) return;
+    var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var today = new Date();
+    var name  = days[today.getDay()];
+    el.textContent = name === days[new Date().getDay()] ? name + "'s Schedule" : 'Today\u2019s Schedule';
+  })();
+</script>
   <script src="chatbot.js"></script>
 </body>
 </html>
