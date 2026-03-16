@@ -132,6 +132,7 @@ export async function updateAppointment(id, fields) {
 // ── CLINIC SETTINGS ───────────────────────────────────────────
 
 const DEFAULT_SETTINGS = {
+  showDemoBanner: true,
   phone:        '7034525123',
   whatsapp:     '917034525123',
   email:        'care@medicareclinic.in',

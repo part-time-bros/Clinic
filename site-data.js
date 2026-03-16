@@ -12,9 +12,9 @@ function esc(str) {
   return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Sanitize fetched settings — wipe any old auraclinic/bangalore data ──
+// ── Sanitize fetched settings — replace any empty/missing field with a default ──
 function sanitizeSettings(s) {
-  const DEMO_DEFAULTS = {
+  const DEFAULTS = {
     email:        'care@medicareclinic.in',
     phone:        '7034525123',
     whatsapp:     '917034525123',
@@ -28,12 +28,10 @@ function sanitizeSettings(s) {
     hoursFooter:  'Mon-Sat: 8AM-8PM, Sun: 9AM-2PM',
     hoursCall:    'Mon-Sat, 8AM-8PM',
   };
-  const BAD = ['auraclinic', 'indiranagar', 'bangalore', '560038', '9876543210', '98765'];
   const clean = { ...s };
-  for (const [key, val] of Object.entries(clean)) {
-    const v = String(val || '').toLowerCase();
-    if (BAD.some(p => v.includes(p)) && DEMO_DEFAULTS[key]) {
-      clean[key] = DEMO_DEFAULTS[key];
+  for (const [key, fallback] of Object.entries(DEFAULTS)) {
+    if (!clean[key] || String(clean[key]).trim() === '') {
+      clean[key] = fallback;
     }
   }
   return clean;
@@ -117,9 +115,14 @@ const SPECIALTY_GROUPS = [
 ];
 
 function getGroup(specialty) {
-  return SPECIALTY_GROUPS.find(g =>
-    specialty?.toLowerCase().includes(g.label.toLowerCase().split(' ')[0])
-  ) || { label: specialty, heading: specialty, hi: '', alt: false };
+  if (!specialty) return { label: '', heading: '', hi: '', alt: false };
+  const lower = specialty.toLowerCase();
+  // Exact match first — prevents 'Interventional Cardiology' matching 'Cardiology' group
+  const exact = SPECIALTY_GROUPS.find(g => g.label.toLowerCase() === lower);
+  if (exact) return exact;
+  // Partial fallback — match if specialty contains the group label
+  const partial = SPECIALTY_GROUPS.find(g => lower.includes(g.label.toLowerCase()));
+  return partial || { label: specialty, heading: specialty, hi: '', alt: false };
 }
 
 function renderDoctorsPage(doctors) {
@@ -232,6 +235,7 @@ Promise.all([
 ]).then(([settings, doctors, availability, hero, testimonials, services]) => {
   clearTimeout(timeoutId);
   applySettings(settings);
+  applyDemoBanner(settings);
   applyHeroContent(hero);
   renderDoctorsPage(doctors);
   renderHomeDocGrid(doctors);
@@ -244,6 +248,20 @@ Promise.all([
   clearSkeletons();
 });
 
+
+// ── Demo banner toggle ────────────────────────────────────────
+// When showDemoBanner is false (set via admin → Clinic Settings),
+// the banner is hidden and the CSS offset variable is zeroed out
+// so footer, wa-float and mob-cta all snap back to their normal positions.
+
+function applyDemoBanner(s) {
+  if (s.showDemoBanner === false) {
+    const banner = document.getElementById('demoBanner');
+    if (banner) banner.style.display = 'none';
+    // Zero out the CSS offset so nothing shifts up unexpectedly
+    document.documentElement.style.setProperty('--demo-bar-h', '0px');
+  }
+}
 
 // ── Hero content ──────────────────────────────────────────────
 

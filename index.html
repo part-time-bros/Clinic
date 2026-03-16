@@ -318,11 +318,11 @@ html.legal-open { overflow: hidden; }
             <input type="text" name="clinic_ref" id="hpFieldHome" tabindex="-1" autocomplete="off">
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" placeholder="Your full name"></div>
-            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" placeholder="+91 XXXXX XXXXX"></div>
+            <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" id="hmNameIn" placeholder="Your full name"></div>
+            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" id="hmPhoneIn" placeholder="+91 XXXXX XXXXX"></div>
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-lbl">Specialty</label><select class="form-in"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Diagnostics</option></select></div>
+            <div class="form-group"><label class="form-lbl">Specialty</label><select class="form-in" id="hmSpecIn"><option value="">Select specialty</option><option>General Medicine</option><option>Cardiology</option><option>Dermatology</option><option>Dental Care</option><option>Paediatrics</option><option>Diagnostics</option></select></div>
             <div class="form-group"><label class="form-lbl">Preferred Date</label><input type="date" class="form-in" id="apptDate"></div>
           </div>
           <div class="form-actions">
@@ -468,10 +468,10 @@ html.legal-open { overflow: hidden; }
   const successEl = document.getElementById('bookingSuccess');
   const errorEl   = document.getElementById('homeError');
 
-  const nameIn  = form.querySelector('input[type="text"]');
-  const phoneIn = form.querySelector('input[type="tel"]');
-  const specIn  = form.querySelector('select');
-  const dateIn  = form.querySelector('input[type="date"]');
+  const nameIn  = document.getElementById('hmNameIn');
+  const phoneIn = document.getElementById('hmPhoneIn');
+  const specIn  = document.getElementById('hmSpecIn');
+  const dateIn  = document.getElementById('apptDate');
 
   attachBlur(nameIn,  v => RULES.name(v));
   attachBlur(phoneIn, v => RULES.phone(v));

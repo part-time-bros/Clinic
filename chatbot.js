@@ -242,7 +242,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
   // ── Styles ────────────────────────────────────────────────────────
   const C = CHATBOT_CONFIG.primaryColor;
   const CSS = `
-  #mc-fab{position:fixed;bottom:88px;right:22px;z-index:9998;width:56px;height:56px;border-radius:50%;background:${C};border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,102,204,.38);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;outline:none}
+  #mc-fab{position:fixed;bottom:calc(92px + var(--demo-bar-h, 0px));right:22px;z-index:9998;width:56px;height:56px;border-radius:50%;background:${C};border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,102,204,.38);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;outline:none}
   #mc-fab:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(0,102,204,.5)}
   #mc-fab svg{transition:opacity .18s,transform .18s}
   #mc-fab .ic-chat{opacity:1;transform:scale(1) rotate(0deg)}
@@ -251,7 +251,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
   #mc-fab.open .ic-close{opacity:1;transform:scale(1) rotate(0deg)}
   #mc-badge{position:absolute;top:-3px;right:-3px;width:18px;height:18px;background:#EF4444;border-radius:50%;border:2px solid #fff;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif}
   #mc-badge.hidden{display:none}
-  #mc-win{position:fixed;bottom:156px;right:22px;z-index:9999;width:368px;max-height:540px;background:#fff;border-radius:20px;box-shadow:0 24px 56px rgba(15,23,42,.15),0 8px 20px rgba(15,23,42,.08);display:flex;flex-direction:column;overflow:hidden;font-family:'DM Sans',sans-serif;transform-origin:bottom right;transform:scale(.85) translateY(16px);opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .22s ease}
+  #mc-win{position:fixed;bottom:calc(160px + var(--demo-bar-h, 0px));right:22px;z-index:9999;width:368px;max-height:540px;background:#fff;border-radius:20px;box-shadow:0 24px 56px rgba(15,23,42,.15),0 8px 20px rgba(15,23,42,.08);display:flex;flex-direction:column;overflow:hidden;font-family:'DM Sans',sans-serif;transform-origin:bottom right;transform:scale(.85) translateY(16px);opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .22s ease}
   #mc-win.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}
   .mc-hdr{display:flex;align-items:center;gap:11px;padding:14px 16px;background:${C};border-radius:20px 20px 0 0;flex-shrink:0}
   .mc-hdr-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -294,8 +294,8 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
   #mc-send:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(0,102,204,.38)}
   #mc-send:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
   .mc-powered{text-align:center;font-size:10px;color:#CBD5E1;padding:4px 0 10px;letter-spacing:.02em}
-  @media(max-width:768px){#mc-fab{bottom:196px;right:14px}#mc-win{bottom:262px;right:8px}}
-  @media(max-width:400px){#mc-win{width:calc(100vw - 16px);right:8px;bottom:262px;max-height:55vh}#mc-fab{right:14px;bottom:196px}}
+  @media(max-width:768px){#mc-fab{bottom:calc(196px + var(--demo-bar-h, 0px));right:14px}#mc-win{bottom:calc(262px + var(--demo-bar-h, 0px));right:8px}}
+  @media(max-width:400px){#mc-win{width:calc(100vw - 16px);right:8px;bottom:calc(262px + var(--demo-bar-h, 0px));max-height:55vh}#mc-fab{right:14px;bottom:calc(196px + var(--demo-bar-h, 0px))}}
   `;
 
   const QUICK_REPLIES = ['Book an appointment','Our doctors','Clinic hours','Lab & diagnostics','Get directions'];

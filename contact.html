@@ -146,10 +146,14 @@ html.legal-open { overflow: hidden; }
           <div class="form-title">Send Us a Message</div>
           <div class="form-sub">For non-urgent enquiries. We respond within one working day.</div>
           <div id="contactForm">
-            <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" placeholder="Your name"></div>
-            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" placeholder="+91 XXXXX XXXXX"></div>
-            <div class="form-group"><label class="form-lbl">Subject</label><select class="form-in"><option value="">Select a topic</option><option>Book an Appointment</option><option>Test Results Enquiry</option><option>Insurance and Billing</option><option>Feedback</option><option>Other</option></select></div>
-            <div class="form-group"><label class="form-lbl">Message</label><textarea class="form-in" placeholder="Your message..." maxlength="1000"></textarea></div>
+            <!-- Honeypot — invisible to humans, bots fill it → silently fake-succeed -->
+            <div style="position:absolute;left:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+              <input type="text" name="clinic_ref" id="hpFieldContact" tabindex="-1" autocomplete="off">
+            </div>
+            <div class="form-group"><label class="form-lbl">Full Name</label><input type="text" class="form-in" id="ctNameIn" placeholder="Your name"></div>
+            <div class="form-group"><label class="form-lbl">Phone Number</label><input type="tel" class="form-in" id="ctPhoneIn" placeholder="+91 XXXXX XXXXX"></div>
+            <div class="form-group"><label class="form-lbl">Subject</label><select class="form-in" id="ctSubjectIn"><option value="">Select a topic</option><option>Book an Appointment</option><option>Test Results Enquiry</option><option>Insurance and Billing</option><option>Feedback</option><option>Other</option></select></div>
+            <div class="form-group"><label class="form-lbl">Message</label><textarea class="form-in" id="ctMessageIn" placeholder="Your message..." maxlength="1000"></textarea></div>
             <div class="form-actions">
               <button class="btn btn-primary btn-full" id="contactSubmitBtn">Send Message</button>
               <div class="form-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Your details are private and secure.</div>
@@ -262,23 +266,84 @@ function showLegal(type) {
 }
 </script>
 <script type="module">
-  import { saveAppointment } from './firebase-config.js';
-  const btn = document.getElementById('contactSubmitBtn');
-  if (btn) {
+  import { saveAppointment }                        from './firebase-config.js';
+  import { RULES, fieldError, fieldOk, attachBlur } from './validate.js';
+
+  const btn       = document.getElementById('contactSubmitBtn');
+  const nameIn    = document.getElementById('ctNameIn');
+  const phoneIn   = document.getElementById('ctPhoneIn');
+  const subjectIn = document.getElementById('ctSubjectIn');
+  const messageIn = document.getElementById('ctMessageIn');
+  const formEl    = document.getElementById('contactForm');
+  const successEl = document.getElementById('contactSuccess');
+
+  if (btn && nameIn && phoneIn) {
+    // Live blur validation
+    attachBlur(nameIn,  v => RULES.name(v));
+    attachBlur(phoneIn, v => RULES.phone(v));
+
     btn.addEventListener('click', async () => {
-      const form   = document.getElementById('contactForm');
-      const inputs = form ? form.querySelectorAll('input, select, textarea') : [];
-      const name   = inputs[0]?.value?.trim() || '';
-      const phone  = inputs[1]?.value?.trim() || '';
-      const subject = inputs[2]?.value?.trim() || '';
-      const message = inputs[3]?.value?.trim() || '';
-      if (!name || !phone) {
-        alert('Please fill in your name and phone number.'); return;
+      // Honeypot — silent fake-success for bots
+      if (document.getElementById('hpFieldContact')?.value) {
+        formEl.style.display    = 'none';
+        successEl.style.display = 'flex';
+        return;
       }
-      btn.disabled = true; btn.textContent = 'Sending...';
+
+      const name    = nameIn.value.trim();
+      const phone   = phoneIn.value.trim();
+      const subject = subjectIn?.value?.trim() || '';
+      const message = messageIn?.value?.trim() || '';
+
+      // Validate name and phone using shared RULES
+      const nameErr  = RULES.name(name);
+      const phoneErr = RULES.phone(phone);
+
+      if (nameErr)  { fieldError(nameIn,  nameErr);  }
+      else          { fieldOk(nameIn); }
+      if (phoneErr) { fieldError(phoneIn, phoneErr); }
+      else          { fieldOk(phoneIn); }
+
+      if (nameErr || phoneErr) return;
+
+      btn.disabled    = true;
+      btn.textContent = 'Sending...';
+
       try {
-        await saveAppointment({ name, phone, subject, message, source: 'contact-form', specialty: subject || 'General Enquiry', date
-  </script>
+        const cleanPhone = phone.replace(/[\s\-+]/g, '').replace(/^91/, '');
+        const today      = new Date().toISOString().slice(0, 10);
+
+        await saveAppointment({
+          name,
+          phone:     cleanPhone,
+          subject,
+          message,
+          source:    'contact-form',
+          specialty: subject || 'General Enquiry',
+          date:      today,
+          status:    'pending',
+        });
+
+        formEl.style.display    = 'none';
+        successEl.style.display = 'flex';
+      } catch (err) {
+        console.error('[contact form]', err);
+        btn.disabled    = false;
+        btn.textContent = 'Send Message';
+        // Show inline error below the button
+        let errEl = document.getElementById('contactError');
+        if (!errEl) {
+          errEl = document.createElement('div');
+          errEl.id = 'contactError';
+          errEl.style.cssText = 'margin-top:10px;padding:11px 14px;border-radius:10px;background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:13.5px;';
+          btn.parentElement.appendChild(errEl);
+        }
+        errEl.textContent    = 'Something went wrong. Please try again or call us directly.';
+        errEl.style.display  = 'block';
+      }
+    });
+  }
+</script>
   <script src="chatbot.js"></script>
 </body>
 </html>

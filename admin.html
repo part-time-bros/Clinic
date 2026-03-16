@@ -781,6 +781,7 @@
     getStaffProfile, getStaffList,
     saveStaff, deactivateStaff, reactivateStaff
   } from './firebase-config.js';
+  import { RULES } from './validate.js';
 
   // ── State ────────────────────────────────────────────────────
   let allAppointments  = [];
@@ -986,30 +987,38 @@
     });
   }
 
-  // Automatically mark confirmed appointments as missed if their date has passed
+  // Automatically mark confirmed appointments as missed if their date has passed.
+  // Re-entry guard prevents concurrent write storms if onSnapshot fires rapidly.
+  let _markingMissedInProgress = false;
   async function autoMarkMissed(appointments) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const toMiss = appointments.filter(a => {
-      if (a.status !== 'confirmed') return false;
-      if (!a.date) return false;
-      const apptDate = new Date(a.date + 'T00:00:00');
-      return apptDate < today;
-    });
-    if (!toMiss.length) return;
-    // Update Firestore and local state in parallel
-    await Promise.all(toMiss.map(async a => {
-      try {
-        await updateAppointmentStatus(a.id, 'missed');
-        a.status = 'missed';
-        writeAuditLog({
-          action:        'auto',
-          description:   `Auto-marked as Missed: ${a.name}'s appointment on ${a.date}`,
-          appointmentId: a.id,
-          adminEmail:    'system',
-        }).catch(()=>{});
-      } catch(e) { console.error('Auto-miss failed for', a.id, e); }
-    }));
+    if (_markingMissedInProgress) return;
+    _markingMissedInProgress = true;
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const toMiss = appointments.filter(a => {
+        if (a.status !== 'confirmed') return false;
+        if (!a.date) return false;
+        const apptDate = new Date(a.date + 'T00:00:00');
+        return apptDate < today;
+      });
+      if (!toMiss.length) return;
+      // Update Firestore and local state in parallel
+      await Promise.all(toMiss.map(async a => {
+        try {
+          await updateAppointmentStatus(a.id, 'missed');
+          a.status = 'missed';
+          writeAuditLog({
+            action:        'auto',
+            description:   `Auto-marked as Missed: ${a.name}'s appointment on ${a.date}`,
+            appointmentId: a.id,
+            adminEmail:    'system',
+          }).catch(()=>{});
+        } catch(e) { console.error('Auto-miss failed for', a.id, e); }
+      }));
+    } finally {
+      _markingMissedInProgress = false;
+    }
   }
 
   // Manual refresh re-subscribes (forces reconnect)
@@ -1046,6 +1055,7 @@
       const col = th.dataset.col;
       if (sortCol === col) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
       else { sortCol = col; sortDir = 'asc'; }
+      currentPage = 1; // reset pagination on sort so we never land on an empty page
       document.querySelectorAll('th').forEach(t => t.classList.remove('sorted'));
       th.classList.add('sorted');
       const arrow = th.querySelector('.sort-arrow');
@@ -1240,31 +1250,27 @@
   modalSaveBtn.addEventListener('click', async () => {
     if (!editingId) return;
 
-    // Validate
-    const name  = mFields.name.value.trim();
-    const phone = mFields.phone.value.trim();
-    const spec  = mFields.specialty.value;
-    const date  = mFields.date.value;
+    // Validate — using shared RULES from validate.js (single source of truth)
+    const name     = mFields.name.value.trim();
+    const phone    = mFields.phone.value.trim();
+    const spec     = mFields.specialty.value;
+    const date     = mFields.date.value;
+    const emailVal = mFields.email.value.trim();
 
     const errors = [];
-    if (!name || name.length < 3)         errors.push('Name must be at least 3 characters.');
-    if (/[0-9]/.test(name))               errors.push('Name cannot contain numbers.');
-    const digits = phone.replace(/[\s\-\+]/g, '');
-    if (!digits)                           errors.push('Phone number is required.');
-    else if (!/^\d+$/.test(digits))        errors.push('Phone must contain digits only.');
-    else if (digits.length !== 10 && !(digits.length === 12 && digits.startsWith('91')))
-                                           errors.push('Enter a valid 10-digit mobile number.');
-    else if (!/^[6-9]/.test(digits.length === 12 ? digits.slice(2) : digits))
-                                           errors.push('Mobile number must start with 6, 7, 8, or 9.');
-    if (!spec)                             errors.push('Please select a specialty.');
-    if (!date)                             errors.push('Please enter an appointment date.');
+    const nameErr  = RULES.name(name);
+    const phoneErr = RULES.phone(phone);
+    const specErr  = RULES.specialty(spec);
+    const emailErr = emailVal ? RULES.email(emailVal, { forceRequired: false }) : null;
 
-    const emailVal = mFields.email.value.trim();
-    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailVal))
-                                           errors.push('Enter a valid email address.');
+    if (nameErr)  errors.push(nameErr);
+    if (phoneErr) errors.push(phoneErr);
+    if (specErr)  errors.push(specErr);
+    if (!date)    errors.push('Please enter an appointment date.');
+    if (emailErr) errors.push(emailErr);
 
     if (errors.length) {
-      modalError.innerHTML  = errors.join('<br>');
+      modalError.innerHTML     = errors.join('<br>');
       modalError.style.display = 'block';
       return;
     }
@@ -1272,6 +1278,7 @@
     modalSaveBtn.disabled    = true;
     modalSaveBtn.textContent = 'Saving...';
 
+    const digits     = phone.replace(/[\s\-+]/g, '');
     const cleanPhone = digits.length === 12 ? digits.slice(2) : digits;
 
     try {
@@ -1974,6 +1981,26 @@
           </div>
         </div>
 
+        <!-- Demo Banner -->
+        <div class="settings-card">
+          <div class="settings-card-title">Demo Banner</div>
+          <div class="settings-card-sub">The dark banner at the bottom of every public page. Disable it when handing off to the client.</div>
+          <div class="s-group" style="flex-direction:row;align-items:center;gap:12px;margin-bottom:0">
+            <label class="s-lbl" style="margin:0;cursor:pointer;display:flex;align-items:center;gap:10px;font-weight:500;">
+              <input type="checkbox" id="sShowDemoBanner" ${s.showDemoBanner !== false ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--primary);cursor:pointer;">
+              Show demo banner on all public pages
+            </label>
+          </div>
+          <p style="margin:10px 0 14px;font-size:12.5px;color:var(--text-3);line-height:1.6">
+            Uncheck and save to hide the banner from all 5 pages instantly — no code edits required.
+            The CSS spacing adjusts automatically.
+          </p>
+          <div style="display:flex;align-items:center">
+            <button class="btn-save-section" onclick="saveDemoBannerSetting()">Save</button>
+            <span class="save-status" id="statusDemoBanner">Saved</span>
+          </div>
+        </div>
+
         <!-- Address -->
         <div class="settings-card">
           <div class="settings-card-title">Address</div>
@@ -2201,6 +2228,18 @@
     catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
 
+  window.saveDemoBannerSetting = async function() {
+    const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
+    const data = { showDemoBanner: document.getElementById('sShowDemoBanner').checked };
+    try {
+      await saveClinicSettings(data);
+      currentSettings = { ...currentSettings, ...data };
+      writeAuditLog({ action: 'settings', description: `Demo banner ${data.showDemoBanner ? 'enabled' : 'disabled'}`, adminEmail: currentAdminEmail }).catch(()=>{});
+      flashSaved('statusDemoBanner', btn); showToast(`Demo banner ${data.showDemoBanner ? 'enabled' : 'disabled'}`);
+    }
+    catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
+  };
+
   window.saveHours = async function() {
     const btn = event.target; btn.dataset.label = btn.textContent; btn.disabled = true; btn.textContent = 'Saving...';
     const data = {
@@ -2291,7 +2330,9 @@
     document.getElementById('sUidGroup').style.display        = '';
     document.getElementById('staffAddInstructions').style.display = '';
     document.getElementById('staffModalError').style.display  = 'none';
-    document.getElementById('staffModal').style.display       = 'flex';
+    const smAdd = document.getElementById('staffModal');
+    smAdd.style.display = 'flex';
+    requestAnimationFrame(() => smAdd.classList.add('open'));
     setTimeout(() => document.getElementById('staffUid').focus(), 150);
   }
 
@@ -2308,12 +2349,16 @@
     document.getElementById('sUidGroup').style.display        = 'none';
     document.getElementById('staffAddInstructions').style.display = 'none';
     document.getElementById('staffModalError').style.display  = 'none';
-    document.getElementById('staffModal').style.display       = 'flex';
+    const smEdit = document.getElementById('staffModal');
+    smEdit.style.display = 'flex';
+    requestAnimationFrame(() => smEdit.classList.add('open'));
     setTimeout(() => document.getElementById('staffName').focus(), 150);
   }
 
   function closeStaffModal() {
-    document.getElementById('staffModal').style.display = 'none';
+    const sm = document.getElementById('staffModal');
+    sm.classList.remove('open');
+    sm.addEventListener('transitionend', () => { sm.style.display = 'none'; }, { once: true });
     editingStaffUid = null;
   }
 
