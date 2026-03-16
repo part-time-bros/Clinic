@@ -295,7 +295,13 @@
     .slip-close-btn{position:fixed;top:16px;right:16px;padding:8px 18px;border-radius:999px;background:#0F172A;color:#fff;font-size:13px;font-weight:600;border:none;cursor:pointer;z-index:10000}
     @media print{.slip-close-btn{display:none}}
 
-    /* ── AVAILABILITY IN SETTINGS ── */
+    /* ── STAFF MODAL ── */
+    #staffModal{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);z-index:1100;display:none;align-items:center;justify-content:center;padding:20px}
+    #staffModal .confirm-box{background:#fff;border-radius:20px;padding:32px;box-shadow:0 24px 56px rgba(15,23,42,.18);width:100%;max-width:440px}
+
+    /* tab bar wider for more tabs */
+    .tab-bar{max-width:100% !important}
+
     .avail-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:10px 0 16px}
     .avail-day{display:flex;flex-direction:column;align-items:center;gap:5px}
     .avail-day-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-3)}
@@ -406,7 +412,7 @@
         <div class="admin-nav-mark"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
         <span class="admin-nav-name">Medicare<em>Clinic</em></span>
       </div>
-      <span class="admin-badge">Admin</span>
+      <span class="admin-badge" id="roleBadge">Admin</span>
     </div>
     <div class="admin-nav-right">
       <span class="admin-email" id="adminEmail"></span>
@@ -415,12 +421,14 @@
   </nav>
 
   <main class="admin-main">
-    <!-- Tab bar -->
-    <div class="tab-bar">
-      <button class="tab-btn active" data-tab="appointments">Appointments <span id="pendingBadge" style="display:none;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px"></span></button>
-      <button class="tab-btn" data-tab="history">Patient History</button>
-      <button class="tab-btn" data-tab="audit">Audit Log</button>
-      <button class="tab-btn" data-tab="settings">Clinic Settings</button>
+    <!-- Tab bar — shown/hidden per role after login -->
+    <div class="tab-bar" id="mainTabBar" style="max-width:100%">
+      <button class="tab-btn active" data-tab="appointments" id="tabBtnAppointments">Appointments <span id="pendingBadge" style="display:none;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px"></span></button>
+      <button class="tab-btn" data-tab="history"      id="tabBtnHistory">Patient History</button>
+      <button class="tab-btn" data-tab="audit"        id="tabBtnAudit">Audit Log</button>
+      <button class="tab-btn" data-tab="settings"     id="tabBtnSettings">Clinic Settings</button>
+      <button class="tab-btn" data-tab="staff"        id="tabBtnStaff">Staff</button>
+      <button class="tab-btn" data-tab="availability" id="tabBtnAvailability" style="display:none">My Schedule</button>
     </div>
 
     <div class="tab-pane active" id="tab-appointments">
@@ -570,8 +578,73 @@
       <!-- settings injected by JS -->
     </div>
 
+    <!-- STAFF MANAGEMENT TAB (super_admin only) -->
+    <div class="tab-pane" id="tab-staff">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;flex:1">Staff Management</div>
+        <button class="btn-refresh" id="addStaffBtn" style="background:var(--blue);color:#fff;border-color:var(--blue)">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Staff
+        </button>
+      </div>
+      <div class="table-card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="staffTableBody"><tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-3)">Loading staff...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCTOR AVAILABILITY TAB (doctor role only) -->
+    <div class="tab-pane" id="tab-availability">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;margin-bottom:18px">My Schedule</div>
+      <div id="myAvailabilityPanel" style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px">
+        <p style="color:var(--text-2)">Loading your schedule...</p>
+      </div>
+    </div>
+
   </main>
 </div><!-- /adminShell -->
+
+<!-- STAFF MODAL -->
+<div class="confirm-backdrop" id="staffModal" style="display:none">
+  <div class="confirm-box" style="max-width:460px;width:100%">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:17px;margin-bottom:4px" id="staffModalTitle">Add Staff Member</div>
+
+    <!-- Step instructions — shown only when adding new staff -->
+    <div id="staffAddInstructions" style="margin-bottom:18px;padding:13px 15px;background:#EFF6FF;border:1.5px solid rgba(0,102,204,0.2);border-radius:12px;font-size:12.5px;color:#1e40af;line-height:1.7">
+      <strong>Before filling this form:</strong><br>
+      1. Open <a href="https://console.firebase.google.com" target="_blank" style="color:#0066CC;font-weight:700">Firebase Console</a> in a new tab<br>
+      2. Go to <strong>Authentication</strong> → <strong>Add User</strong><br>
+      3. Enter their email + a password → click <strong>Add User</strong><br>
+      4. Copy the <strong>UID</strong> shown next to their name<br>
+      5. Paste that UID in the field below ↓
+    </div>
+
+    <div class="f-group" id="sUidGroup"><label class="f-lbl">Firebase UID <span style="color:#DC2626">*</span></label><input class="f-in" id="staffUid" placeholder="Paste UID from Firebase Console"></div>
+    <div class="f-group"><label class="f-lbl">Full Name</label><input class="f-in" id="staffName" placeholder="Dr. Priya Nair"></div>
+    <div class="f-group"><label class="f-lbl">Email</label><input class="f-in" type="email" id="staffEmail" placeholder="priya@medicareclinic.in"></div>
+    <div class="f-group">
+      <label class="f-lbl">Role</label>
+      <select class="f-in" id="staffRole">
+        <option value="receptionist">Receptionist</option>
+        <option value="nurse">Nurse</option>
+        <option value="doctor">Doctor</option>
+        <option value="super_admin">Super Admin</option>
+      </select>
+    </div>
+    <div class="f-group"><label class="f-lbl">Department / Specialty</label><input class="f-in" id="staffDept" placeholder="e.g. Cardiology, Front Desk"></div>
+    <div id="staffModalError" style="display:none;margin-bottom:12px;padding:10px 13px;border-radius:var(--r);background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:13px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+      <button class="btn-refresh" id="staffModalCancel">Cancel</button>
+      <button class="btn-save-section" id="staffModalSave">Save Staff</button>
+    </div>
+  </div>
+</div>
 
 <!-- CONFIRM DIALOG -->
 <div class="confirm-backdrop" id="confirmDialog">
@@ -704,7 +777,9 @@
     writeAuditLog, subscribeToAuditLog,
     getHeroContent, saveHeroContent,
     getTestimonials, saveTestimonials,
-    getServices, saveServices
+    getServices, saveServices,
+    getStaffProfile, getStaffList,
+    saveStaff, deactivateStaff, reactivateStaff
   } from './firebase-config.js';
 
   // ── State ────────────────────────────────────────────────────
@@ -724,6 +799,28 @@
   let currentHero         = {};
   let currentTestimonials = [];
   let currentServices     = [];
+
+  // ── Role state ───────────────────────────────────────────────
+  // role: 'super_admin' | 'doctor' | 'receptionist' | 'nurse'
+  let currentUserRole   = null;
+  let currentUserProfile = null;
+
+  // ── Role permission map ──────────────────────────────────────
+  const ROLE_PERMISSIONS = {
+    super_admin:  { tabs: ['appointments','history','audit','settings','staff'], canEdit: true,  canChangeStatus: true,  canViewAudit: true,  canManageStaff: true,  canManageSettings: true  },
+    doctor:       { tabs: ['appointments','availability'],                       canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, ownOnly: true  },
+    receptionist: { tabs: ['appointments','history'],                            canEdit: true,  canChangeStatus: true,  canViewAudit: false, canManageStaff: false, canManageSettings: false },
+    nurse:        { tabs: ['appointments'],                                      canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, notesOnly: true },
+  };
+
+  function perms() { return ROLE_PERMISSIONS[currentUserRole] || ROLE_PERMISSIONS.nurse; }
+
+  const ROLE_LABELS = {
+    super_admin:  { label: 'Super Admin',  color: '#7C3AED', bg: '#F5F3FF' },
+    doctor:       { label: 'Doctor',       color: '#059669', bg: '#ECFDF5' },
+    receptionist: { label: 'Receptionist', color: '#0066CC', bg: '#EFF6FF' },
+    nurse:        { label: 'Nurse',        color: '#D97706', bg: '#FFFBEB' },
+  };
 
   // ── Elements ─────────────────────────────────────────────────
   const loginScreen    = document.getElementById('loginScreen');
@@ -763,20 +860,88 @@
     notes:      document.getElementById('eNotes'),
   };
 
-  // ── Auth ─────────────────────────────────────────────────────
-  onAuthChange(user => {
+  // ── Auth + Role loading ──────────────────────────────────────
+  onAuthChange(async user => {
     if (user) {
+      // Load role from Firestore staff collection
+      const profile = await getStaffProfile(user.uid);
+
+      if (!profile || profile.active === false) {
+        // No staff record or deactivated — deny access
+        await adminLogout();
+        loginError.textContent = 'Access denied. Contact your administrator.';
+        loginError.style.display = 'block';
+        return;
+      }
+
+      currentUserRole    = profile.role || 'nurse';
+      currentUserProfile = profile;
+      currentAdminEmail  = user.email;
+
+      // Update UI
       loginScreen.style.display = 'none';
       adminShell.style.display  = 'block';
       adminEmailEl.textContent  = user.email;
-      currentAdminEmail         = user.email;
+
+      // Update role badge
+      const rl = ROLE_LABELS[currentUserRole] || ROLE_LABELS.nurse;
+      const badge = document.getElementById('roleBadge');
+      if (badge) {
+        badge.textContent   = rl.label;
+        badge.style.color   = rl.color;
+        badge.style.background = rl.bg;
+        badge.style.borderColor = rl.color + '33';
+      }
+
+      // Show/hide tabs based on role
+      applyRoleToUI();
+
       startRealtimeListener();
       loadAvailability();
     } else {
       loginScreen.style.display = 'flex';
       adminShell.style.display  = 'none';
+      currentUserRole    = null;
+      currentUserProfile = null;
     }
   });
+
+  function applyRoleToUI() {
+    const p = perms();
+
+    // Show only permitted tabs
+    const allTabBtns = {
+      appointments: document.getElementById('tabBtnAppointments'),
+      history:      document.getElementById('tabBtnHistory'),
+      audit:        document.getElementById('tabBtnAudit'),
+      settings:     document.getElementById('tabBtnSettings'),
+      staff:        document.getElementById('tabBtnStaff'),
+      availability: document.getElementById('tabBtnAvailability'),
+    };
+
+    Object.entries(allTabBtns).forEach(([key, btn]) => {
+      if (!btn) return;
+      const allowed = p.tabs.includes(key);
+      btn.style.display = allowed ? '' : 'none';
+    });
+
+    // Restrict edit controls for nurse / read-only roles
+    if (!p.canEdit) {
+      // Hide edit/status buttons — done in renderTable after data loads
+    }
+
+    // Doctor gets their own schedule tab
+    if (currentUserRole === 'doctor') {
+      const avBtn = document.getElementById('tabBtnAvailability');
+      if (avBtn) avBtn.style.display = '';
+      loadDoctorOwnSchedule();
+    }
+
+    // Load staff tab if super_admin
+    if (currentUserRole === 'super_admin') {
+      loadStaffTable();
+    }
+  }
 
   async function doLogin() {
     const email = loginEmailEl.value.trim();
@@ -796,6 +961,13 @@
   logoutBtn.addEventListener('click', () => {
     if (unsubAppointments) { unsubAppointments(); unsubAppointments = null; }
     if (unsubAuditLog)     { unsubAuditLog();     unsubAuditLog = null; }
+    // Bug 6 fix: reset all session state so next login gets a clean slate
+    settingsLoaded  = false;
+    currentSettings = {};
+    currentDoctors  = [];
+    // Clear settings pane so stale data isn't shown to next user
+    const settingsPane = document.getElementById('tab-settings');
+    if (settingsPane) settingsPane.innerHTML = '';
     adminLogout();
   });
 
@@ -889,6 +1061,11 @@
     const q   = document.getElementById('searchIn').value.toLowerCase().trim();
 
     let rows = allAppointments.filter(a => {
+      // Bug 3 fix: doctors only see their own appointments
+      if (perms().ownOnly && currentUserProfile?.name) {
+        const myName = currentUserProfile.name.toLowerCase();
+        if (!a.doctor || !a.doctor.toLowerCase().includes(myName.split(' ').pop().toLowerCase())) return false;
+      }
       if (sf  !== 'all' && a.status    !== sf)  return false;
       if (spf !== 'all' && a.specialty !== spf) return false;
       if (q) {
@@ -941,11 +1118,12 @@
         <td><span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span></td>
         <td><div class="action-wrap">
           <button class="btn-act btn-print">Print</button>
-          <button class="btn-act btn-edit">Edit</button>
-          ${a.status === 'pending'   ? '<button class=\"btn-act btn-confirm\"   data-status=\"confirmed\">Confirm</button>' : ''}
-          ${a.status === 'confirmed' ? '<button class=\"btn-act btn-complete\"  data-status=\"completed\">Mark Attended</button>' : ''}
-          ${a.status === 'missed'    ? '<button class=\"btn-act btn-attended\"  data-status=\"completed\">Mark Attended</button>' : ''}
-          ${a.status !== 'cancelled' && a.status !== 'completed' ? '<button class=\"btn-act btn-cancel\" data-status=\"cancelled\">Cancel</button>' : ''}
+          ${perms().canEdit   ? '<button class=\"btn-act btn-edit\">Edit</button>' : ''}
+          ${perms().notesOnly ? '<button class=\"btn-act btn-edit\" data-notes-only=\"1\">Add Note</button>' : ''}
+          ${perms().canChangeStatus && a.status === 'pending'   ? '<button class=\"btn-act btn-confirm\"  data-status=\"confirmed\">Confirm</button>'      : ''}
+          ${perms().canChangeStatus && a.status === 'confirmed' ? '<button class=\"btn-act btn-complete\" data-status=\"completed\">Mark Attended</button>' : ''}
+          ${perms().canChangeStatus && a.status === 'missed'    ? '<button class=\"btn-act btn-attended\" data-status=\"completed\">Mark Attended</button>' : ''}
+          ${perms().canChangeStatus && a.status !== 'cancelled' && a.status !== 'completed' ? '<button class=\"btn-act btn-cancel\" data-status=\"cancelled\">Cancel</button>' : ''}
         </div></td>
       </tr>`).join('');
 
@@ -972,9 +1150,10 @@
     // edit button listeners
     tableBody.querySelectorAll('.btn-edit').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id   = btn.closest('tr').dataset.id;
-        const appt = allAppointments.find(a => a.id === id);
-        if (appt) openEditModal(appt);
+        const id       = btn.closest('tr').dataset.id;
+        const appt     = allAppointments.find(a => a.id === id);
+        const notesOnly = btn.dataset.notesOnly === '1';
+        if (appt) openEditModal(appt, notesOnly);
       });
     });
   }
@@ -1014,7 +1193,7 @@
   }
 
   // ── Edit modal ────────────────────────────────────────────────
-  function openEditModal(appt) {
+  function openEditModal(appt, notesOnly = false) {
     editingId = appt.id;
     modalSubtitle.textContent = `ID: ${appt.id.slice(0, 10)}... · Submitted ${formatDate(appt.date)}`;
     modalError.style.display  = 'none';
@@ -1031,15 +1210,26 @@
     mFields.adminNotes.value = appt.adminNotes  || '';
     mFields.notes.value      = appt.notes       || '';
 
+    // Bug 2 fix: nurse notesOnly mode — lock everything except adminNotes
+    const lockFields = ['name','phone','email','specialty','doctor','date','time','visitType','status','notes'];
+    lockFields.forEach(f => {
+      if (mFields[f]) mFields[f].disabled = notesOnly;
+    });
+    if (mFields.adminNotes) mFields.adminNotes.disabled = false; // always editable
+    document.getElementById('modalSaveBtn').textContent = notesOnly ? 'Save Note' : 'Save Changes';
+
     editModal.classList.add('open');
     document.body.style.overflow = 'hidden';
-    setTimeout(() => mFields.name.focus(), 120);
+    setTimeout(() => (notesOnly ? mFields.adminNotes : mFields.name).focus(), 120);
   }
 
   function closeModal() {
     editModal.classList.remove('open');
     document.body.style.overflow = '';
     editingId = null;
+    // Re-enable all fields so next open isn't stuck disabled
+    Object.values(mFields).forEach(f => { if (f) f.disabled = false; });
+    document.getElementById('modalSaveBtn').textContent = 'Save Changes';
   }
 
   modalCloseBtn.addEventListener('click', closeModal);
@@ -1555,11 +1745,12 @@
         <div class="m-card-row"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>${esc(a.specialty||'—')}${a.doctor ? ' · '+esc(a.doctor) : ''}</div>
         <div class="m-card-actions">
           <button class="btn-act btn-print" data-id="${a.id}">Print</button>
-          <button class="btn-act btn-edit" data-id="${a.id}">Edit</button>
-          ${a.status==='pending'   ? `<button class="btn-act btn-confirm"   data-id="${a.id}" data-status="confirmed">Confirm</button>` : ''}
-          ${a.status==='confirmed' ? `<button class="btn-act btn-complete"  data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
-          ${a.status==='missed'    ? `<button class="btn-act btn-attended"  data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
-          ${a.status!=='cancelled'&&a.status!=='completed' ? `<button class="btn-act btn-cancel" data-id="${a.id}" data-status="cancelled">Cancel</button>` : ''}
+          ${perms().canEdit   ? `<button class="btn-act btn-edit" data-id="${a.id}">Edit</button>` : ''}
+          ${perms().notesOnly ? `<button class="btn-act btn-edit" data-id="${a.id}" data-notes-only="1">Add Note</button>` : ''}
+          ${perms().canChangeStatus && a.status==='pending'   ? `<button class="btn-act btn-confirm"  data-id="${a.id}" data-status="confirmed">Confirm</button>` : ''}
+          ${perms().canChangeStatus && a.status==='confirmed' ? `<button class="btn-act btn-complete" data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
+          ${perms().canChangeStatus && a.status==='missed'    ? `<button class="btn-act btn-attended" data-id="${a.id}" data-status="completed">Mark Attended</button>` : ''}
+          ${perms().canChangeStatus && a.status!=='cancelled' && a.status!=='completed' ? `<button class="btn-act btn-cancel" data-id="${a.id}" data-status="cancelled">Cancel</button>` : ''}
         </div>
       </div>`).join('');
 
@@ -1568,7 +1759,11 @@
       btn.addEventListener('click', () => { const a = allAppointments.find(x => x.id===btn.dataset.id); if(a) openPrintSlip(a); });
     });
     container.querySelectorAll('.btn-edit[data-id]').forEach(btn => {
-      btn.addEventListener('click', () => { const a = allAppointments.find(x => x.id===btn.dataset.id); if(a) openEditModal(a); });
+      btn.addEventListener('click', () => {
+        const a = allAppointments.find(x => x.id===btn.dataset.id);
+        const notesOnly = btn.dataset.notesOnly === '1';
+        if(a) openEditModal(a, notesOnly);
+      });
     });
     container.querySelectorAll('.btn-act[data-status][data-id]').forEach(btn => {
       btn.addEventListener('click', () => changeStatus(btn.dataset.id, btn.dataset.status, btn));
@@ -1718,13 +1913,19 @@
   // ── TABS ─────────────────────────────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      const tabName = btn.dataset.tab;
+      // Bug 4 fix: hard role check — even if tab is somehow visible
+      if (!perms().tabs.includes(tabName)) {
+        console.warn(`[RoleGuard] Access denied to tab: ${tabName} for role: ${currentUserRole}`);
+        return;
+      }
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-      if (btn.dataset.tab === 'settings') initSettings();
-      if (btn.dataset.tab === 'audit')    initAuditLog();
-      if (btn.dataset.tab === 'history')  initPatientHistory();
+      document.getElementById('tab-' + tabName).classList.add('active');
+      if (tabName === 'settings') initSettings();
+      if (tabName === 'audit')    initAuditLog();
+      if (tabName === 'history')  initPatientHistory();
     });
   });
 
@@ -1766,7 +1967,7 @@
           <div class="settings-card-sub">Phone, WhatsApp, and email shown across all pages.</div>
           <div class="s-group"><label class="s-lbl">Phone Number (10 digits)</label><input class="s-in" id="sPhone" value="${esc(s.phone)}" maxlength="15" placeholder="7034525123"></div>
           <div class="s-group"><label class="s-lbl">WhatsApp Number (with country code)</label><input class="s-in" id="sWhatsapp" value="${esc(s.whatsapp)}" maxlength="15" placeholder="917034525123"></div>
-          <div class="s-group"><label class="s-lbl">Email Address</label><input class="s-in" id="sEmail" type="email" value="${esc(s.email)}" placeholder="care@medicareclinic.in"></div>
+          <div class="s-group"><label class="s-lbl">Email Address</label><input class="s-in" id="staffEmail" type="email" value="${esc(s.email)}" placeholder="care@medicareclinic.in"></div>
           <div style="display:flex;align-items:center">
             <button class="btn-save-section" onclick="saveContactInfo()">Save Contact Info</button>
             <span class="save-status" id="statusContact">Saved</span>
@@ -1971,7 +2172,7 @@
     const data = {
       phone,
       whatsapp: document.getElementById('sWhatsapp').value.trim().replace(/\D/g,''),
-      email:    document.getElementById('sEmail').value.trim(),
+      email:    document.getElementById('sClinicEmail').value.trim(),
     };
     try {
       await saveClinicSettings(data);
@@ -2029,6 +2230,214 @@
     }
     catch(e) { showToast('Save failed: ' + (e?.message||e)); btn.disabled=false; btn.textContent=btn.dataset.label; }
   };
+
+  // ══════════════════════════════════════════════════════════════
+  //  STAFF MANAGEMENT  (super_admin only)
+  // ══════════════════════════════════════════════════════════════
+
+  let staffList = [];
+  let editingStaffUid = null;
+
+  async function loadStaffTable() {
+    const tbody = document.getElementById('staffTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-3)">Loading...</td></tr>';
+    try {
+      staffList = await getStaffList();
+      renderStaffTable();
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="6" style="padding:24px;color:#DC2626">${esc(e.message)}</td></tr>`;
+    }
+  }
+
+  function renderStaffTable() {
+    const tbody = document.getElementById('staffTableBody');
+    if (!tbody) return;
+    if (!staffList.length) {
+      tbody.innerHTML = '<tr><td colspan="6" style="padding:32px;text-align:center;color:var(--text-3)">No staff added yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = staffList.map(s => {
+      const rl = ROLE_LABELS[s.role] || ROLE_LABELS.nurse;
+      const isActive = s.active !== false;
+      return `<tr data-uid="${esc(s.id)}">
+        <td style="font-weight:600">${esc(s.name || '—')}</td>
+        <td style="color:var(--text-2)">${esc(s.email || '—')}</td>
+        <td><span style="font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;background:${rl.bg};color:${rl.color}">${rl.label}</span></td>
+        <td style="color:var(--text-2)">${esc(s.department || '—')}</td>
+        <td><span style="font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;
+          background:${isActive ? '#ECFDF5' : '#F1F5F9'};
+          color:${isActive ? '#059669' : '#94A3B8'}">${isActive ? 'Active' : 'Inactive'}</span></td>
+        <td><div class="action-wrap">
+          ${s.id !== currentUserProfile?.id ? `
+            <button class="btn-act btn-edit" onclick="openEditStaff('${esc(s.id)}')">Edit</button>
+            ${isActive
+              ? `<button class="btn-act btn-cancel" onclick="deactivateStaffMember('${esc(s.id)}','${esc(s.name||'')}')">Deactivate</button>`
+              : `<button class="btn-act btn-confirm" onclick="reactivateStaffMember('${esc(s.id)}')">Reactivate</button>`
+            }` : '<span style="font-size:12px;color:var(--text-3)">You</span>'}
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function openAddStaff() {
+    editingStaffUid = null;
+    document.getElementById('staffModalTitle').textContent = 'Add Staff Member';
+    document.getElementById('staffUid').value   = '';
+    document.getElementById('staffName').value  = '';
+    document.getElementById('sEmail').value = '';
+    document.getElementById('staffRole').value  = 'receptionist';
+    document.getElementById('staffDept').value  = '';
+    document.getElementById('sUidGroup').style.display        = '';
+    document.getElementById('staffAddInstructions').style.display = '';
+    document.getElementById('staffModalError').style.display  = 'none';
+    document.getElementById('staffModal').style.display       = 'flex';
+    setTimeout(() => document.getElementById('staffUid').focus(), 150);
+  }
+
+  function openEditStaff(uid) {
+    const s = staffList.find(x => x.id === uid);
+    if (!s) return;
+    editingStaffUid = uid;
+    document.getElementById('staffModalTitle').textContent = 'Edit Staff Member';
+    document.getElementById('staffName').value  = s.name       || '';
+    document.getElementById('sEmail').value = s.email      || '';
+    document.getElementById('staffRole').value  = s.role       || 'nurse';
+    document.getElementById('staffDept').value  = s.department || '';
+    // Hide UID field and instructions on edit — UID can't change
+    document.getElementById('sUidGroup').style.display        = 'none';
+    document.getElementById('staffAddInstructions').style.display = 'none';
+    document.getElementById('staffModalError').style.display  = 'none';
+    document.getElementById('staffModal').style.display       = 'flex';
+    setTimeout(() => document.getElementById('staffName').focus(), 150);
+  }
+
+  function closeStaffModal() {
+    document.getElementById('staffModal').style.display = 'none';
+    editingStaffUid = null;
+  }
+
+  async function saveStaffMember() {
+    const saveBtn = document.getElementById('staffModalSave');
+    const errEl   = document.getElementById('staffModalError');
+    const uid     = document.getElementById('staffUid')?.value.trim();
+    const name    = document.getElementById('staffName').value.trim();
+    const email   = document.getElementById('sEmail').value.trim();
+    const role    = document.getElementById('staffRole').value;
+    const dept    = document.getElementById('staffDept').value.trim();
+
+    errEl.style.display = 'none';
+
+    if (!editingStaffUid && !uid)   { errEl.textContent = 'Firebase UID is required. Get it from Firebase Console → Authentication.'; errEl.style.display='block'; return; }
+    if (!name)                       { errEl.textContent = 'Full name is required.';  errEl.style.display='block'; return; }
+    if (!email)                      { errEl.textContent = 'Email is required.';      errEl.style.display='block'; return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+
+    try {
+      const targetUid = editingStaffUid || uid;
+      await saveStaff(targetUid, { name, email, role, department: dept, active: true });
+
+      if (editingStaffUid) {
+        const idx = staffList.findIndex(x => x.id === editingStaffUid);
+        if (idx > -1) staffList[idx] = { ...staffList[idx], name, email, role, department: dept };
+        showToast(`${name} updated ✅`);
+      } else {
+        staffList.push({ id: targetUid, name, email, role, department: dept, active: true });
+        showToast(`${name} added ✅`);
+      }
+
+      writeAuditLog({
+        action:      editingStaffUid ? 'staff_edit' : 'staff_add',
+        description: `${editingStaffUid ? 'Edited' : 'Added'} staff: ${email} (${role})`,
+        adminEmail:  currentAdminEmail,
+      }).catch(() => {});
+
+      renderStaffTable();
+      closeStaffModal();
+    } catch(e) {
+      errEl.textContent = e?.message || 'Save failed. Please try again.';
+      errEl.style.display = 'block';
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = 'Save Staff';
+    }
+  }
+
+  async function deactivateStaffMember(uid, name) {
+    const ok = await showConfirm({ title: `Deactivate ${name}?`, msg: 'They will lose access immediately. You can reactivate them later.', type: 'warn', okLabel: 'Deactivate' });
+    if (!ok) return;
+    try {
+      await deactivateStaff(uid);
+      const idx = staffList.findIndex(x => x.id === uid);
+      if (idx > -1) staffList[idx].active = false;
+      renderStaffTable();
+      showToast(`${name} deactivated`);
+      writeAuditLog({ action:'staff_deactivate', description:`Deactivated: ${name} (${uid})`, adminEmail: currentAdminEmail }).catch(()=>{});
+    } catch(e) { showToast('Failed: ' + (e?.message || e)); }
+  }
+
+  async function reactivateStaffMember(uid) {
+    const s = staffList.find(x => x.id === uid);
+    try {
+      await reactivateStaff(uid);
+      const idx = staffList.findIndex(x => x.id === uid);
+      if (idx > -1) staffList[idx].active = true;
+      renderStaffTable();
+      showToast(`${s?.name || 'Staff member'} reactivated`);
+      writeAuditLog({ action:'staff_reactivate', description:`Reactivated: ${s?.name || uid}`, adminEmail: currentAdminEmail }).catch(()=>{});
+    } catch(e) { showToast('Failed: ' + (e?.message || e)); }
+  }
+
+  // Wire up staff modal buttons
+  document.getElementById('addStaffBtn')?.addEventListener('click', openAddStaff);
+  document.getElementById('staffModalCancel')?.addEventListener('click', closeStaffModal);
+  document.getElementById('staffModalSave')?.addEventListener('click', saveStaffMember);
+  document.getElementById('staffModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeStaffModal(); });
+
+  // ══════════════════════════════════════════════════════════════
+  //  DOCTOR OWN SCHEDULE  (doctor role only)
+  // ══════════════════════════════════════════════════════════════
+
+  async function loadDoctorOwnSchedule() {
+    const panel = document.getElementById('myAvailabilityPanel');
+    if (!panel) return;
+
+    // Doctor sees only their own appointments filtered by name
+    const myName = currentUserProfile?.name || '';
+
+    const myAppts = allAppointments.filter(a =>
+      a.doctor && myName && a.doctor.toLowerCase().includes(myName.toLowerCase())
+    );
+
+    const today = new Date().toISOString().slice(0,10);
+    const upcoming = myAppts.filter(a => a.date >= today && a.status !== 'cancelled').slice(0,10);
+
+    panel.innerHTML = `
+      <div style="margin-bottom:20px">
+        <div style="font-size:13px;color:var(--text-2);margin-bottom:14px">
+          Showing upcoming appointments assigned to <strong>${esc(myName)}</strong>.
+        </div>
+        ${upcoming.length === 0
+          ? `<div style="padding:32px;text-align:center;color:var(--text-3)">No upcoming appointments.</div>`
+          : `<div class="table-card"><div class="table-wrap"><table>
+              <thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+              <tbody>
+                ${upcoming.map(a => `
+                  <tr>
+                    <td style="font-weight:600">${esc(a.name||'—')}</td>
+                    <td>${formatDate(a.date)}</td>
+                    <td>${esc(a.time||'—')}</td>
+                    <td><span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span></td>
+                  </tr>`).join('')}
+              </tbody>
+            </table></div></div>`
+        }
+      </div>
+      <div style="margin-top:8px;padding:14px 16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--r);font-size:13px;color:#92400E">
+        ℹ️ To update your availability (off days / blocked dates), contact your clinic admin.
+      </div>
+    `;
+  }
 
 </script>
 

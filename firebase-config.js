@@ -261,31 +261,66 @@ export async function saveServices(list) {
   await setDoc(doc(db, 'settings', 'services'), { list });
 }
 
-// ─────────────────────────────────────────────────────────────
-// Firestore Security Rules — UPDATED (paste into Firebase console)
-// ─────────────────────────────────────────────────────────────
+// ── STAFF & ROLE MANAGEMENT ───────────────────────────────────
 //
-// rules_version = '2';
-// service cloud.firestore {
-//   match /databases/{database}/documents {
-//     match /appointments/{id} {
-//       allow create: if
-//         request.resource.data.keys().hasAll(['name','phone','specialty','date','status','createdAt'])
-//         && request.resource.data.name is string
-//         && request.resource.data.name.size() > 0
-//         && request.resource.data.name.size() < 120
-//         && request.resource.data.phone is string
-//         && request.resource.data.status == 'pending';
-//       allow read, update: if request.auth != null;
-//       allow delete: if false;
-//     }
-//     match /settings/{document} {
-//       allow read: if true;
-//       allow write: if request.auth != null;
-//     }
-//     match /auditLog/{entry} {
-//       allow create, read: if request.auth != null;
-//       allow update, delete: if false;
-//     }
-//   }
-// }
+//  Roles: 'super_admin' | 'doctor' | 'receptionist' | 'nurse'
+//
+//  Firestore: staff/{uid} → { name, email, role, department, active, createdAt }
+//
+//  ⚠️  First super_admin: Firebase Console → Authentication → copy UID
+//      → Firestore → staff → new doc with that UID as ID → add fields:
+//      name, email, role: "super_admin", active: true
+//  All subsequent staff added from admin panel → Staff tab (no terminal needed).
+
+export async function getStaffProfile(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'staff', uid));
+    return snap.exists() ? { id: snap.id, ...snap.data() } : null;
+  } catch (e) {
+    console.warn('[getStaffProfile]', e);
+    return null;
+  }
+}
+
+export async function getStaffList() {
+  try {
+    const snap = await getDocs(collection(db, 'staff'));
+    return snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  } catch (e) {
+    console.warn('[getStaffList]', e);
+    return [];
+  }
+}
+
+// ── Direct Firestore staff writes (no Cloud Functions needed) ───
+// Staff AUTH accounts are created manually in Firebase Console (2 min per person).
+// This code handles everything else: saving role, editing, deactivating.
+
+// uid = the UID from Firebase Console → Authentication
+// data = { name, email, role, department, active }
+export async function saveStaff(uid, data) {
+  await setDoc(doc(db, 'staff', uid), {
+    ...data,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+// Deactivate — sets active: false. Never deletes (DPDP audit trail).
+export async function deactivateStaff(uid) {
+  await setDoc(doc(db, 'staff', uid), {
+    active:    false,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+// Reactivate
+export async function reactivateStaff(uid) {
+  await setDoc(doc(db, 'staff', uid), {
+    active:    true,
+    updatedAt: serverTimestamp(),
+  }, { merge: true });
+}
+
+// See firestore.rules file for Firestore Security Rules.
