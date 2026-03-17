@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://medicareclinic.in/</loc><priority>1.0</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://medicareclinic.in/services.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://medicareclinic.in/doctors.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://medicareclinic.in/booking.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://medicareclinic.in/contact.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://auraclinics.vercel.app/</loc><priority>1.0</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://auraclinics.vercel.app/services.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://auraclinics.vercel.app/doctors.html</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://auraclinics.vercel.app/booking.html</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://auraclinics.vercel.app/contact.html</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
 </urlset>

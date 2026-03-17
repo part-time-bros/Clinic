@@ -290,11 +290,12 @@ const LEGAL = {
 function showLegal(type) {
   document.getElementById('legalContent').innerHTML = LEGAL[type];
   var modal = document.getElementById('legalModal');
-  // Scroll inner content to top
   var inner = modal.querySelector('div');
   if (inner) inner.scrollTop = 0;
-  // Show modal — i
-  </script>
+  modal.style.display = 'flex';
+  document.documentElement.classList.add('legal-open');
+}
+</script>
   <script src="chatbot.js"></script>
 </body>
 </html>

@@ -3,8 +3,9 @@
 //  Drop in: add  <script src="chatbot.js"></script>  before </body>
 //
 //  MODEL STRATEGY (March 2026)
-//  PRIMARY  → gemini-2.5-flash       (stable, 10 RPM / 500 RPD free)
+//  PRIMARY  → gemini-2.5-flash       (stable, 10 RPM / 250 RPD free)
 //  FALLBACK → gemini-2.5-flash-lite  (stable, 15 RPM / 1,000 RPD free)
+//  Note: Flash RPD was reduced from 500→250 in Google's December 2025 quota update.
 //
 //  FREE-TIER OPTIMISATIONS
 //  ✓ Precision cache — only fires on SHORT, clearly categorical messages.
@@ -46,15 +47,15 @@ const CHATBOT_CONFIG = {
   // Rich context = smarter answers. Gemini needs to know the full
   // clinic — doctors, services, policies — to answer properly.
   const SYSTEM_PROMPT = `
-You are Maya, the warm and knowledgeable AI receptionist at ${CHATBOT_CONFIG.clinicName}, located at ${CHATBOT_CONFIG.clinicAddress}.
+You are Maya, the warm and knowledgeable AI receptionist at ${cfg.clinicName}, located at ${cfg.clinicAddress}.
 
 ━━ CLINIC DETAILS ━━
-Phone / WhatsApp: ${CHATBOT_CONFIG.clinicPhone}
-Email: ${CHATBOT_CONFIG.clinicEmail}
+Phone / WhatsApp: ${cfg.clinicPhone}
+Email: ${cfg.clinicEmail}
 Hours: Monday–Friday 8AM–8PM | Saturday 8AM–6PM | Sunday 9AM–2PM
 Appointments confirmed via WhatsApp within 30 minutes during clinic hours.
 Lab reports delivered via WhatsApp on the same day for routine tests.
-Book online: ${CHATBOT_CONFIG.bookingUrl}
+Book online: ${cfg.bookingUrl}
 
 ━━ DOCTORS ━━
 1. Dr. Lakshmi Nair — General & Internal Medicine (16 yrs exp)
@@ -100,6 +101,11 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
 - Reply in the same language the user writes in — English, Malayalam, or Hindi.
 - Keep responses conversational and human. No robotic repetition of the clinic name in every sentence.
 `.trim();
+  }
+
+  // Live config — starts from CHATBOT_CONFIG, updated by __mcUpdateConfig once Firestore loads
+  let _cfg          = Object.assign({}, CHATBOT_CONFIG);
+  let _systemPrompt = buildSystemPrompt(_cfg);
 
   // ── PII Stripper (DPDP Act 2023) ─────────────────────────────────
   function stripPII(text) {
@@ -120,11 +126,11 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
   // by hours cache, or "my doctor told me to visit" triggering booking.
   // Longer / complex messages always go straight to Gemini.
 
-  const CACHE = [
+  function buildCache(cfg) { return [
     {
       maxWords: 5,
       starts: ['hi', 'hello', 'hey', 'hii', 'helo', 'good morning', 'good afternoon', 'good evening', 'namaste', 'namaskar'],
-      reply: `👋 Hi there! I'm **Maya**, the AI assistant at ${CHATBOT_CONFIG.clinicName}.\n\nHow can I help you today? You can ask me about our doctors, services, booking an appointment, or clinic timings.`,
+      reply: `👋 Hi there! I'm **Maya**, the AI assistant at ${cfg.clinicName}.\n\nHow can I help you today? You can ask me about our doctors, services, booking an appointment, or clinic timings.`,
     },
     {
       maxWords: 4,
@@ -134,39 +140,68 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
     {
       maxWords: 3,
       exact: ['bye', 'goodbye', 'ok bye', 'see you', 'take care'],
-      reply: `Take care and stay healthy! 💙 We look forward to seeing you at ${CHATBOT_CONFIG.clinicName}.`,
+      reply: `Take care and stay healthy! 💙 We look forward to seeing you at ${cfg.clinicName}.`,
     },
     {
       maxWords: 6,
       starts: ['what are your hours', 'what are the hours', 'what time do you open', 'what time does the clinic', 'clinic timings', 'clinic hours', 'opening hours', 'working hours', 'are you open today'],
-      reply: `🕐 **Clinic Hours:**\n• Monday–Friday: 8AM – 8PM\n• Saturday: 8AM – 6PM\n• Sunday: 9AM – 2PM\n\nWalk-ins welcome. To guarantee your slot, [book an appointment](${CHATBOT_CONFIG.bookingUrl}) or WhatsApp us at wa.me/${CHATBOT_CONFIG.clinicWA}.`,
+      reply: `🕐 **Clinic Hours:**\n• Monday–Friday: 8AM – 8PM\n• Saturday: 8AM – 6PM\n• Sunday: 9AM – 2PM\n\nWalk-ins welcome. To guarantee your slot, [book an appointment](${cfg.bookingUrl}) or WhatsApp us at wa.me/${cfg.clinicWA}.`,
     },
     {
       maxWords: 6,
       starts: ['how do i book', 'how to book', 'how can i book', 'book an appointment', 'make an appointment', 'i want to book', 'want to make'],
-      reply: `You can book in 3 ways:\n1. **Online** — [Fill the booking form](${CHATBOT_CONFIG.bookingUrl}) (takes 2 minutes)\n2. **WhatsApp** — Message us at wa.me/${CHATBOT_CONFIG.clinicWA}\n3. **Call** — 📞 ${CHATBOT_CONFIG.clinicPhone}\n\nWe confirm your slot within **30 minutes** on WhatsApp during clinic hours.`,
+      reply: `You can book in 3 ways:\n1. **Online** — [Fill the booking form](${cfg.bookingUrl}) (takes 2 minutes)\n2. **WhatsApp** — Message us at wa.me/${cfg.clinicWA}\n3. **Call** — 📞 ${cfg.clinicPhone}\n\nWe confirm your slot within **30 minutes** on WhatsApp during clinic hours.`,
     },
     {
       maxWords: 5,
       starts: ['where are you', 'where is the clinic', 'clinic address', 'clinic location', 'how to reach', 'how do i get'],
-      reply: `📍 **${CHATBOT_CONFIG.clinicAddress}**\nNear Kowdiar Junction, Trivandrum.\n\nSearch **"MediCare Clinic Kowdiar"** on Google Maps for directions.`,
+      reply: `📍 **${cfg.clinicAddress}**\nNear Kowdiar Junction, Trivandrum.\n\nSearch **"MediCare Clinic Kowdiar"** on Google Maps for directions.`,
     },
     {
       maxWords: 5,
       exact: ['phone number', 'contact number', 'your number', 'whatsapp number', 'contact details', 'how to contact', 'how to reach you'],
-      reply: `📞 **${CHATBOT_CONFIG.clinicPhone}**\n💬 WhatsApp: wa.me/${CHATBOT_CONFIG.clinicWA}\n📧 ${CHATBOT_CONFIG.clinicEmail}\n\nAvailable during clinic hours (Mon–Sat 8AM–8PM).`,
+      reply: `📞 **${cfg.clinicPhone}**\n💬 WhatsApp: wa.me/${cfg.clinicWA}\n📧 ${cfg.clinicEmail}\n\nAvailable during clinic hours (Mon–Sat 8AM–8PM).`,
     },
     {
       maxWords: 4,
       starts: ['emergency', "it's an emergency", 'its an emergency', 'this is an emergency'],
-      reply: `🚨 **If this is a medical emergency, call 112 or go to the nearest emergency room immediately.**\n\nFor urgent same-day clinic appointments: 📞 **${CHATBOT_CONFIG.clinicPhone}**`,
+      reply: `🚨 **If this is a medical emergency, call 112 or go to the nearest emergency room immediately.**\n\nFor urgent same-day clinic appointments: 📞 **${cfg.clinicPhone}**`,
     },
-  ];
+  ]; }
+
+  let _cache = buildCache(_cfg);
+
+  // ── Live config updater ───────────────────────────────────────────
+  // Called by site-data.js after Firestore settings load.
+  // Maps clinic settings fields → CHATBOT_CONFIG shape, then rebuilds
+  // the system prompt and precision cache with the fresh values.
+  window.__mcUpdateConfig = function(settings) {
+    if (!settings) return;
+    // Map Firestore settings fields to chatbot config keys
+    const hoursStr = [settings.hoursWeekday, settings.hoursSat, settings.hoursSun]
+      .filter(Boolean).join(' | ');
+    Object.assign(_cfg, {
+      clinicPhone:   settings.phone   || _cfg.clinicPhone,
+      clinicWA:      settings.whatsapp || _cfg.clinicWA,
+      clinicEmail:   settings.email   || _cfg.clinicEmail,
+      clinicAddress: settings.addressFull || _cfg.clinicAddress,
+      clinicHours:   hoursStr         || _cfg.clinicHours,
+    });
+    _systemPrompt = buildSystemPrompt(_cfg);
+    _cache        = buildCache(_cfg);
+    // Update the live status line in the chat header if it's already mounted
+    const statusEl = document.querySelector('#mc-win .mc-hdr-status');
+    if (statusEl) {
+      const dot = statusEl.querySelector('.mc-dot');
+      statusEl.textContent = _cfg.clinicName;
+      if (dot) statusEl.prepend(dot);
+    }
+  };
 
   function getCachedReply(text) {
     const t  = text.toLowerCase().trim();
     const wc = t.split(/\s+/).length;
-    for (const entry of CACHE) {
+    for (const entry of _cache) {
       if (wc > (entry.maxWords || 6)) continue;
       if (entry.exact?.some(e  => t === e || t.startsWith(e + ' '))) return entry.reply;
       if (entry.starts?.some(s => t.startsWith(s)))                   return entry.reply;
@@ -192,7 +227,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        system_instruction: { parts: [{ text: _systemPrompt }] },
         contents: msgHistory,
         generationConfig: {
           temperature:     0.7,
@@ -233,7 +268,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
     }
 
     msgHistory.pop();
-    return `I'm having a bit of trouble right now. Please reach us directly:\n📞 **${CHATBOT_CONFIG.clinicPhone}**\n💬 WhatsApp: wa.me/${CHATBOT_CONFIG.clinicWA}`;
+    return `I'm having a bit of trouble right now. Please reach us directly:\n📞 **${cfg.clinicPhone}**\n💬 WhatsApp: wa.me/${cfg.clinicWA}`;
   }
 
   // ── State ─────────────────────────────────────────────────────────
@@ -388,7 +423,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
 
   function addWelcome() {
     const w = document.createElement('div'); w.className = 'mc-msg bot';
-    w.innerHTML = `<div class="mc-bbl">👋 Hi! I'm <strong>Maya</strong>, the AI assistant at <strong>${CHATBOT_CONFIG.clinicName}</strong>.<br><br>I can help you with appointments, information about our doctors and services, clinic hours, or any general questions.<br><br>What can I help you with today?</div><div class="mc-time">${nowStr()}</div>`;
+    w.innerHTML = `<div class="mc-bbl">👋 Hi! I'm <strong>Maya</strong>, the AI assistant at <strong>${cfg.clinicName}</strong>.<br><br>I can help you with appointments, information about our doctors and services, clinic hours, or any general questions.<br><br>What can I help you with today?</div><div class="mc-time">${nowStr()}</div>`;
     $('mc-msgs').appendChild(w); showQuickReplies();
   }
 
@@ -407,7 +442,7 @@ Book online: ${CHATBOT_CONFIG.bookingUrl}
         <div class="mc-hdr-av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>
         <div class="mc-hdr-info">
           <div class="mc-hdr-name">Maya — AI Receptionist</div>
-          <div class="mc-hdr-status"><div class="mc-dot"></div>${CHATBOT_CONFIG.clinicName}</div>
+          <div class="mc-hdr-status"><div class="mc-dot"></div>${cfg.clinicName}</div>
         </div>
         <button class="mc-hdr-btn" id="mc-clear" title="Clear chat" aria-label="Clear chat">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>

@@ -29,7 +29,9 @@
   }
 
   /* Reveal on scroll */
-  const isLow = navigator.deviceMemory <= 1 || navigator.hardwareConcurrency <= 2;
+  // deviceMemory is Chrome/Edge only — undefined in Firefox/Safari, which is fine (defaults to animations on)
+  const isLow = (navigator.deviceMemory !== undefined && navigator.deviceMemory <= 1) ||
+                (navigator.hardwareConcurrency !== undefined && navigator.hardwareConcurrency <= 2);
   let revealObs = null;
   if (!isLow) {
     revealObs = new IntersectionObserver(entries => {

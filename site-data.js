@@ -234,6 +234,10 @@ Promise.all([
   getHeroContent(), getTestimonials(), getServices()
 ]).then(([settings, doctors, availability, hero, testimonials, services]) => {
   clearTimeout(timeoutId);
+  // Expose live settings globally so booking.html and chatbot.js can read them
+  window.__acSettings = settings;
+  // Update chatbot with live Firestore values (phone, WA, email, address, hours)
+  if (typeof window.__mcUpdateConfig === 'function') window.__mcUpdateConfig(settings);
   applySettings(settings);
   applyDemoBanner(settings);
   applyHeroContent(hero);

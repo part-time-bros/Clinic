@@ -131,7 +131,7 @@ html.legal-open { overflow: hidden; }
             <input type="text" name="clinic_ref" id="hpField" tabindex="-1" autocomplete="off">
           </div>
           <div class="form-row">
-            <div class="form-group"><label class="form-lbl">Full Name *</label><input type="text" class="form-in" placeholder="Your full name"></div>
+            <div class="form-group"><label class="form-lbl">Full Name *</label><input type="text" class="form-in" id="bkName" placeholder="Your full name"></div>
             <div class="form-group"><label class="form-lbl">Phone Number *</label><input type="tel" class="form-in" placeholder="+91 XXXXX XXXXX"></div>
           </div>
           <div class="form-group full"><label class="form-lbl">Email Address</label><input type="email" class="form-in" placeholder="your@email.com"></div>
@@ -169,9 +169,9 @@ html.legal-open { overflow: hidden; }
                    submitBookingToFirebase(response.razorpay_payment_id);
                  },
                  prefill: {
-                   name: nameIn.value,
-                   contact: phoneIn.value,
-                   email: emailIn.value
+                   name:    document.getElementById('bkName')?.value    || '',
+                   contact: document.querySelector('#fullBookingForm input[type="tel"]')?.value  || '',
+                   email:   document.querySelector('#fullBookingForm input[type="email"]')?.value || '',
                  },
                  theme: { color: "#0066CC" }
                };
@@ -223,7 +223,7 @@ html.legal-open { overflow: hidden; }
           <script>
             document.getElementById('payConfirmBtn').addEventListener('click', function() {
               // Validate form first before showing payment modal
-              var nameIn  = document.querySelector('#fullBookingForm input[placeholder="Your full name"]');
+              var nameIn  = document.getElementById('bkName');
               var phoneIn = document.querySelector('#fullBookingForm input[type="tel"]');
               var specIn  = document.getElementById('bkSpecialty');
               var dateIn  = document.getElementById('bkDate');
@@ -427,7 +427,7 @@ html.legal-open { overflow: hidden; }
   const errorEl   = document.getElementById('bkError');
 
   // ── Input references ─────────────────────────────────────────
-  const nameIn  = form.querySelector('input[placeholder="Your full name"]');
+  const nameIn  = document.getElementById('bkName');
   const phoneIn = form.querySelector('input[type="tel"]');
   const emailIn = form.querySelector('input[type="email"]');
   const specIn  = document.getElementById('bkSpecialty') || form.querySelector('select');
@@ -488,7 +488,7 @@ html.legal-open { overflow: hidden; }
     }
 
     const getValue = sel => form.querySelector(sel)?.value?.trim() ?? '';
-    const name      = getValue('input[placeholder="Your full name"]');
+    const name      = document.getElementById('bkName')?.value?.trim() ?? '';
     const phone     = getValue('input[type="tel"]');
     const email     = getValue('input[type="email"]');
     const specialty = document.getElementById('bkSpecialty')?.value?.trim() ?? '';
@@ -564,7 +564,10 @@ html.legal-open { overflow: hidden; }
         'Please confirm my slot. Thank you!'
       );
       const waBtn = document.getElementById('successWaBtn');
-      if (waBtn) waBtn.href = 'https://wa.me/917034525123?text=' + waMsg;
+      // Use live WhatsApp number from Firestore settings (set by site-data.js)
+      // Falls back to the hardcoded default if settings haven't loaded yet
+      const liveWA = window.__acSettings?.whatsapp || '917034525123';
+      if (waBtn) waBtn.href = 'https://wa.me/' + liveWA + '?text=' + waMsg;
       incrementRate();
       form.style.display      = 'none';
       successEl.style.display = 'flex';
