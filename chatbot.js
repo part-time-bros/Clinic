@@ -44,9 +44,10 @@ const CHATBOT_CONFIG = {
   ];
 
   // ── System prompt ─────────────────────────────────────────────────
-  // Rich context = smarter answers. Gemini needs to know the full
-  // clinic — doctors, services, policies — to answer properly.
-  const SYSTEM_PROMPT = `
+  // Built as a function so live Firestore settings can update it at runtime.
+  // window.__mcUpdateConfig() rebuilds both prompt and cache after settings load.
+  function buildSystemPrompt(cfg) {
+    return `
 You are Maya, the warm and knowledgeable AI receptionist at ${cfg.clinicName}, located at ${cfg.clinicAddress}.
 
 ━━ CLINIC DETAILS ━━
