@@ -428,7 +428,6 @@
       <div style="position:relative">
         <input type="password" class="f-in" id="loginPassword" placeholder="Your password" autocomplete="current-password" style="padding-right:44px">
         <button type="button" id="pwToggleBtn" title="Show/hide password"
-          onclick="_twTogglePw()"
           style="position:absolute;right:0;top:0;height:100%;width:42px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94A3B8;transition:color .18s"
           onmouseenter="this.style.color='#475569'" onmouseleave="this.style.color='#94A3B8'">
           <svg id="pwEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -828,14 +827,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script>
-function _twTogglePw() {
-  var inp = document.getElementById('loginPassword');
-  if (!inp) return;
-  inp.type = inp.type === 'password' ? 'text' : 'password';
-  inp.focus();
-}
-</script>
 
 <script type="module">
   import {
@@ -1088,8 +1079,15 @@ function _twTogglePw() {
   // Tick lockout countdown every second
   setInterval(() => { if (loginScreen.style.display !== 'none') checkLockout(); }, 1000);
 
-  // Password toggle handled by _twTogglePw() inline onclick (standalone script)
-  // Works even if the ES module fails to load — no listener needed here
+  // ── Password toggle ─────────────────────────────────────────
+  document.getElementById('pwToggleBtn')?.addEventListener('click', () => {
+    const isText = loginPwEl.type === 'text';
+    loginPwEl.type = isText ? 'password' : 'text';
+    const icon = document.getElementById('pwEyeIcon');
+    if (icon) icon.innerHTML = isText
+      ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  });
 
   async function doLogin() {
     if (checkLockout()) return;
@@ -1139,7 +1137,6 @@ function _twTogglePw() {
     }
   }
 
-  // Module is ready — wire up the login button directly
   loginBtn.addEventListener('click', doLogin);
   loginEmailEl.addEventListener('keydown', e => { if (e.key === 'Enter') { loginPwEl.focus(); } });
   loginPwEl.addEventListener('keydown',   e => { if (e.key === 'Enter') doLogin(); });
