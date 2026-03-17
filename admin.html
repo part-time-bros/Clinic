@@ -49,7 +49,9 @@
     .btn-login{width:100%;padding:13px;border-radius:var(--r-full);background:var(--blue);color:#fff;font-size:14.5px;font-weight:600;box-shadow:0 4px 14px rgba(0,102,204,0.25);transition:all .2s var(--ease);margin-top:4px}
     .btn-login:hover{background:var(--blue-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,102,204,0.3)}
     .btn-login:disabled{opacity:.6;transform:none;cursor:not-allowed}
+    @keyframes loginShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
     .login-error{display:none;margin-top:12px;padding:11px 14px;border-radius:var(--r);background:#FEF2F2;border:1px solid #FECACA;color:#DC2626;font-size:13px}
+    .login-success-note{display:none;margin-top:12px;padding:11px 14px;border-radius:var(--r);background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;font-size:13px;text-align:center}
 
     /* ── SHELL ── */
     #adminShell{display:none;min-height:100vh}
@@ -340,9 +342,9 @@
     .confirm-box{background:var(--card);border-radius:16px;padding:28px;max-width:380px;width:100%;box-shadow:var(--shadow-xl);transform:scale(0.95);opacity:0;transition:all .22s var(--spring)}
     .confirm-backdrop.open .confirm-box{transform:scale(1);opacity:1}
     .confirm-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
-    .confirm-icon.warn{background:#FEF9C3} .confirm-icon.danger{background:#FEF2F2}
+    .confirm-icon.warn{background:#FEF9C3} .confirm-icon.danger{background:#FEF2F2} .confirm-icon.info{background:#EFF6FF}
     .confirm-icon svg{width:20px;height:20px;fill:none;stroke-width:2;stroke-linecap:round}
-    .confirm-icon.warn svg{stroke:#D97706} .confirm-icon.danger svg{stroke:#DC2626}
+    .confirm-icon.warn svg{stroke:#D97706} .confirm-icon.danger svg{stroke:#DC2626} .confirm-icon.info svg{stroke:#0066CC}
     .confirm-title{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:16px;margin-bottom:6px}
     .confirm-msg{font-size:13.5px;color:var(--text-2);margin-bottom:22px;line-height:1.5}
     .confirm-btns{display:flex;gap:10px}
@@ -351,6 +353,7 @@
     .btn-confirm-ok{flex:1;padding:11px;border-radius:var(--r-full);font-size:13.5px;font-weight:600;color:#fff;border:none;cursor:pointer;transition:all .18s}
     .btn-confirm-ok.warn{background:#D97706} .btn-confirm-ok.warn:hover{background:#B45309}
     .btn-confirm-ok.danger{background:#DC2626} .btn-confirm-ok.danger:hover{background:#B91C1C}
+    .btn-confirm-ok.info{background:#0066CC}  .btn-confirm-ok.info:hover{background:#004999}
 
     /* ── AUDIT LOG ── */
     .audit-list{display:flex;flex-direction:column;gap:0}
@@ -384,6 +387,25 @@
     .live-dot{width:6px;height:6px;border-radius:50%;background:#059669;animation:pulse-green 2s infinite}
     @keyframes pulse-green{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.8)}}
 
+    .btn-notif{width:34px;height:34px;border-radius:50%;background:#F1F5F9;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s;position:relative;flex-shrink:0}
+    .btn-notif:hover{background:#E2E8F0}
+    .btn-notif.enabled{background:#EFF6FF;border-color:var(--border-blue)}
+    .btn-notif.enabled svg{stroke:var(--blue)}
+    .btn-notif .notif-dot{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#059669;border:2px solid #fff;display:none}
+    .btn-notif.enabled .notif-dot{display:block}
+    /* Bulk actions */
+    .bulk-bar{display:none;align-items:center;gap:10px;padding:10px 16px;background:#EFF6FF;border:1.5px solid rgba(0,102,204,0.2);border-radius:12px;margin-bottom:14px;flex-wrap:wrap}
+    .bulk-bar.visible{display:flex}
+    .bulk-count{font-size:13px;font-weight:700;color:#0066CC;flex:1}
+    .bulk-btn{padding:6px 14px;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;color:var(--text-2)}
+    .bulk-btn:hover{background:#F1F5F9;color:var(--text)}
+    .bulk-btn.danger{border-color:#FECACA;color:#DC2626}
+    .bulk-btn.danger:hover{background:#FEF2F2}
+    .bulk-btn.success{border-color:#A7F3D0;color:#059669}
+    .bulk-btn.success:hover{background:#ECFDF5}
+    .cb-col{width:36px;padding-left:14px!important}
+    #selectAllChk{cursor:pointer;width:15px;height:15px;accent-color:var(--blue)}
+    .row-chk{cursor:pointer;width:15px;height:15px;accent-color:var(--blue)}
   </style>
 </head>
 <body>
@@ -396,9 +418,25 @@
       <span class="login-logo-name">Medicare<em>Clinic</em></span>
     </div>
     <div class="login-title">Admin Panel</div>
-    <div class="login-sub">Sign in to manage appointments.</div>
-    <div class="f-group"><label class="f-lbl">Email</label><input type="email" class="f-in" id="loginEmail" placeholder="admin@medicareclinic.in" autocomplete="email"></div>
-    <div class="f-group"><label class="f-lbl">Password</label><input type="password" class="f-in" id="loginPassword" placeholder="Your password" autocomplete="current-password"></div>
+    <div class="login-sub" id="loginSub">Sign in to manage appointments.</div>
+    <div class="f-group">
+      <label class="f-lbl">Email</label>
+      <input type="email" class="f-in" id="loginEmail" placeholder="admin@medicareclinic.in" autocomplete="email" spellcheck="false">
+    </div>
+    <div class="f-group">
+      <label class="f-lbl">Password</label>
+      <div style="position:relative">
+        <input type="password" class="f-in" id="loginPassword" placeholder="Your password" autocomplete="current-password" style="padding-right:44px">
+        <button type="button" id="pwToggleBtn" title="Show/hide password"
+          style="position:absolute;right:0;top:0;height:100%;width:42px;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#94A3B8;transition:color .18s"
+          onmouseenter="this.style.color='#475569'" onmouseleave="this.style.color='#94A3B8'">
+          <svg id="pwEyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div id="loginLockout" style="display:none;margin-bottom:10px;padding:10px 13px;border-radius:10px;background:#FEF9C3;border:1px solid #FDE68A;color:#854D0E;font-size:13px;text-align:center"></div>
     <button class="btn-login" id="loginBtn">Sign In</button>
     <div class="login-error" id="loginError"></div>
   </div>
@@ -417,18 +455,30 @@
     <div class="admin-nav-right">
       <span class="admin-email" id="adminEmail"></span>
       <button class="btn-logout" id="logoutBtn">Sign Out</button>
+      <button class="btn-notif" id="notifBtn" title="Enable booking notifications" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </button>
     </div>
   </nav>
 
   <main class="admin-main">
     <!-- Tab bar — shown/hidden per role after login -->
     <div class="tab-bar" id="mainTabBar" style="max-width:100%">
+      <button class="tab-btn" data-tab="dashboard" id="tabBtnDashboard">Dashboard</button>
       <button class="tab-btn active" data-tab="appointments" id="tabBtnAppointments">Appointments <span id="pendingBadge" style="display:none;background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:999px;margin-left:4px"></span></button>
       <button class="tab-btn" data-tab="history"      id="tabBtnHistory">Patient History</button>
       <button class="tab-btn" data-tab="audit"        id="tabBtnAudit">Audit Log</button>
       <button class="tab-btn" data-tab="settings"     id="tabBtnSettings">Clinic Settings</button>
       <button class="tab-btn" data-tab="staff"        id="tabBtnStaff">Staff</button>
       <button class="tab-btn" data-tab="availability" id="tabBtnAvailability" style="display:none">My Schedule</button>
+    </div>
+
+    <!-- DASHBOARD TAB -->
+    <div class="tab-pane" id="tab-dashboard">
+      <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;margin-bottom:20px">Dashboard</div>
+      <div id="dashboardContent" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <!-- injected by renderDashboard() -->
+      </div>
     </div>
 
     <div class="tab-pane active" id="tab-appointments">
@@ -500,11 +550,21 @@
       </div>
     </div>
 
+    <!-- Bulk action bar -->
+    <div class="bulk-bar" id="bulkBar">
+      <span class="bulk-count" id="bulkCount">0 selected</span>
+      <button class="bulk-btn success" id="bulkConfirm">Confirm Selected</button>
+      <button class="bulk-btn success" id="bulkAttend">Mark Attended</button>
+      <button class="bulk-btn danger"  id="bulkCancel">Cancel Selected</button>
+      <button class="bulk-btn"         id="bulkClear">Clear Selection</button>
+    </div>
+
     <div class="table-card" id="tableView">
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
+              <th class="cb-col"><input type="checkbox" id="selectAllChk" title="Select all visible rows"></th>
               <th data-col="name">Patient <span class="sort-arrow">↕</span></th>
               <th data-col="phone">Phone</th>
               <th data-col="specialty">Specialty <span class="sort-arrow">↕</span></th>
@@ -516,7 +576,7 @@
             </tr>
           </thead>
           <tbody id="apptTableBody">
-            <tr class="loading-row"><td colspan="8">Loading appointments...</td></tr>
+            <tr class="loading-row"><td colspan="9">Loading appointments...</td></tr>
           </tbody>
         </table>
       </div>
@@ -806,12 +866,17 @@
   let currentUserRole   = null;
   let currentUserProfile = null;
 
+  // ── Notification state ───────────────────────────────────────
+  let _notifPermission   = Notification?.permission || 'default'; // 'default'|'granted'|'denied'
+  let _seenApptIds       = new Set(); // tracks IDs already notified this session
+  let _notifInitialLoad  = true;      // suppress notifications on first snapshot
+
   // ── Role permission map ──────────────────────────────────────
   const ROLE_PERMISSIONS = {
-    super_admin:  { tabs: ['appointments','history','audit','settings','staff'], canEdit: true,  canChangeStatus: true,  canViewAudit: true,  canManageStaff: true,  canManageSettings: true  },
-    doctor:       { tabs: ['appointments','availability'],                       canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, ownOnly: true  },
-    receptionist: { tabs: ['appointments','history'],                            canEdit: true,  canChangeStatus: true,  canViewAudit: false, canManageStaff: false, canManageSettings: false },
-    nurse:        { tabs: ['appointments'],                                      canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, notesOnly: true },
+    super_admin:  { tabs: ['dashboard','appointments','history','audit','settings','staff'], canEdit: true,  canChangeStatus: true,  canViewAudit: true,  canManageStaff: true,  canManageSettings: true  },
+    doctor:       { tabs: ['appointments','availability'],                                  canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, ownOnly: true  },
+    receptionist: { tabs: ['dashboard','appointments','history'],                           canEdit: true,  canChangeStatus: true,  canViewAudit: false, canManageStaff: false, canManageSettings: false },
+    nurse:        { tabs: ['appointments'],                                                 canEdit: false, canChangeStatus: false, canViewAudit: false, canManageStaff: false, canManageSettings: false, notesOnly: true },
   };
 
   function perms() { return ROLE_PERMISSIONS[currentUserRole] || ROLE_PERMISSIONS.nurse; }
@@ -897,6 +962,7 @@
       // Show/hide tabs based on role
       applyRoleToUI();
 
+      initNotifButton();
       startRealtimeListener();
       loadAvailability();
     } else {
@@ -904,6 +970,9 @@
       adminShell.style.display  = 'none';
       currentUserRole    = null;
       currentUserProfile = null;
+      // Always reset login UI on sign-out so the button never stays stuck
+      // on "Signing in…" and credentials are never visible to the next user
+      resetLoginUI();
     }
   });
 
@@ -912,6 +981,7 @@
 
     // Show only permitted tabs
     const allTabBtns = {
+      dashboard:    document.getElementById('tabBtnDashboard'),
       appointments: document.getElementById('tabBtnAppointments'),
       history:      document.getElementById('tabBtnHistory'),
       audit:        document.getElementById('tabBtnAudit'),
@@ -944,33 +1014,206 @@
     }
   }
 
+  // ── Login hardening ────────────────────────────────────────
+  // Max 5 failed attempts → 5-minute lockout stored in sessionStorage
+  const MAX_ATTEMPTS  = 5;
+  const LOCKOUT_MS    = 5 * 60 * 1000;
+  const LOCKOUT_KEY   = 'ac_login_lockout';
+  const ATTEMPTS_KEY  = 'ac_login_attempts';
+
+  function getLockoutState() {
+    try {
+      const until = parseInt(sessionStorage.getItem(LOCKOUT_KEY) || '0', 10);
+      const count = parseInt(sessionStorage.getItem(ATTEMPTS_KEY) || '0', 10);
+      return { until, count };
+    } catch { return { until: 0, count: 0 }; }
+  }
+
+  function setAttempts(count, lockUntil) {
+    try {
+      sessionStorage.setItem(ATTEMPTS_KEY, String(count));
+      if (lockUntil) sessionStorage.setItem(LOCKOUT_KEY, String(lockUntil));
+      else sessionStorage.removeItem(LOCKOUT_KEY);
+    } catch {}
+  }
+
+  function resetLoginUI() {
+    loginBtn.disabled    = false;
+    loginBtn.textContent = 'Sign In';
+    loginEmailEl.value   = '';
+    loginPwEl.value      = '';
+    loginError.style.display   = 'none';
+    loginError.textContent     = '';
+    document.getElementById('loginLockout').style.display = 'none';
+  }
+
+  function showLoginError(msg) {
+    loginError.textContent   = msg;
+    loginError.style.display = 'block';
+    // Shake animation
+    loginBtn.style.animation = 'none';
+    loginBtn.offsetHeight; // reflow
+    loginBtn.style.animation = 'loginShake 0.4s ease';
+  }
+
+  function checkLockout() {
+    const { until, count } = getLockoutState();
+    const remaining = until - Date.now();
+    const lockEl    = document.getElementById('loginLockout');
+    if (remaining > 0) {
+      const mins = Math.ceil(remaining / 60000);
+      lockEl.textContent    = `Too many failed attempts. Try again in ${mins} minute${mins > 1 ? 's' : ''}.`;
+      lockEl.style.display  = 'block';
+      loginBtn.disabled     = true;
+      loginBtn.textContent  = 'Sign In';
+      loginError.style.display = 'none';
+      return true;
+    }
+    if (until > 0) setAttempts(0, 0); // lockout expired — reset
+    lockEl.style.display = 'none';
+    loginBtn.disabled    = false;
+    return false;
+  }
+
+  // Tick lockout countdown every second
+  setInterval(() => { if (loginScreen.style.display !== 'none') checkLockout(); }, 1000);
+
+  // Show/hide password toggle
+  const pwToggleBtn = document.getElementById('pwToggleBtn');
+  if (pwToggleBtn) {
+    pwToggleBtn.addEventListener('click', () => {
+      const isText = loginPwEl.type === 'text';
+      loginPwEl.type = isText ? 'password' : 'text';
+      document.getElementById('pwEyeIcon').innerHTML = isText
+        ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+        : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+    });
+  }
+
   async function doLogin() {
+    if (checkLockout()) return;
+
     const email = loginEmailEl.value.trim();
     const pw    = loginPwEl.value;
-    if (!email || !pw) { loginError.textContent = 'Please enter email and password.'; loginError.style.display = 'block'; return; }
-    loginBtn.disabled = true; loginBtn.textContent = 'Signing in...'; loginError.style.display = 'none';
+
+    // Client-side field checks
+    if (!email && !pw) { showLoginError('Please enter your email and password.'); return; }
+    if (!email)        { showLoginError('Please enter your email address.'); loginEmailEl.focus(); return; }
+    if (!email.includes('@') || !email.includes('.')) { showLoginError('Please enter a valid email address.'); loginEmailEl.focus(); return; }
+    if (!pw)           { showLoginError('Please enter your password.'); loginPwEl.focus(); return; }
+    if (pw.length < 6) { showLoginError('Password must be at least 6 characters.'); loginPwEl.focus(); return; }
+
+    loginBtn.disabled    = true;
+    loginBtn.textContent = 'Signing in…';
+    loginError.style.display = 'none';
+
     try {
       await adminLogin(email, pw);
+      // On success: onAuthChange fires → switches to shell.
+      // Reset attempt counter on successful login.
+      setAttempts(0, 0);
+      // Button stays disabled/spinner until onAuthChange fires and hides the screen —
+      // this prevents double-click and the "stuck Signing in" flash on fast logins.
     } catch (err) {
-      loginError.textContent   = err.code === 'auth/invalid-credential' ? 'Invalid email or password.' : 'Sign-in failed. Please try again.';
-      loginError.style.display = 'block';
-      loginBtn.disabled = false; loginBtn.textContent = 'Sign In';
+      const { count } = getLockoutState();
+      const newCount  = count + 1;
+      const remaining = MAX_ATTEMPTS - newCount;
+
+      if (newCount >= MAX_ATTEMPTS) {
+        setAttempts(newCount, Date.now() + LOCKOUT_MS);
+        showLoginError('');
+        checkLockout();
+      } else {
+        setAttempts(newCount, 0);
+        const hint = remaining === 1 ? ' — 1 attempt left before lockout' : ` — ${remaining} attempts left`;
+        const msg  = err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found'
+          ? `Incorrect email or password${hint}.`
+          : err.code === 'auth/too-many-requests'
+          ? 'Too many attempts. Please wait a few minutes.'
+          : 'Sign-in failed. Please try again.';
+        showLoginError(msg);
+      }
+      loginBtn.disabled    = false;
+      loginBtn.textContent = 'Sign In';
     }
   }
+
   loginBtn.addEventListener('click', doLogin);
-  loginPwEl.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  loginEmailEl.addEventListener('keydown', e => { if (e.key === 'Enter') { loginPwEl.focus(); } });
+  loginPwEl.addEventListener('keydown',   e => { if (e.key === 'Enter') doLogin(); });
+
+  // Clear error as user types
+  loginEmailEl.addEventListener('input', () => { loginError.style.display = 'none'; });
+  loginPwEl.addEventListener('input',    () => { loginError.style.display = 'none'; });
+
   logoutBtn.addEventListener('click', () => {
     if (unsubAppointments) { unsubAppointments(); unsubAppointments = null; }
     if (unsubAuditLog)     { unsubAuditLog();     unsubAuditLog = null; }
-    // Bug 6 fix: reset all session state so next login gets a clean slate
     settingsLoaded  = false;
     currentSettings = {};
     currentDoctors  = [];
-    // Clear settings pane so stale data isn't shown to next user
     const settingsPane = document.getElementById('tab-settings');
     if (settingsPane) settingsPane.innerHTML = '';
+    // Reset notification seed so next login re-seeds correctly
+    _seenApptIds      = new Set();
+    _notifInitialLoad = true;
     adminLogout();
+    // resetLoginUI is also called from onAuthChange null-branch below
   });
+
+  // ── Browser Notifications ────────────────────────────────────
+  function initNotifButton() {
+    const btn = document.getElementById('notifBtn');
+    if (!btn || !('Notification' in window)) return;
+    btn.style.display = 'flex';
+
+    function refreshBtnState() {
+      _notifPermission = Notification.permission;
+      btn.classList.toggle('enabled', _notifPermission === 'granted');
+      btn.title = _notifPermission === 'granted'
+        ? 'Booking notifications ON — click to learn more'
+        : 'Click to enable booking notifications';
+    }
+    refreshBtnState();
+
+    btn.addEventListener('click', async () => {
+      if (_notifPermission === 'granted') {
+        showToast('Notifications are ON — you will be alerted when new bookings arrive.');
+        return;
+      }
+      if (_notifPermission === 'denied') {
+        showToast('Notifications blocked — enable them in your browser site settings.');
+        return;
+      }
+      const result = await Notification.requestPermission();
+      _notifPermission = result;
+      refreshBtnState();
+      if (result === 'granted') showToast('Booking notifications enabled ✅');
+      else showToast('Notification permission not granted.');
+    });
+  }
+
+  function maybeNotifyNewBookings(newData) {
+    if (_notifPermission !== 'granted') return;
+    if (_notifInitialLoad) {
+      // Seed seen-set on first load — don't notify for existing records
+      newData.forEach(a => _seenApptIds.add(a.id));
+      _notifInitialLoad = false;
+      return;
+    }
+    const fresh = newData.filter(a => !_seenApptIds.has(a.id) && a.status === 'pending');
+    fresh.forEach(a => {
+      _seenApptIds.add(a.id);
+      try {
+        const n = new Notification('New Booking — ' + (a.specialty || 'Appointment'), {
+          body: (a.name || 'Patient') + ' · ' + (a.date || '') + (a.time ? ' at ' + a.time : ''),
+          icon: 'data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230066CC'/%3E%3Cpath d='M16 6a6 6 0 1 0 0 12A6 6 0 0 0 16 6zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm-7 12c-2.21 0-4 1.34-4 3v1h22v-1c0-1.66-1.79-3-4-3H9z' fill='white'/%3E%3C/svg%3E',
+          tag:  'booking-' + a.id,
+        });
+        n.onclick = () => { window.focus(); n.close(); };
+      } catch(e) { /* Notification blocked mid-session */ }
+    });
+  }
 
   // ── Real-time subscription ───────────────────────────────────
   function startRealtimeListener() {
@@ -980,6 +1223,7 @@
       // Auto-flag missed appointments before rendering
       await autoMarkMissed(data);
       allAppointments = data;
+      maybeNotifyNewBookings(data);
       updateStats();
       renderTable();
       if (currentView === 'calendar') renderCalendar();
@@ -1026,9 +1270,16 @@
     refreshBtn.classList.add('spinning');
     startRealtimeListener();
   });
-  filterStatus.addEventListener('change', renderTable);
-  filterSpec.addEventListener('change', renderTable);
-  searchIn.addEventListener('input', renderTable);
+  function clearSelectionAndRender() {
+    tableBody.querySelectorAll('.row-chk').forEach(c => { c.checked = false; });
+    const sa = document.getElementById('selectAllChk');
+    if (sa) { sa.checked = false; sa.indeterminate = false; }
+    currentPage = 1;
+    renderTable();
+  }
+  filterStatus.addEventListener('change', clearSelectionAndRender);
+  filterSpec.addEventListener('change',   clearSelectionAndRender);
+  searchIn.addEventListener('input',      clearSelectionAndRender);
 
   // ── Stats ─────────────────────────────────────────────────────
   function updateStats() {
@@ -1112,13 +1363,14 @@
     updatePagination(totalFiltered);
 
     if (rows.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8"><div class="table-empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>No appointments found.</p></div></td></tr>`;
+      tableBody.innerHTML = `<tr><td colspan="9"><div class="table-empty"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><p>No appointments found.</p></div></td></tr>`;
       document.getElementById('mobileCards').innerHTML = '';
       return;
     }
 
     tableBody.innerHTML = pageRows.map(a => `
       <tr data-id="${a.id}">
+        <td class="cb-col"><input type="checkbox" class="row-chk" data-id="${a.id}"></td>
         <td class="td-name">${esc(a.name || '—')}${a.adminNotes ? '<br><span style="font-size:11px;color:var(--text-3);font-weight:400">'+esc(a.adminNotes)+'</span>' : ''}</td>
         <td class="td-phone"><a href="tel:+91${esc(a.phone)}">${esc(a.phone || '—')}</a>${a.email ? '<br><a href="mailto:'+esc(a.email)+'" style="font-size:11.5px;color:var(--text-3)">'+esc(a.email)+'</a>' : ''}</td>
         <td class="td-spec">${esc(a.specialty || '—')}</td>
@@ -1166,7 +1418,103 @@
         if (appt) openEditModal(appt, notesOnly);
       });
     });
+
+    // Row checkbox listeners — update bulk bar after each render
+    tableBody.querySelectorAll('.row-chk').forEach(chk => {
+      chk.addEventListener('change', updateBulkBar);
+    });
+    // Sync select-all state
+    const selectAllChk = document.getElementById('selectAllChk');
+    if (selectAllChk) {
+      const allChks = tableBody.querySelectorAll('.row-chk');
+      selectAllChk.checked       = allChks.length > 0 && [...allChks].every(c => c.checked);
+      selectAllChk.indeterminate = !selectAllChk.checked && [...allChks].some(c => c.checked);
+    }
+    updateBulkBar();
   }
+
+  // ── Bulk action helpers ───────────────────────────────────────
+  function getSelectedIds() {
+    // Gather from both desktop table and mobile cards, deduplicate
+    const fromTable  = [...tableBody.querySelectorAll('.row-chk:checked')].map(c => c.dataset.id);
+    const fromMobile = [...document.querySelectorAll('#mobileCards .row-chk:checked')].map(c => c.dataset.id);
+    return [...new Set([...fromTable, ...fromMobile])];
+  }
+
+  function updateBulkBar() {
+    const ids    = getSelectedIds();
+    const bar    = document.getElementById('bulkBar');
+    const countEl = document.getElementById('bulkCount');
+    if (!bar) return;
+    bar.classList.toggle('visible', ids.length > 0);
+    if (countEl) countEl.textContent = `${ids.length} appointment${ids.length !== 1 ? 's' : ''} selected`;
+    // Show/hide action buttons based on what statuses are selected
+    const selectedAppts = ids.map(id => allAppointments.find(a => a.id === id)).filter(Boolean);
+    const hasConfirmable = selectedAppts.some(a => a.status === 'pending');
+    const hasAttendable  = selectedAppts.some(a => a.status === 'confirmed' || a.status === 'missed');
+    const hasCancellable = selectedAppts.some(a => a.status !== 'cancelled' && a.status !== 'completed');
+    const confirmBtn = document.getElementById('bulkConfirm');
+    const attendBtn  = document.getElementById('bulkAttend');
+    const cancelBtn  = document.getElementById('bulkCancel');
+    if (confirmBtn) confirmBtn.style.display = hasConfirmable ? '' : 'none';
+    if (attendBtn)  attendBtn.style.display  = hasAttendable  ? '' : 'none';
+    if (cancelBtn)  cancelBtn.style.display  = hasCancellable ? '' : 'none';
+  }
+
+  async function executeBulkAction(newStatus) {
+    const ids = getSelectedIds();
+    if (!ids.length) return;
+    const label = newStatus === 'confirmed' ? 'confirm' : newStatus === 'completed' ? 'mark as attended' : 'cancel';
+    const ok = await showConfirm({
+      title:   `Bulk ${label}`,
+      msg:     `${label.charAt(0).toUpperCase() + label.slice(1)} ${ids.length} selected appointment${ids.length !== 1 ? 's' : ''}?`,
+      type:    newStatus === 'cancelled' ? 'warn' : 'info',
+      okLabel: `Yes, ${label}`,
+    });
+    if (!ok) return;
+
+    const btn = document.getElementById(
+      newStatus === 'confirmed' ? 'bulkConfirm' : newStatus === 'completed' ? 'bulkAttend' : 'bulkCancel'
+    );
+    if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+    let done = 0, failed = 0;
+    await Promise.all(ids.map(async id => {
+      try {
+        await updateAppointmentStatus(id, newStatus);
+        const a = allAppointments.find(x => x.id === id);
+        if (a) a.status = newStatus;
+        done++;
+      } catch { failed++; }
+    }));
+
+    writeAuditLog({
+      action:      'bulk_status',
+      description: `Bulk ${label}: ${done} appointment${done !== 1 ? 's' : ''} → ${newStatus}${failed ? ` (${failed} failed)` : ''}`,
+      adminEmail:  currentAdminEmail,
+    }).catch(() => {});
+
+    showToast(`${done} appointment${done !== 1 ? 's' : ''} ${label}ed${failed ? `, ${failed} failed` : ''} ✅`);
+    updateStats();
+    renderTable();
+  }
+
+  // Wire bulk buttons (once — they're in static HTML)
+  document.getElementById('bulkConfirm')?.addEventListener('click', () => executeBulkAction('confirmed'));
+  document.getElementById('bulkAttend')?.addEventListener('click',  () => executeBulkAction('completed'));
+  document.getElementById('bulkCancel')?.addEventListener('click',  () => executeBulkAction('cancelled'));
+  document.getElementById('bulkClear')?.addEventListener('click',   () => {
+    tableBody.querySelectorAll('.row-chk').forEach(c => { c.checked = false; });
+    const sa = document.getElementById('selectAllChk');
+    if (sa) { sa.checked = false; sa.indeterminate = false; }
+    updateBulkBar();
+  });
+
+  // Select-all checkbox
+  document.getElementById('selectAllChk')?.addEventListener('change', function() {
+    tableBody.querySelectorAll('.row-chk').forEach(c => { c.checked = this.checked; });
+    updateBulkBar();
+  });
 
   // ── Status change (with confirmation for destructive actions) ──
   async function changeStatus(id, status, btn) {
@@ -1497,6 +1845,12 @@
 
     document.getElementById('printSlip').style.display = 'block';
     document.body.style.overflow = 'hidden';
+
+    // Wire download button for this specific appointment
+    const dlBtn = document.getElementById('slipDownloadBtn');
+    if (dlBtn) {
+      dlBtn.onclick = () => downloadSlipPDF(appt);
+    }
   }
 
   window.closePrintSlip = function() {
@@ -1742,9 +2096,14 @@
     if (!rows.length) { container.innerHTML = ''; return; }
 
     container.innerHTML = rows.map(a => `
-      <div class="m-card">
+      <div class="m-card" data-id="${a.id}">
         <div class="m-card-top">
-          <div class="m-card-name">${esc(a.name || '—')}</div>
+          <label style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;min-width:0">
+            <input type="checkbox" class="row-chk" data-id="${a.id}"
+              style="width:15px;height:15px;accent-color:#0066CC;flex-shrink:0"
+              ${[...document.querySelectorAll('#apptTableBody .row-chk')].find(c=>c.dataset.id===a.id)?.checked ? 'checked' : ''}>
+            <div class="m-card-name" style="margin:0">${esc(a.name || '—')}</div>
+          </label>
           <span class="badge ${a.status}"><span class="badge-dot"></span>${cap(a.status)}</span>
         </div>
         <div class="m-card-row"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 9.81"/></svg><a href="tel:+91${esc(a.phone)}" style="color:var(--blue);font-weight:500">+91 ${esc(a.phone||'—')}</a></div>
@@ -1774,6 +2133,16 @@
     });
     container.querySelectorAll('.btn-act[data-status][data-id]').forEach(btn => {
       btn.addEventListener('click', () => changeStatus(btn.dataset.id, btn.dataset.status, btn));
+    });
+
+    // Sync mobile card checkboxes with desktop table checkboxes and bulk bar
+    container.querySelectorAll('.row-chk').forEach(mChk => {
+      mChk.addEventListener('change', () => {
+        // Mirror state to desktop table row if visible
+        const deskChk = document.querySelector(`#apptTableBody .row-chk[data-id="${mChk.dataset.id}"]`);
+        if (deskChk) deskChk.checked = mChk.checked;
+        updateBulkBar();
+      });
     });
   }
 
@@ -1809,6 +2178,7 @@
       return;
     }
 
+    const groupedData = grouped; // keep ref for download buttons below
     results.innerHTML = Object.entries(grouped).map(([phone, appts]) => {
       const latest   = appts[0];
       const total    = appts.length;
@@ -1832,9 +2202,15 @@
                 ${latest.email ? ` · <a href="mailto:${esc(latest.email)}" style="color:var(--text-2)">${esc(latest.email)}</a>` : ''}
               </div>
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
               <span style="background:#F1F5F9;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:700">${total} visit${total!==1?'s':''}</span>
               ${Object.entries(statCounts).map(([s,c]) => `<span class="badge ${s}"><span class="badge-dot"></span>${c} ${cap(s)}</span>`).join('')}
+              <button class="btn-refresh btn-dl-history"
+                data-phone="${esc(phone)}"
+                style="margin-left:4px;background:#EFF6FF;border-color:rgba(0,102,204,0.2);color:#0066CC;font-size:12px;padding:5px 12px;gap:5px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download PDF
+              </button>
             </div>
           </div>
           <div class="table-wrap">
@@ -1847,6 +2223,17 @@
           </div>
         </div>`;
     }).join('');
+
+    // Wire download buttons for each patient group
+    results.querySelectorAll('.btn-dl-history').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const phone = btn.dataset.phone;
+        const appts = groupedData[phone] || [];
+        const name  = appts[0]?.name || 'Patient';
+        const email = appts[0]?.email || '';
+        downloadPatientHistoryPDF(name, phone, email, appts);
+      });
+    });
   }
 
 
@@ -1930,11 +2317,206 @@
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + tabName).classList.add('active');
+      if (tabName === 'dashboard') renderDashboard();
       if (tabName === 'settings') initSettings();
       if (tabName === 'audit')    initAuditLog();
       if (tabName === 'history')  initPatientHistory();
     });
   });
+
+  // ── DASHBOARD ────────────────────────────────────────────────
+  function renderDashboard() {
+    const container = document.getElementById('dashboardContent');
+    if (!container) return;
+
+    const now   = new Date();
+    const today = now.toISOString().slice(0, 10);
+
+    // ── Bookings last 7 days (bar chart) ─────────────────────
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      days.push(d.toISOString().slice(0, 10));
+    }
+    const dayCounts = days.map(d => allAppointments.filter(a => a.date === d).length);
+    const dayLabels = days.map(d => {
+      const dt = new Date(d + 'T00:00:00');
+      return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()];
+    });
+
+    // ── Status breakdown (donut) ──────────────────────────────
+    const statusKeys    = ['pending','confirmed','completed','missed','cancelled'];
+    const statusColors  = ['#D97706','#059669','#3B82F6','#94A3B8','#DC2626'];
+    const statusCounts  = statusKeys.map(s => allAppointments.filter(a => a.status === s).length);
+
+    // ── Specialty breakdown (horizontal bar) ──────────────────
+    const specMap = {};
+    allAppointments.forEach(a => { if (a.specialty) specMap[a.specialty] = (specMap[a.specialty] || 0) + 1; });
+    const specEntries = Object.entries(specMap).sort((a,b) => b[1]-a[1]).slice(0, 6);
+
+    // ── Today summary ─────────────────────────────────────────
+    const todayAppts    = allAppointments.filter(a => a.date === today);
+    const todayPending  = todayAppts.filter(a => a.status === 'pending').length;
+    const todayConfirmed= todayAppts.filter(a => a.status === 'confirmed').length;
+    const todayDone     = todayAppts.filter(a => a.status === 'completed').length;
+
+    container.innerHTML = `
+      <!-- Today summary strip -->
+      <div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
+        ${[
+          ['Today's Bookings', todayAppts.length, '#0066CC'],
+          ['Pending Today',     todayPending,       '#D97706'],
+          ['Confirmed Today',   todayConfirmed,     '#059669'],
+          ['Attended Today',    todayDone,          '#3B82F6'],
+        ].map(([lbl,val,col]) => `
+          <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:18px 20px;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+            <div style="font-size:28px;font-weight:800;font-family:'Plus Jakarta Sans',sans-serif;color:${col};line-height:1;margin-bottom:5px">${val}</div>
+            <div style="font-size:11.5px;color:#94A3B8;text-transform:uppercase;letter-spacing:.07em;font-weight:500">${lbl}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Bookings last 7 days bar chart -->
+      <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:22px 24px;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;margin-bottom:16px">Bookings — Last 7 Days</div>
+        <canvas id="dashBarCanvas" width="400" height="180" style="width:100%;height:180px"></canvas>
+      </div>
+
+      <!-- Status donut -->
+      <div style="background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:22px 24px;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;margin-bottom:16px">Status Breakdown</div>
+        <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+          <canvas id="dashDonutCanvas" width="150" height="150" style="flex-shrink:0"></canvas>
+          <div style="display:flex;flex-direction:column;gap:7px;font-size:12.5px">
+            ${statusKeys.map((s,i) => `
+              <div style="display:flex;align-items:center;gap:7px">
+                <div style="width:10px;height:10px;border-radius:3px;background:${statusColors[i]};flex-shrink:0"></div>
+                <span style="color:#475569;text-transform:capitalize">${s}</span>
+                <span style="font-weight:700;color:#0F172A;margin-left:auto;padding-left:12px">${statusCounts[i]}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Top specialties horizontal bar -->
+      <div style="grid-column:1/-1;background:#fff;border:1px solid #E2E8F0;border-radius:14px;padding:22px 24px;box-shadow:0 1px 3px rgba(15,23,42,0.06)">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;margin-bottom:16px">Top Specialties</div>
+        ${specEntries.length === 0
+          ? '<p style="color:#94A3B8;font-size:13px">No data yet.</p>'
+          : specEntries.map(([spec, count]) => {
+              const pct = Math.round((count / allAppointments.length) * 100);
+              return `<div style="margin-bottom:12px">
+                <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+                  <span style="color:#475569">${spec}</span>
+                  <span style="font-weight:700;color:#0F172A">${count} <span style="color:#94A3B8;font-weight:400">(${pct}%)</span></span>
+                </div>
+                <div style="height:8px;background:#F1F5F9;border-radius:99px;overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#0066CC,#00957A);border-radius:99px;transition:width .5s ease"></div>
+                </div>
+              </div>`;
+            }).join('')}
+      </div>`;
+
+    // Draw bar chart
+    requestAnimationFrame(() => {
+      drawBarChart('dashBarCanvas', dayLabels, dayCounts, '#0066CC');
+      drawDonut('dashDonutCanvas', statusCounts, statusColors);
+    });
+  }
+
+  function drawBarChart(canvasId, labels, values, color) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx    = canvas.getContext('2d');
+    const W = canvas.width = canvas.offsetWidth * window.devicePixelRatio || 400;
+    const H = 180 * (window.devicePixelRatio || 1);
+    canvas.height = H;
+    ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+    const w = canvas.offsetWidth || 400;
+    const h = 180;
+    ctx.clearRect(0, 0, w, h);
+    const max    = Math.max(...values, 1);
+    const pad    = { top: 16, right: 10, bottom: 28, left: 28 };
+    const bw     = (w - pad.left - pad.right) / labels.length;
+    const barW   = bw * 0.55;
+
+    // Gridlines
+    ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = pad.top + ((h - pad.top - pad.bottom) / 4) * i;
+      ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(w - pad.right, y); ctx.stroke();
+      const v = Math.round(max - (max / 4) * i);
+      ctx.fillStyle = '#94A3B8'; ctx.font = `${10 * (window.devicePixelRatio||1) / (window.devicePixelRatio||1)}px DM Sans,sans-serif`;
+      ctx.textAlign = 'right'; ctx.fillText(v, pad.left - 4, y + 3);
+    }
+
+    // Bars
+    values.forEach((v, i) => {
+      const x   = pad.left + i * bw + (bw - barW) / 2;
+      const barH = ((h - pad.top - pad.bottom) * v) / max;
+      const y   = h - pad.bottom - barH;
+      const grad = ctx.createLinearGradient(0, y, 0, y + barH);
+      grad.addColorStop(0, '#0066CC'); grad.addColorStop(1, '#00957A');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      const r = Math.min(4, barW / 2);
+      // roundRect polyfill — Safari < 15.4 and older Chrome don't support it
+      if (ctx.roundRect) {
+        ctx.roundRect(x, y, barW, barH, [r, r, 0, 0]);
+      } else {
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + barW - r, y);
+        ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
+        ctx.lineTo(x + barW, y + barH);
+        ctx.lineTo(x, y + barH);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+      }
+      ctx.fill();
+      // Value label
+      if (v > 0) {
+        ctx.fillStyle = '#0F172A'; ctx.font = `bold 11px DM Sans,sans-serif`;
+        ctx.textAlign = 'center'; ctx.fillText(v, x + barW / 2, y - 4);
+      }
+      // Day label
+      ctx.fillStyle = '#94A3B8'; ctx.font = `11px DM Sans,sans-serif`;
+      ctx.textAlign = 'center'; ctx.fillText(labels[i], x + barW / 2, h - 8);
+    });
+  }
+
+  function drawDonut(canvasId, values, colors) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx   = canvas.getContext('2d');
+    const size  = 150;
+    canvas.width = canvas.height = size;
+    ctx.clearRect(0, 0, size, size);
+    const total = values.reduce((a, b) => a + b, 0);
+    if (total === 0) {
+      ctx.fillStyle = '#E2E8F0'; ctx.beginPath();
+      ctx.arc(75, 75, 55, 0, Math.PI * 2); ctx.fill();
+      return;
+    }
+    let start = -Math.PI / 2;
+    values.forEach((v, i) => {
+      if (v === 0) return;
+      const sweep = (v / total) * Math.PI * 2;
+      ctx.beginPath();
+      ctx.moveTo(75, 75);
+      ctx.arc(75, 75, 60, start, start + sweep);
+      ctx.closePath();
+      ctx.fillStyle = colors[i];
+      ctx.fill();
+      start += sweep;
+    });
+    // Donut hole
+    ctx.beginPath(); ctx.arc(75, 75, 38, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff'; ctx.fill();
+    // Centre total
+    ctx.fillStyle = '#0F172A'; ctx.font = 'bold 18px Plus Jakarta Sans,sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(total, 75, 75);
+  }
 
   // ── SETTINGS ─────────────────────────────────────────────────
   let settingsLoaded = false;
@@ -2377,6 +2959,18 @@
     if (!name)                       { errEl.textContent = 'Full name is required.';  errEl.style.display='block'; return; }
     if (!email)                      { errEl.textContent = 'Email is required.';      errEl.style.display='block'; return; }
 
+    // Duplicate checks — only when adding new staff (not editing)
+    if (!editingStaffUid) {
+      if (staffList.some(s => s.id === uid)) {
+        errEl.textContent = 'A staff member with this UID already exists. Each person can only have one role. Use Edit to change their role.';
+        errEl.style.display = 'block'; return;
+      }
+      if (staffList.some(s => s.email?.toLowerCase() === email.toLowerCase())) {
+        errEl.textContent = 'A staff member with this email address is already registered.';
+        errEl.style.display = 'block'; return;
+      }
+    }
+
     saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
 
     try {
@@ -2437,6 +3031,275 @@
   document.getElementById('addStaffBtn')?.addEventListener('click', openAddStaff);
   document.getElementById('staffModalCancel')?.addEventListener('click', closeStaffModal);
   document.getElementById('staffModalSave')?.addEventListener('click', saveStaffMember);
+
+  // ── PDF Generation (jsPDF lazy-loaded on first use) ──────────
+  let _jsPDFLoaded = false;
+  function loadJsPDF() {
+    if (_jsPDFLoaded) return Promise.resolve();
+    return new Promise((resolve, reject) => {
+      const s1 = document.createElement('script');
+      s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s1.onload = () => {
+        const s2 = document.createElement('script');
+        s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+        s2.onload = () => { _jsPDFLoaded = true; resolve(); };
+        s2.onerror = reject;
+        document.head.appendChild(s2);
+      };
+      s1.onerror = reject;
+      document.head.appendChild(s1);
+    });
+  }
+
+  // ── Shared PDF helpers ────────────────────────────────────────
+  function pdfClinicHeader(doc, clinicName, clinicAddress) {
+    const name = clinicName || currentSettings?.name || 'MediCare Clinic';
+    const addr = clinicAddress || currentSettings?.addressFull || '12 Health Avenue, Kowdiar, Trivandrum';
+    // Blue header bar
+    doc.setFillColor(0, 102, 204);
+    doc.rect(0, 0, 210, 22, 'F');
+    // Clinic name
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.text(name, 14, 10);
+    // Address
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(addr, 14, 16);
+    // Generated date right-aligned
+    const dateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) + ' IST';
+    doc.text('Generated: ' + dateStr, 196, 16, { align: 'right' });
+    doc.setTextColor(15, 23, 42);
+    return 28; // y after header
+  }
+
+  function pdfFooter(doc) {
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setDrawColor(226, 232, 240);
+      doc.line(14, 284, 196, 284);
+      doc.setFontSize(8);
+      doc.setTextColor(148, 163, 184);
+      doc.setFont('helvetica', 'normal');
+      doc.text('This is a system-generated document. Confidential — for clinic use only.', 14, 289);
+      doc.text(`Page ${i} of ${pageCount}`, 196, 289, { align: 'right' });
+    }
+  }
+
+  // ── Download PDF for a single appointment slip ────────────────
+  async function downloadSlipPDF(appt) {
+    try {
+      await loadJsPDF();
+    } catch(e) {
+      showToast('Could not load PDF library. Check your internet connection.'); return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = pdfClinicHeader(doc, null, null);
+
+    // Title
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(15, 23, 42);
+    doc.text('Appointment Record', 14, y + 8);
+
+    // Appointment ID chip
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(148, 163, 184);
+    doc.text('ID: ' + (appt.apptId || appt.id), 14, y + 15);
+    y += 22;
+
+    // Status badge
+    const statusColors = {
+      pending:   [254, 249, 195], confirmed: [236, 253, 245],
+      completed: [239, 246, 255], cancelled: [254, 242, 242], missed: [241, 245, 249]
+    };
+    const statusText = {
+      pending:   [133, 77,  14],  confirmed: [6,   95,  70],
+      completed: [30,  64,  175], cancelled: [153, 27,  27],  missed: [71, 85, 105]
+    };
+    const sc = statusColors[appt.status] || [241,245,249];
+    const st = statusText[appt.status]   || [71,85,105];
+    doc.setFillColor(...sc);
+    doc.setDrawColor(...sc);
+    doc.roundedRect(14, y - 5, 36, 8, 2, 2, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...st);
+    const statusLabel = (appt.status || 'unknown').charAt(0).toUpperCase() + (appt.status || '').slice(1);
+    doc.text(statusLabel, 32, y + 0.5, { align: 'center' });
+    y += 10;
+
+    // Two-column detail grid
+    const fields = [
+      ['Patient Name',  appt.name         || '—'],
+      ['Phone',         '+91 ' + (appt.phone || '—')],
+      ['Email',         appt.email        || '—'],
+      ['Specialty',     appt.specialty    || '—'],
+      ['Doctor',        appt.doctor       || 'Any available'],
+      ['Date',          formatDate(appt.date) || '—'],
+      ['Time',          appt.time         || 'Any time'],
+      ['Visit Type',    appt.visitType    || '—'],
+      ['Booked At',     appt.bookedAt     || '—'],
+      ['Source',        appt.source       || '—'],
+    ];
+    if (appt.notes)      fields.push(['Patient Notes',  appt.notes]);
+    if (appt.adminNotes) fields.push(['Admin Notes',    appt.adminNotes]);
+
+    // Section heading
+    doc.setFillColor(248, 250, 252);
+    doc.rect(14, y, 182, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('APPOINTMENT DETAILS', 17, y + 4.8);
+    y += 10;
+
+    // Fields in two columns
+    doc.setFont('helvetica', 'normal');
+    const colW = 91;
+    fields.forEach((([label, value], i) => {
+      const col  = i % 2;
+      const row  = Math.floor(i / 2);
+      const x    = 14 + col * colW;
+      const rowY = y + row * 12;
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(148, 163, 184);
+      doc.setFont('helvetica', 'bold');
+      doc.text(label.toUpperCase(), x, rowY);
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(15, 23, 42);
+      doc.setFont('helvetica', 'normal');
+      // Wrap long values
+      const lines = doc.splitTextToSize(String(value), colW - 6);
+      doc.text(lines[0], x, rowY + 5);
+    }));
+
+    // Move y past the grid
+    y += Math.ceil(fields.length / 2) * 12 + 8;
+
+    // Divider
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, y, 196, y);
+    y += 6;
+
+    // Confidentiality note
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.setFont('helvetica', 'italic');
+    doc.text('This record is confidential. Please handle in accordance with applicable data protection laws.', 14, y);
+
+    pdfFooter(doc);
+
+    const safeName = (appt.name || 'patient').replace(/[^a-zA-Z0-9]/g, '_');
+    doc.save(`appointment_${safeName}_${appt.apptId || appt.id.slice(0,8)}.pdf`);
+    showToast('PDF downloaded ✅');
+  }
+
+  // ── Download full patient history report ─────────────────────
+  async function downloadPatientHistoryPDF(patientName, phone, email, appts) {
+    try {
+      await loadJsPDF();
+    } catch(e) {
+      showToast('Could not load PDF library. Check your internet connection.'); return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    let y = pdfClinicHeader(doc, null, null);
+
+    // Patient banner
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(17);
+    doc.setTextColor(15, 23, 42);
+    doc.text('Patient History Report', 14, y + 8);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(71, 85, 105);
+    doc.text(patientName || 'Unknown Patient', 14, y + 15);
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    const contactLine = [phone ? '+91 ' + phone : null, email || null].filter(Boolean).join('  ·  ');
+    if (contactLine) doc.text(contactLine, 14, y + 21);
+    y += 28;
+
+    // Summary stats row
+    const statCounts = {};
+    appts.forEach(a => { statCounts[a.status] = (statCounts[a.status]||0)+1; });
+    const statLabels = [
+      ['Total Visits', appts.length, [0,102,204]],
+      ['Completed',    statCounts.completed || 0, [5,150,105]],
+      ['Pending',      statCounts.pending   || 0, [217,119,6]],
+      ['Cancelled',    statCounts.cancelled || 0, [220,38,38]],
+    ];
+    const statBoxW = 42;
+    statLabels.forEach(([label, val, color], i) => {
+      const sx = 14 + i * (statBoxW + 4);
+      doc.setFillColor(248, 250, 252);
+      doc.setDrawColor(226, 232, 240);
+      doc.roundedRect(sx, y, statBoxW, 18, 2, 2, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(...color);
+      doc.text(String(val), sx + statBoxW / 2, y + 10, { align: 'center' });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(label.toUpperCase(), sx + statBoxW / 2, y + 15.5, { align: 'center' });
+    });
+    y += 24;
+
+    // Appointment table
+    const rows = appts.map(a => [
+      formatDate(a.date) || '—',
+      a.time || 'Any',
+      a.specialty || '—',
+      a.doctor || 'Any',
+      (a.visitType || '—').replace('First visit','1st Visit'),
+      (a.status || '—').charAt(0).toUpperCase() + (a.status||'').slice(1),
+      (a.notes || '—').slice(0, 40) + ((a.notes||'').length > 40 ? '…' : ''),
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [['Date', 'Time', 'Specialty', 'Doctor', 'Visit Type', 'Status', 'Notes']],
+      body: rows,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [0, 102, 204],
+        textColor: 255,
+        fontStyle: 'bold',
+        fontSize: 8,
+      },
+      bodyStyles:  { fontSize: 8, textColor: [15, 23, 42], cellPadding: 3 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 22 }, 1: { cellWidth: 16 }, 2: { cellWidth: 28 },
+        3: { cellWidth: 28 }, 4: { cellWidth: 22 }, 5: { cellWidth: 20 }, 6: { cellWidth: 'auto' }
+      },
+      margin: { left: 14, right: 14 },
+      didParseCell: data => {
+        if (data.section === 'body' && data.column.index === 5) {
+          const s = data.cell.raw.toLowerCase();
+          const colours = {
+            completed: [5,150,105], confirmed: [5,150,105],
+            pending:   [217,119,6], cancelled: [220,38,38], missed: [100,116,139]
+          };
+          if (colours[s]) data.cell.styles.textColor = colours[s];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    pdfFooter(doc);
+    const safeName = (patientName || 'patient').replace(/[^a-zA-Z0-9]/g, '_');
+    doc.save(`patient_history_${safeName}.pdf`);
+    showToast('Patient history PDF downloaded ✅');
+  }
   document.getElementById('staffModal')?.addEventListener('click', e => { if (e.target === e.currentTarget) closeStaffModal(); });
 
   // ══════════════════════════════════════════════════════════════
@@ -2488,7 +3351,15 @@
 
 <!-- Print Slip -->
 <div id="printSlip">
-  <button class="slip-close-btn" onclick="closePrintSlip()">Close</button>
+  <div style="position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10001">
+    <button class="slip-close-btn" style="position:static" onclick="closePrintSlip()">Close</button>
+    <button class="slip-close-btn" style="position:static;background:#475569" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:inline;vertical-align:middle;margin-right:5px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Print
+    </button>
+    <button class="slip-close-btn" id="slipDownloadBtn" style="position:static;background:#0066CC">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download PDF
+    </button>
+  </div>
   <div class="slip-wrap">
     <div class="slip-header">
       <div class="slip-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
