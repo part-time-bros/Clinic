@@ -2899,7 +2899,7 @@
     setTimeout(() => document.getElementById('staffUid').focus(), 150);
   }
 
-  function openEditStaff(uid) {
+  window.openEditStaff = function(uid) {
     const s = staffList.find(x => x.id === uid);
     if (!s) return;
     editingStaffUid = uid;
@@ -2983,7 +2983,7 @@
     }
   }
 
-  async function deactivateStaffMember(uid, name) {
+  window.deactivateStaffMember = async function(uid, name) {
     const ok = await showConfirm({ title: `Deactivate ${name}?`, msg: 'They will lose access immediately. You can reactivate them later.', type: 'warn', okLabel: 'Deactivate' });
     if (!ok) return;
     try {
@@ -2996,7 +2996,7 @@
     } catch(e) { showToast('Failed: ' + (e?.message || e)); }
   }
 
-  async function reactivateStaffMember(uid) {
+  window.reactivateStaffMember = async function(uid) {
     const s = staffList.find(x => x.id === uid);
     try {
       await reactivateStaff(uid);

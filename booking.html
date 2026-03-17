@@ -281,10 +281,8 @@ html.legal-open { overflow: hidden; }
               body > *:not(#printApptSlip) { display: none !important; }
               #printApptSlip {
                 display: block !important;
-                position: fixed !important;
-                inset: 0 !important;
+                position: static !important;
                 background: white !important;
-                z-index: 999999 !important;
                 padding: 20px !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -344,11 +342,20 @@ html.legal-open { overflow: hidden; }
           document.getElementById('printDate').textContent      = date;
           document.getElementById('printTime').textContent      = time;
           var slip = document.getElementById('printApptSlip');
+          // Move slip to direct body child so @media print CSS works correctly
+          var originalParent = slip.parentNode;
+          var originalNext   = slip.nextSibling;
+          document.body.appendChild(slip);
           slip.style.display = 'block';
           setTimeout(function() {
             window.print();
-            setTimeout(function() { slip.style.display = 'none'; }, 500);
-          }, 100);
+            setTimeout(function() {
+              slip.style.display = 'none';
+              // Restore to original position
+              if (originalNext) originalParent.insertBefore(slip, originalNext);
+              else originalParent.appendChild(slip);
+            }, 500);
+          }, 150);
         }
         </script>
       </div>

@@ -269,7 +269,7 @@ Book online: ${cfg.bookingUrl}
     }
 
     msgHistory.pop();
-    return `I'm having a bit of trouble right now. Please reach us directly:\n📞 **${cfg.clinicPhone}**\n💬 WhatsApp: wa.me/${cfg.clinicWA}`;
+    return `I'm having a bit of trouble right now. Please reach us directly:\n📞 **${_cfg.clinicPhone}**\n💬 WhatsApp: wa.me/${_cfg.clinicWA}`;
   }
 
   // ── State ─────────────────────────────────────────────────────────
@@ -424,7 +424,7 @@ Book online: ${cfg.bookingUrl}
 
   function addWelcome() {
     const w = document.createElement('div'); w.className = 'mc-msg bot';
-    w.innerHTML = `<div class="mc-bbl">👋 Hi! I'm <strong>Maya</strong>, the AI assistant at <strong>${cfg.clinicName}</strong>.<br><br>I can help you with appointments, information about our doctors and services, clinic hours, or any general questions.<br><br>What can I help you with today?</div><div class="mc-time">${nowStr()}</div>`;
+    w.innerHTML = `<div class="mc-bbl">👋 Hi! I'm <strong>Maya</strong>, the AI assistant at <strong>${_cfg.clinicName}</strong>.<br><br>I can help you with appointments, information about our doctors and services, clinic hours, or any general questions.<br><br>What can I help you with today?</div><div class="mc-time">${nowStr()}</div>`;
     $('mc-msgs').appendChild(w); showQuickReplies();
   }
 
@@ -443,7 +443,7 @@ Book online: ${cfg.bookingUrl}
         <div class="mc-hdr-av"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/></svg></div>
         <div class="mc-hdr-info">
           <div class="mc-hdr-name">Maya — AI Receptionist</div>
-          <div class="mc-hdr-status"><div class="mc-dot"></div>${cfg.clinicName}</div>
+          <div class="mc-hdr-status"><div class="mc-dot"></div>${_cfg.clinicName}</div>
         </div>
         <button class="mc-hdr-btn" id="mc-clear" title="Clear chat" aria-label="Clear chat">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>
