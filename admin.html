@@ -848,13 +848,29 @@ function _twTogglePw() {
 }
 
 // _twDoLogin is overwritten by the module once it loads.
-// Until then this fallback shows a helpful message instead of silence.
+// If clicked before module is ready, disable the button and retry automatically
+// every 100ms until the real doLogin is available (max 8 seconds).
 window._twDoLogin = function() {
+  var btn   = document.getElementById('loginBtn');
   var errEl = document.getElementById('loginError');
-  if (errEl) {
-    errEl.textContent = 'Still loading — please wait a moment and try again.';
-    errEl.style.display = 'block';
-  }
+  if (errEl) { errEl.style.display = 'none'; }
+  if (btn)   { btn.disabled = true; btn.textContent = 'Loading…'; }
+  var waited = 0;
+  var poll = setInterval(function() {
+    waited += 100;
+    // Check if module has replaced this with the real function
+    if (window._twLoginReady) {
+      clearInterval(poll);
+      window._twDoLogin();
+    } else if (waited >= 8000) {
+      clearInterval(poll);
+      if (btn)   { btn.disabled = false; btn.textContent = 'Sign In'; }
+      if (errEl) {
+        errEl.textContent = 'Could not connect. Please refresh the page and try again.';
+        errEl.style.display = 'block';
+      }
+    }
+  }, 100);
 };
 </script>
 
@@ -1162,7 +1178,8 @@ window._twDoLogin = function() {
 
   // Expose doLogin to window so the standalone onclick can reach it
   // (the onclick fallback is already set; this replaces it with the real function)
-  window._twDoLogin = doLogin;
+  window._twDoLogin  = doLogin;
+  window._twLoginReady = true; // signals the fallback that the module is ready
 
   // Keydown shortcuts — these stay in the module since they depend on module state
   loginEmailEl.addEventListener('keydown', e => { if (e.key === 'Enter') { loginPwEl.focus(); } });
