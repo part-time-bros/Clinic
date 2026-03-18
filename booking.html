@@ -24,6 +24,23 @@
 <style>
 html.legal-open { overflow: hidden; }
 </style>
+<style>
+/* Print slip — triggered by body.printing class added via JS */
+@media print {
+  body.printing > *:not(#printApptSlip) { display: none !important; }
+  body.printing #printApptSlip {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 999999 !important;
+    background: #fff !important;
+    padding: 20px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  @page { margin: 0.5cm; size: A5 portrait; }
+}
+</style>
 </head>
 <body>
 <div id="demoBanner" style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:linear-gradient(135deg,#0F172A,#1e3a5f);color:#fff;box-shadow:0 -4px 24px rgba(0,0,0,0.3);">
@@ -276,21 +293,7 @@ html.legal-open { overflow: hidden; }
 
         <!-- ── PRINTABLE APPOINTMENT SLIP ──────────────────────── -->
         <div id="printApptSlip" style="display:none;">
-          <style>
-            @media print {
-              body > *:not(#printApptSlip) { display: none !important; }
-              #printApptSlip {
-                display: block !important;
-                position: static !important;
-                background: white !important;
-                padding: 20px !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-              }
-              @page { margin: 0.5cm; size: A5 portrait; }
-            }
-          </style>
+
           <div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;max-width:380px;margin:0 auto;border:2px solid #0066CC;border-radius:14px;padding:24px;background:#fff;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;">
               <div style="width:36px;height:36px;background:#0066CC;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -332,49 +335,30 @@ html.legal-open { overflow: hidden; }
           var phone = document.querySelector('[data-site="phone-text"]')?.textContent || '+91 70345 25123';
           var email = document.querySelector('[data-site="email-text"]')?.textContent || 'care@medicareclinic.in';
 
-          // Open a clean print window — most reliable cross-browser approach
-          var pw = window.open('', '_blank', 'width=420,height=600');
-          pw.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-            '<title>Appointment Slip</title>' +
-            '<style>' +
-              'body{margin:0;padding:20px;font-family:Arial,sans-serif;background:#fff;}' +
-              '.slip{max-width:380px;margin:0 auto;border:2px solid #0066CC;border-radius:14px;padding:24px;}' +
-              '.hdr{display:flex;align-items:center;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #E2E8F0;}' +
-              '.logo{width:36px;height:36px;background:#0066CC;border-radius:8px;display:flex;align-items:center;justify-content:center;}' +
-              '.clinic-name{font-weight:800;font-size:15px;color:#0F172A;}' +
-              '.clinic-addr{font-size:10px;color:#94A3B8;}' +
-              '.lbl{font-size:10px;font-weight:700;color:#64748B;letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-bottom:6px;}' +
-              '.appt-id{font-family:monospace;font-size:20px;font-weight:900;color:#0066CC;letter-spacing:3px;background:#EFF6FF;border-radius:8px;padding:8px 16px;display:inline-block;}' +
-              '.id-wrap{text-align:center;margin-bottom:18px;}' +
-              'table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;}' +
-              'td{padding:6px 0;border-bottom:1px solid #F1F5F9;}' +
-              'td:first-child{color:#64748B;font-weight:600;}' +
-              'td:last-child{font-weight:700;color:#0F172A;text-align:right;}' +
-              '.note{background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 12px;font-size:10.5px;color:#92400E;margin-bottom:14px;line-height:1.5;}' +
-              '.footer{text-align:center;font-size:10px;color:#94A3B8;line-height:1.6;}' +
-              '.footer strong{color:#0F172A;}' +
-              '@page{margin:0.5cm;size:A5 portrait;}' +
-            '</style></head><body>' +
-            '<div class="slip">' +
-              '<div class="hdr">' +
-                '<div class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>' +
-                '<div><div class="clinic-name">MediCare Clinic</div><div class="clinic-addr">12 Health Avenue, Kowdiar, Trivandrum 695003</div></div>' +
-              '</div>' +
-              '<div class="id-wrap"><div class="lbl">APPOINTMENT SLIP</div><div class="appt-id">' + id + '</div></div>' +
-              '<table>' +
-                '<tr><td>Patient Name</td><td>' + name + '</td></tr>' +
-                '<tr><td>Specialty</td><td>' + spec + '</td></tr>' +
-                '<tr><td>Date</td><td>' + date + '</td></tr>' +
-                '<tr><td>Time</td><td>' + time + '</td></tr>' +
-                '<tr><td>Status</td><td style="color:#D97706;">Pending Confirmation</td></tr>' +
-              '</table>' +
-              '<div class="note">&#9200; We will confirm your slot via WhatsApp within 30 minutes during clinic hours (8AM–8PM, Mon–Sat).</div>' +
-              '<div class="footer">Please bring this slip to your appointment<br><strong>' + phone + '</strong> &middot; ' + email + '</div>' +
-            '</div>' +
-            '</body></html>');
-          pw.document.close();
-          pw.focus();
-          setTimeout(function() { pw.print(); pw.close(); }, 400);
+          // Populate slip fields
+          document.getElementById('printApptId').textContent    = id;
+          document.getElementById('printName').textContent      = name;
+          document.getElementById('printSpecialty').textContent = spec;
+          document.getElementById('printDate').textContent      = date;
+          document.getElementById('printTime').textContent      = time;
+          var ph = document.getElementById('printPhone');
+          var em = document.getElementById('printEmail');
+          if (ph) ph.textContent = phone;
+          if (em) em.textContent = email;
+
+          // Show slip and add printing class to body
+          var slip = document.getElementById('printApptSlip');
+          slip.style.display = 'block';
+          document.body.classList.add('printing');
+
+          setTimeout(function() {
+            window.print();
+            // Clean up after print dialog closes
+            setTimeout(function() {
+              document.body.classList.remove('printing');
+              slip.style.display = 'none';
+            }, 500);
+          }, 150);
         }
         </script>
       </div>
